@@ -7,6 +7,10 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="LibCLCC.NET" Version="1.2.3" />
+  </ItemGroup>
+
   <!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>$(DefineConstants);UNSAFE</DefineConstants>
   </PropertyGroup>
