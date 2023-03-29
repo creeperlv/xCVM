@@ -307,10 +307,6 @@ namespace xCVM.Core
             }
         }
     }
-    public class xCVMRTProgram
-    {
-        public xCVMProgram program;
-    }
     public class ManagedMem
     {
         public List<xCVMObject> Mem = new List<xCVMObject>();
@@ -319,10 +315,5 @@ namespace xCVM.Core
     {
         public byte[] data;
 
-    }
-    public class xCVMProgram
-    {
-        public Dictionary<int, string> UsingFunctions = new Dictionary<int, string>();
-        public List<Instruct> Instructions = new List<Instruct>();
     }
 }
