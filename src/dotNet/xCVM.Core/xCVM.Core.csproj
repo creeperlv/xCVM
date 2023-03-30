@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LibCLCC.NET" Version="1.2.3" />
+    <PackageReference Include="LibCLCC.NET" Version="1.3.4" />
   </ItemGroup>
 
   <!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

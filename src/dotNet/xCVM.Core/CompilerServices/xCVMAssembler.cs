@@ -10,13 +10,13 @@ namespace xCVM.Core.CompilerServices
     public class xCVMAssembler
     {
         public xCVMAssembler() { }
-        public xCVMModule Assemble(FileInfo file)
+        public AssembleResult Assemble(FileInfo file)
         {
             using var sr = file.OpenText();
             var content = sr.ReadToEnd();
             return Assemble(content);
         }
-        public xCVMModule Assemble(Stream stream)
+        public AssembleResult Assemble(Stream stream)
         {
             using (StreamReader sr = new StreamReader(stream))
             {
@@ -24,28 +24,93 @@ namespace xCVM.Core.CompilerServices
             }
         }
         ASMParser parser = new ASMParser();
-        public xCVMModule Assemble(Segment segments)
+        public AssembleResult Assemble(Segment segments)
         {
-            xCVMModule program = new xCVMModule();
+            xCVMModule module = new xCVMModule();
+            AssembleResult assembleResult = new AssembleResult(module);
             var current = segments;
+            SegmentContext context = new SegmentContext(current);
+            int Sections = 0;
             while (true)
             {
-                current = segments.Next;
-                if (current == null) break;
-                if (current.content == ".module")
-                {
 
-                }
-                else
-                if (current.content == "text")
+                if (context.Current == null) break;
                 {
+                    (var mr, var section) = context.MatchCollectionMarchWithMatchNext(":", ".module", ".text", ".ids", ".codes");
+                    if (mr == MatchResult.Match)
+                    {
+                        Sections = section;
+                    }
+                    else if (mr == MatchResult.Mismatch)
+                    {
+                        switch (Sections)
+                        {
+                            case 0:
+                                {
+                                    (var _mr, var _selection) = context.MatchCollectionMarchReturnName("ModuleName", "Author", "Copyright", "ModuleVersion", "TargetVersion");
+                                    if (_mr == MatchResult.Match)
+                                    {
+                                        switch (_selection)
+                                        {
+                                            case "ModuleName":
+                                                {
+                                                    module.ModuleMetadata.ModuleName = context.Current.content;
+                                                    context.GoNext();
+                                                }
+                                                break;
+                                            case "Author":
+                                                {
+                                                    module.ModuleMetadata.Author = context.Current.content;
+                                                    context.GoNext();
+                                                }
+                                                break;
+                                            case "Copyright":
+                                                {
+                                                    module.ModuleMetadata.Copyright = context.Current.content;
+                                                    context.GoNext();
+                                                }
+                                                break;
+                                            case "ModuleVersion":
+                                                {
+                                                    if (Version.TryParse(context.Current.content, out var result))
+                                                    {
+                                                        module.ModuleMetadata.ModuleVersion = result;
+                                                    }
+                                                    else assembleResult.AddError(new VersionFormatError(context.Current));
+                                                    context.GoNext();
+                                                }
+                                                break;
+                                            case "TargetVersion":
+                                                {
+                                                    if (Version.TryParse(context.Current.content, out var result))
+                                                    {
+                                                        module.ModuleMetadata.TargetVersion = result;
+                                                    }
+                                                    else assembleResult.AddError(new VersionFormatError(context.Current));
+                                                    context.GoNext();
+                                                }
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else if (mr == MatchResult.ReachEnd)
+                    {
 
+                    }
                 }
+
             }
-            return program;
+            return assembleResult;
 
         }
-        public xCVMModule Assemble(string content)
+        public AssembleResult Assemble(string content)
         {
             var segments = parser.Parse(content, false);
             return Assemble(segments);

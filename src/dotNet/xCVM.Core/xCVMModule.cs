@@ -2,7 +2,7 @@
 {
     public class xCVMModule
     {
-        public ModuleMetadata? ModuleMetadata;
+        public ModuleMetadata ModuleMetadata=new ModuleMetadata();
         public Dictionary<int, string> IDs=new Dictionary<int, string>();
         public Dictionary<int, string> Texts=new Dictionary<int, string>();
         public Dictionary<int, string> UsingFunctions = new Dictionary<int, string>();
@@ -12,7 +12,7 @@
     public class ModuleMetadata
     {
         public string ModuleName;
-        public string Publisher;
+        public string Author;
         public string Copyright;
         public Version ModuleVersion;
         public Version TargetVersion;
