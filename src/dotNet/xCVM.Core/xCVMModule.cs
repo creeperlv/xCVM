@@ -13,6 +13,7 @@
     {
         public string ModuleName;
         public string Publisher;
+        public string Copyright;
         public Version ModuleVersion;
         public Version TargetVersion;
     }

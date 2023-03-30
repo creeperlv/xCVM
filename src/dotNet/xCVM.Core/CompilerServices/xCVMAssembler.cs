@@ -32,7 +32,7 @@ namespace xCVM.Core.CompilerServices
             {
                 current = segments.Next;
                 if (current == null) break;
-                if (current.content == "text")
+                if (current.content == ".module")
                 {
 
                 }
