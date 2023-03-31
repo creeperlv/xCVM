@@ -24,4 +24,6 @@ typedef struct parserconf {
 	//ClosableCommentIdentifier//
 	/////////////////////////////
 	GenericList closableCommentIdentifiers;
-}ParserConfiguration;
+}* ParserConfiguration;
+
+ExceptableResult xCVM_Parse(ParserConfiguration config, FILE INPUT);

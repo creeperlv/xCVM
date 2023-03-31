@@ -33,6 +33,7 @@ typedef struct ER {
 	void* Content;
 }*ExceptableResult;
 Exception NewException(int ID,char* Descrption);
+bool HasException(ExceptableResult ER);
 ExceptableResult NewER();
 ExceptableResult NewGL(size_t ItemSize);
 ExceptableResult AddGL(GenericList List, void* item);

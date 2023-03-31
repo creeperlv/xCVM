@@ -45,7 +45,7 @@ ExceptableResult NewGL(size_t ItemSize)
 
 ExceptableResult AddGL(GenericList List, void* item)
 {
-	if (List->Count >= List->HEAD) {
+	if (List->Count >= List->Size) {
 		void* temp = (void*)realloc(List->HEAD, List->ItemSize * (List->Size + GL_SIZE));
 		if (temp == NULL) {
 			ExceptableResult result = NewER();
@@ -110,7 +110,9 @@ ExceptableResult NewSegment()
 	er->Content = seg;
 	return er;
 }
-
+bool HasException(ExceptableResult ER) {
+	return ER->Exception == NULL;
+}
 void DestoryException(Exception exception)
 {
 	free(exception);

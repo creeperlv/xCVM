@@ -38,7 +38,7 @@ void WriteLineGL(GenericList str)
 {
 	ExceptableResult ER = GLToCStr(str);
 	if (ER->Exception != NULL) {
-		WriteLineCStr("PANIC:%s\n", ER->Exception->Description);
+		printf("PANIC:%s\n", ER->Exception->Description);
 		DestoryER(ER);
 	}
 	else {
@@ -57,7 +57,7 @@ void WriteGL(GenericList str)
 {
 	ExceptableResult ER = GLToCStr(str);
 	if (ER->Exception != NULL) {
-		WriteCStr("PANIC:%s\n", ER->Exception->Description);
+		printf("PANIC:%s\n", ER->Exception->Description);
 		DestoryER(ER);
 	}
 	else {
