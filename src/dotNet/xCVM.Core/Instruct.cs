@@ -6,16 +6,15 @@ public class Instruct
     public byte[] Op0;
     public byte[] Op1;
     public byte[] Op2;
-    public byte[]? Op3;
 }
 public enum ManagedExt
 {
     /// <summary>
-    ///  mcall $reg_contains_pointer , ID:function_name, $reg_contains_arg_0_pointer, int:argument_count
+    ///  mcall ID:function_name, $reg_contains_arg_0_pointer, int:argument_count
     /// </summary>
     mcall = 0x0801, 
     /// <summary>
-    /// mset $reg_contains_pointer_to_object, ID:Field_Name, $reg_contains_pointer_to_data, int:data_type
+    /// mset $reg_contains_pointer_to_object, ID:Field_Name, $reg_contains_pointer_to_data # int:data_type is at 
     /// </summary>
     mset = 0x0802, thread = 0x0803, mrd=0x804
 }

@@ -6,17 +6,17 @@ namespace xCVM.Core.CompilerServices
     {
         public Segment? Segment;
 
-        public AssemblerError(Segment? binded, string? msg="")
+        public AssemblerError(Segment? binded, string? msg = "")
         {
             Segment = binded;
             _msg = msg;
         }
 
         string? _msg;
-        public virtual string? Message { get=>_msg; }
+        public virtual string? Message { get => _msg; }
         public override string ToString()
         {
-            return Message??"";
+            return Message ?? "";
         }
     }
     public class VersionFormatError : AssemblerError
@@ -29,7 +29,7 @@ namespace xCVM.Core.CompilerServices
     }
     public class UnexpectedEndOfFileError : AssemblerError
     {
-        public UnexpectedEndOfFileError(Segment? binded) : base(binded,null)
+        public UnexpectedEndOfFileError(Segment? binded) : base(binded, null)
         {
         }
         public override string Message => $"End at unexpected location.";
@@ -49,6 +49,22 @@ namespace xCVM.Core.CompilerServices
         }
 
         public override string Message => $"Cannot convert content to Int64.";
+    }
+    public class FloatParseError : AssemblerError
+    {
+        public FloatParseError(Segment? binded) : base(binded, null)
+        {
+        }
+
+        public override string Message => $"Cannot convert content to Single.";
+    }
+    public class DoubleParseError: AssemblerError
+    {
+        public DoubleParseError(Segment? binded) : base(binded, null)
+        {
+        }
+
+        public override string Message => $"Cannot convert content to Single.";
     }
     public class RegisterFormatError : AssemblerError
     {

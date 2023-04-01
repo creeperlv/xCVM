@@ -120,7 +120,7 @@ namespace xCVM.Core.CompilerServices
                                 break;
                             case 2:
                                 {
-                                    if (int.TryParse(context.Current.content, out var result))
+                                    if (int.TryParse(context.Current!.content, out var result))
                                     {
                                         if (context.GoNext())
                                         {
@@ -208,6 +208,90 @@ namespace xCVM.Core.CompilerServices
                                                     _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
                                                 }
                                                 break;
+                                            case "lsub":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.lsub };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "lsubi":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.lsubi };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
+                                            case "lmul":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.lmul };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "lmuli":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.lmuli };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
+                                            case "ldiv":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.ldiv };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "ldivi":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.ldivi };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
+                                            case "fadd_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fadd_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "faddi_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.faddi_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
+                                            case "fsub_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fsub_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "fsubi_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fsubi_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
+                                            case "fmul_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fmul_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "fmuli_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fmuli_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
+                                            case "fdiv_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fdiv_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
+                                                }
+                                                break;
+                                            case "fdivi_s":
+                                                {
+                                                    var inst = new Instruct { Operation = (int)Inst.fdivi_s };
+                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
+                                                }
+                                                break;
                                             default:
                                                 break;
                                         }
@@ -239,7 +323,6 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (NextData(assembleResult, context, AcceptReg1, Reg2Data, out inst.Op2))
                     {
-                        inst.Op3 = null;
                         module.Instructions.Add(inst);
                     }
                 }
@@ -268,6 +351,24 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
+                case 2:
+                    {
+                        if (NextFloat(assembleResult, context, out var reg0))
+                        {
+                            reg = BitConverter.GetBytes(reg0);
+                            return true;
+                        }
+                    }
+                    break;
+                case 3:
+                    {
+                        if (NextDouble(assembleResult, context, out var reg0))
+                        {
+                            reg = BitConverter.GetBytes(reg0);
+                            return true;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -290,7 +391,7 @@ namespace xCVM.Core.CompilerServices
                         assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
-                if (int.TryParse(context.Current!.content, out var reg))
+                if (int.TryParse(_int, out var reg))
                 {
                     reg0 = reg;
                     return true;
@@ -324,7 +425,7 @@ namespace xCVM.Core.CompilerServices
                         assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
-                if (long.TryParse(context.Current!.content, out var reg))
+                if (long.TryParse(_int, out var reg))
                 {
                     reg0 = reg;
                     return true;
@@ -332,6 +433,52 @@ namespace xCVM.Core.CompilerServices
                 else
                 {
                     assembleResult.AddError(new LongParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = -1;
+            return false;
+        }
+        private static bool NextFloat(AssembleResult assembleResult, SegmentContext context, out float reg0)
+        {
+            if (context.GoNext())
+            {
+                var _int = context.Current!.content;
+                if (float.TryParse(_int, out var reg))
+                {
+                    reg0 = reg;
+                    return true;
+                }
+                else
+                {
+                    assembleResult.AddError(new FloatParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = -1;
+            return false;
+        }
+        private static bool NextDouble(AssembleResult assembleResult, SegmentContext context, out double reg0)
+        {
+            if (context.GoNext())
+            {
+                var _int = context.Current!.content;
+                if (double.TryParse(_int, out var reg))
+                {
+                    reg0 = reg;
+                    return true;
+                }
+                else
+                {
+                    assembleResult.AddError(new DoubleParseError(context.Last));
                 }
             }
             else
