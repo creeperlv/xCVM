@@ -24,7 +24,7 @@ namespace xCVM.Core.CompilerServices
                 using var sr = item.OpenText();
                 var content = sr.ReadToEnd();
                 var _s = parser.Parse(content, false, item.FullName);
-                if (s is null) _s = s;
+                if (s is null) s = _s;
                 else s.Concatenate(_s);
             }
             if (s is null) return new AssembleResult(new xCVMModule());
@@ -51,7 +51,9 @@ namespace xCVM.Core.CompilerServices
                 if (context.ReachEnd)
                     break;
                 {
+
                     (var mr, var section) = context.MatchCollectionMarchWithMatchNext(":", ".module", ".text", ".ids", ".codes");
+                    //Console.WriteLine(mr + ":" + section);
                     if (mr == MatchResult.Match)
                     {
                         Sections = section;
@@ -160,6 +162,9 @@ namespace xCVM.Core.CompilerServices
                                         "ladd", "laddi", "lsub", "lsubi", "lmul", "lmuli", "ldiv", "ldivi",
                                         "fadd_s", "faddi_s", "fsub_s", "fsubi_s", "fmul_s", "fmuli_s", "fdiv_s", "fdivi_s"
                                         );
+                                    //Console.WriteLine( context.Current.content);
+                                    context.GoBack();
+                                    //Console.WriteLine( context.Current.content);
                                     if (matched.Item1 == MatchResult.Match)
                                     {
                                         switch (matched.Item2)
@@ -314,7 +319,22 @@ namespace xCVM.Core.CompilerServices
                                     }
                                     else
                                     {
-                                        assembleResult.AddError(new UnknownInstructionError(context.Current));
+                                        bool willIgnore = false;
+                                        if (context.Current != null)
+                                            switch (context.Current.content)
+                                            {
+                                                case "":
+                                                case ";":
+                                                    {
+                                                        willIgnore = true;
+                                                    }
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                        if (!willIgnore)
+                                            assembleResult.AddError(new UnknownInstructionError(context.Current));
+                                        context.GoNext();
                                         break;
                                     }
                                 }
@@ -340,9 +360,9 @@ namespace xCVM.Core.CompilerServices
         {
             if (NextData(assembleResult, context, AcceptReg0, Reg0Data, out inst.Op0))
             {
-                if (NextData(assembleResult, context, AcceptReg2, Reg1Data, out inst.Op1))
+                if (NextData(assembleResult, context, AcceptReg1, Reg1Data, out inst.Op1))
                 {
-                    if (NextData(assembleResult, context, AcceptReg1, Reg2Data, out inst.Op2))
+                    if (NextData(assembleResult, context, AcceptReg2, Reg2Data, out inst.Op2))
                     {
                         var __re = context.MatachNext(";");
                         if (__re == MatchResult.Match)
@@ -354,6 +374,9 @@ namespace xCVM.Core.CompilerServices
                             assembleResult.AddError(new MustEndWithSemicolonError(context.Last));
                         }
                     }
+                    else
+                    {
+                    }
                 }
             }
         }
@@ -362,7 +385,7 @@ namespace xCVM.Core.CompilerServices
         {
             switch (dataType)
             {
-                case 0:
+                case 1:
                     {
                         if (NextInt(assembleResult, context, AcceptRegister, out var reg0))
                         {
@@ -371,7 +394,7 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
-                case 1:
+                case 2:
                     {
                         if (NextLong(assembleResult, context, AcceptRegister, out var reg0))
                         {
@@ -380,7 +403,7 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
-                case 2:
+                case 3:
                     {
                         if (NextFloat(assembleResult, context, out var reg0))
                         {
@@ -389,7 +412,7 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
-                case 3:
+                case 4:
                     {
                         if (NextDouble(assembleResult, context, out var reg0))
                         {

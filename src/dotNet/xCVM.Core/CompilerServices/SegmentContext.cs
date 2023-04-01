@@ -135,6 +135,7 @@ namespace xCVM.Core.CompilerServices
         public bool GoNext()
         {
             if (_Current == null) return false;
+            _Last = _Current;
             _Current = _Current.Next;
             return _Current != null;
         }
