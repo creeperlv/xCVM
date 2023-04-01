@@ -58,7 +58,7 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to Single.";
     }
-    public class DoubleParseError: AssemblerError
+    public class DoubleParseError : AssemblerError
     {
         public DoubleParseError(Segment? binded) : base(binded, null)
         {
@@ -73,5 +73,19 @@ namespace xCVM.Core.CompilerServices
         }
 
         public override string Message => $"Should start with $.";
+    }
+    public class UnknownInstructionError : AssemblerError
+    {
+        public UnknownInstructionError(Segment? binded) : base(binded, null)
+        {
+        }
+        public override string Message => $"Unknown instruction.";
+    }
+    public class MustEndWithSemicolonError : AssemblerError
+    {
+        public MustEndWithSemicolonError(Segment? binded) : base(binded, null)
+        {
+        }
+        public override string Message => $"Must end with semicolon error.";
     }
 }

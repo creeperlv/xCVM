@@ -14,7 +14,21 @@ namespace xCVM.Core.CompilerServices
         {
             using var sr = file.OpenText();
             var content = sr.ReadToEnd();
-            return Assemble(content);
+            return Assemble(parser.Parse(content, false, file.FullName));
+        }
+        public AssembleResult Assemble(List<FileInfo> files)
+        {
+            Segment? s = null;
+            foreach (var item in files)
+            {
+                using var sr = item.OpenText();
+                var content = sr.ReadToEnd();
+                var _s = parser.Parse(content, false, item.FullName);
+                if (s is null) _s = s;
+                else s.Concatenate(_s);
+            }
+            if (s is null) return new AssembleResult(new xCVMModule());
+            return Assemble(s);
         }
         public AssembleResult Assemble(Stream stream)
         {
@@ -55,25 +69,25 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             case "ModuleName":
                                                 {
-                                                    module.ModuleMetadata.ModuleName = context.Current.content;
+                                                    module.ModuleMetadata.ModuleName = context.Current!.content;
                                                     context.GoNext();
                                                 }
                                                 break;
                                             case "Author":
                                                 {
-                                                    module.ModuleMetadata.Author = context.Current.content;
+                                                    module.ModuleMetadata.Author = context.Current!.content;
                                                     context.GoNext();
                                                 }
                                                 break;
                                             case "Copyright":
                                                 {
-                                                    module.ModuleMetadata.Copyright = context.Current.content;
+                                                    module.ModuleMetadata.Copyright = context.Current!.content;
                                                     context.GoNext();
                                                 }
                                                 break;
                                             case "ModuleVersion":
                                                 {
-                                                    if (Version.TryParse(context.Current.content, out var result))
+                                                    if (Version.TryParse(context.Current!.content, out var result))
                                                     {
                                                         module.ModuleMetadata.ModuleVersion = result;
                                                     }
@@ -83,7 +97,7 @@ namespace xCVM.Core.CompilerServices
                                                 break;
                                             case "TargetVersion":
                                                 {
-                                                    if (Version.TryParse(context.Current.content, out var result))
+                                                    if (Version.TryParse(context.Current!.content, out var result))
                                                     {
                                                         module.ModuleMetadata.TargetVersion = result;
                                                     }
@@ -99,7 +113,7 @@ namespace xCVM.Core.CompilerServices
                                 break;
                             case 1:
                                 {
-                                    if (int.TryParse(context.Current.content, out var result))
+                                    if (int.TryParse(context.Current!.content, out var result))
                                     {
                                         if (context.GoNext())
                                         {
@@ -142,7 +156,9 @@ namespace xCVM.Core.CompilerServices
                             case 3:
                                 {
                                     var matched = context.MatchCollectionMarchReturnName(
-                                        "add", "addi", "sub", "subi", "mul", "muli", "div", "divi"
+                                        "add", "addi", "sub", "subi", "mul", "muli", "div", "divi",
+                                        "ladd", "laddi", "lsub", "lsubi", "lmul", "lmuli", "ldiv", "ldivi",
+                                        "fadd_s", "faddi_s", "fsub_s", "fsubi_s", "fmul_s", "fmuli_s", "fdiv_s", "fdivi_s"
                                         );
                                     if (matched.Item1 == MatchResult.Match)
                                     {
@@ -296,6 +312,11 @@ namespace xCVM.Core.CompilerServices
                                                 break;
                                         }
                                     }
+                                    else
+                                    {
+                                        assembleResult.AddError(new UnknownInstructionError(context.Current));
+                                        break;
+                                    }
                                 }
                                 break;
                             default:
@@ -323,7 +344,15 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (NextData(assembleResult, context, AcceptReg1, Reg2Data, out inst.Op2))
                     {
-                        module.Instructions.Add(inst);
+                        var __re = context.MatachNext(";");
+                        if (__re == MatchResult.Match)
+                        {
+                            module.Instructions.Add(inst);
+                        }
+                        else
+                        {
+                            assembleResult.AddError(new MustEndWithSemicolonError(context.Last));
+                        }
                     }
                 }
             }

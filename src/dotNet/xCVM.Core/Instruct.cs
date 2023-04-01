@@ -3,9 +3,9 @@
 public class Instruct
 {
     public int Operation;
-    public byte[] Op0;
-    public byte[] Op1;
-    public byte[] Op2;
+    public byte[]? Op0;
+    public byte[]? Op1;
+    public byte[]? Op2;
 }
 public enum ManagedExt
 {
