@@ -19,12 +19,43 @@ namespace xCVM.Core.CompilerServices
             return Message??"";
         }
     }
-    public class VersionFormatError:AssemblerError
+    public class VersionFormatError : AssemblerError
     {
-        public VersionFormatError(Segment? binded) : base(binded,null)
+        public VersionFormatError(Segment? binded) : base(binded, null)
         {
         }
 
         public override string Message => $"Cannot convert content to System.Version.";
+    }
+    public class UnexpectedEndOfFileError : AssemblerError
+    {
+        public UnexpectedEndOfFileError(Segment? binded) : base(binded,null)
+        {
+        }
+        public override string Message => $"End at unexpected location.";
+    }
+    public class IntParseError : AssemblerError
+    {
+        public IntParseError(Segment? binded) : base(binded, null)
+        {
+        }
+
+        public override string Message => $"Cannot convert content to Int32.";
+    }
+    public class LongParseError : AssemblerError
+    {
+        public LongParseError(Segment? binded) : base(binded, null)
+        {
+        }
+
+        public override string Message => $"Cannot convert content to Int64.";
+    }
+    public class RegisterFormatError : AssemblerError
+    {
+        public RegisterFormatError(Segment? binded) : base(binded, null)
+        {
+        }
+
+        public override string Message => $"Should start with $.";
     }
 }

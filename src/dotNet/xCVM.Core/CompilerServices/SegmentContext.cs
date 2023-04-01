@@ -5,7 +5,7 @@ namespace xCVM.Core.CompilerServices
 {
     public class SegmentContext
     {
-        private Segment? Last = null;
+        private Segment? _Last = null;
         private Segment? _Current;
 
         public SegmentContext(Segment? current)
@@ -14,6 +14,7 @@ namespace xCVM.Core.CompilerServices
         }
 
         public Segment? Current => _Current;
+        public Segment? Last=> _Last;
         public (MatchResult, string?) MatchCollectionMarchReturnName(params string[] matches)
         {
             if (Current == null) return (MatchResult.ReachEnd, null);
@@ -126,9 +127,9 @@ namespace xCVM.Core.CompilerServices
         }
         public bool GoBack()
         {
-            if (Last == null) return false;
-            _Current = Last;
-            Last = _Current.Prev;
+            if (_Last == null) return false;
+            _Current = _Last;
+            _Last = _Current.Prev;
             return true;
         }
         public bool GoNext()
@@ -137,6 +138,7 @@ namespace xCVM.Core.CompilerServices
             _Current = _Current.Next;
             return _Current != null;
         }
+        public bool ReachEnd=>_Current==null;
     }
     public enum MatchResult
     {

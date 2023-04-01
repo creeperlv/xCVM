@@ -6,7 +6,7 @@ public class Instruct
     public byte[] Op0;
     public byte[] Op1;
     public byte[] Op2;
-    public byte[] Op3;
+    public byte[]? Op3;
 }
 public enum ManagedExt
 {
