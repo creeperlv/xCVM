@@ -25,6 +25,66 @@ namespace xCVM.Core
         public static ModuleMetadata FromBytes(byte[] bytes)
         {
             ModuleMetadata result = new ModuleMetadata();
+            int StartIndex = 0;
+            {
+                var l = BitConverter.ToInt32(bytes, StartIndex);
+                StartIndex += Constants.int_size;
+                if (l > 0)
+                {
+                    result.ModuleName = Encoding.UTF8.GetString(bytes, StartIndex, l);
+                    StartIndex += l;
+                }
+            }
+            {
+                var l = BitConverter.ToInt32(bytes, StartIndex);
+                StartIndex += Constants.int_size;
+                if (l > 0)
+                {
+                    result.Author = Encoding.UTF8.GetString(bytes, StartIndex, l);
+                    StartIndex += l;
+                }
+            }
+            {
+                var l = BitConverter.ToInt32(bytes, StartIndex);
+                StartIndex += Constants.int_size;
+                if (l > 0)
+                {
+                    result.Copyright = Encoding.UTF8.GetString(bytes, StartIndex, l);
+                    StartIndex += l;
+                }
+            }
+            {
+                var l = BitConverter.ToInt32(bytes, StartIndex);
+                StartIndex += Constants.int_size;
+                if (l > 0)
+                {
+                    var major = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    var minor = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    var build = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    var rev = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    result.ModuleVersion = new Version(major, minor, build, rev);
+                }
+            }
+            {
+                var l = BitConverter.ToInt32(bytes, StartIndex);
+                StartIndex += Constants.int_size;
+                if (l > 0)
+                {
+                    var major = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    var minor = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    var build = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    var rev = BitConverter.ToInt32(bytes, StartIndex);
+                    StartIndex += Constants.int_size;
+                    result.TargetVersion = new Version(major, minor, build, rev);
+                }
+            }
             return result;
         }
         public static ModuleMetadata FromStream(Stream stream)

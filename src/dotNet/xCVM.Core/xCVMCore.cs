@@ -8,10 +8,6 @@ namespace xCVM.Core
 {
     public class xCVMCore
     {
-        readonly int long_size = sizeof(long);
-        readonly int int_size = sizeof(int);
-        readonly int float_size = sizeof(float);
-        readonly int double_size = sizeof(double);
         xCVMRTProgram? program = null;
         xCVMem Registers;
         xCVMem NativeMemory;
@@ -25,8 +21,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
-                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
+                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -35,8 +31,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
-                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
+                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -45,8 +41,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
-                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
+                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -55,8 +51,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
-                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
+                        int OP1 = BitConverter.ToInt32(Registers.data[op1..(op1 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -66,7 +62,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -75,7 +71,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 - op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -84,7 +80,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 * op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -93,7 +89,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + int_size)]);
+                        int OP0 = BitConverter.ToInt32(Registers.data[op0..(op0 + Constants.int_size)]);
                         BitConverter.GetBytes(OP0 / op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -102,8 +98,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
-                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
+                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -112,8 +108,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
-                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
+                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -122,8 +118,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
-                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
+                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -132,8 +128,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
-                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
+                        long OP1 = BitConverter.ToInt64(Registers.data[op1..(op1 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -144,7 +140,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -153,7 +149,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 - op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -162,7 +158,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 * op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -171,7 +167,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + long_size)]);
+                        long OP0 = BitConverter.ToInt64(Registers.data[op0..(op0 + Constants.long_size)]);
                         BitConverter.GetBytes(OP0 / op1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -182,8 +178,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        var OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + float_size)]);
-                        var OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + float_size)]);
+                        var OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + Constants.float_size)]);
+                        var OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + Constants.float_size)]);
                         BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -192,8 +188,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        float OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + float_size)]);
-                        float OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + float_size)]);
+                        float OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + Constants.float_size)]);
+                        float OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + Constants.float_size)]);
                         BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -202,8 +198,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        float OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + float_size)]);
-                        float OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + float_size)]);
+                        float OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + Constants.float_size)]);
+                        float OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + Constants.float_size)]);
                         BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -212,8 +208,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        float OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + float_size)]);
-                        float OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + float_size)]);
+                        float OP0 = BitConverter.ToSingle(Registers.data[op0..(op0 + Constants.float_size)]);
+                        float OP1 = BitConverter.ToSingle(Registers.data[op1..(op1 + Constants.float_size)]);
                         BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -223,8 +219,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        var OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + double_size)]);
-                        var OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + double_size)]);
+                        var OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + Constants.double_size)]);
+                        var OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + Constants.double_size)]);
                         BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -233,8 +229,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        double OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + double_size)]);
-                        double OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + double_size)]);
+                        double OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + Constants.double_size)]);
+                        double OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + Constants.double_size)]);
                         BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -243,8 +239,8 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        double OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + double_size)]);
-                        double OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + double_size)]);
+                        double OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + Constants.double_size)]);
+                        double OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + Constants.double_size)]);
                         BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data, op2);
                     }
                     break;
@@ -253,14 +249,14 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0);
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2);
-                        double OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + double_size)]);
-                        double OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + double_size)]);
+                        double OP0 = BitConverter.ToDouble(Registers.data[op0..(op0 + Constants.double_size)]);
+                        double OP1 = BitConverter.ToDouble(Registers.data[op1..(op1 + Constants.double_size)]);
                         BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data, op2);
                     }
                     break;
                 case (int)ManagedExt.mcall:
                     {
-                        
+
                     }
                     break;
                 default:
