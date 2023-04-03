@@ -3,6 +3,10 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace xCVM.Core.CompilerServices
 {
+    public interface IContentable
+    {
+        string Content { get; }
+    }
     public class SegmentContext
     {
         private Segment? _Last = null;
@@ -14,7 +18,23 @@ namespace xCVM.Core.CompilerServices
         }
 
         public Segment? Current => _Current;
-        public Segment? Last=> _Last;
+        public Segment? Last => _Last;
+        public (MatchResult, IContentable?)MatachCollectionMarchReturnContentable(params IContentable[] matches)
+        {
+            if (Current == null) return (MatchResult.ReachEnd, null);
+            for (int i = 0; i < matches.Length; i++)
+            {
+                if (Current.content == matches[i].Content)
+                {
+                    if (Current.Next != null)
+                    {
+                        GoNext();
+                        return (MatchResult.Match, matches[i]);
+                    }
+                }
+            }
+            return (MatchResult.Mismatch, null);
+        }
         public (MatchResult, string?) MatchCollectionMarchReturnName(params string[] matches)
         {
             if (Current == null) return (MatchResult.ReachEnd, null);
@@ -139,7 +159,7 @@ namespace xCVM.Core.CompilerServices
             _Current = _Current.Next;
             return _Current != null;
         }
-        public bool ReachEnd=>_Current==null;
+        public bool ReachEnd => _Current == null;
     }
     public enum MatchResult
     {
