@@ -19,18 +19,14 @@ namespace xCVM.Core.CompilerServices
 
         public Segment? Current => _Current;
         public Segment? Last => _Last;
-        public (MatchResult, IContentable?)MatachCollectionMarchReturnContentable(params IContentable[] matches)
+        public (MatchResult, IContentable?)MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches)
         {
             if (Current == null) return (MatchResult.ReachEnd, null);
-            for (int i = 0; i < matches.Length; i++)
+            foreach (var item in matches)
             {
-                if (Current.content == matches[i].Content)
+                if(Current.content==item.Content)
                 {
-                    if (Current.Next != null)
-                    {
-                        GoNext();
-                        return (MatchResult.Match, matches[i]);
-                    }
+                    return (MatchResult.Match, item);
                 }
             }
             return (MatchResult.Mismatch, null);

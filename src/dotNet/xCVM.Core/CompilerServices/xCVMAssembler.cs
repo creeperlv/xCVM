@@ -9,7 +9,11 @@ namespace xCVM.Core.CompilerServices
 {
     public class xCVMAssembler
     {
-        public xCVMAssembler() { }
+        AssemblerDefinition? AssemblerDefinition;
+        public xCVMAssembler(AssemblerDefinition? definition = null)
+        {
+            AssemblerDefinition = definition;
+        }
         public AssembleResult Assemble(FileInfo file)
         {
             using var sr = file.OpenText();
@@ -45,6 +49,8 @@ namespace xCVM.Core.CompilerServices
             var current = segments;
             SegmentContext context = new SegmentContext(current);
             int Sections = 0;
+            Dictionary<string, int> Labels = new Dictionary<string, int>();
+            int _IC = 0;
             while (true)
             {
 
@@ -60,289 +66,8 @@ namespace xCVM.Core.CompilerServices
                     }
                     else if (mr == MatchResult.Mismatch)
                     {
-                        switch (Sections)
-                        {
-                            case 0:
-                                {
-                                    (var _mr, var _selection) = context.MatchCollectionMarchReturnName("ModuleName", "Author", "Copyright", "ModuleVersion", "TargetVersion");
-                                    if (_mr == MatchResult.Match)
-                                    {
-                                        switch (_selection)
-                                        {
-                                            case "ModuleName":
-                                                {
-                                                    module.ModuleMetadata.ModuleName = context.Current!.content;
-                                                    context.GoNext();
-                                                }
-                                                break;
-                                            case "Author":
-                                                {
-                                                    module.ModuleMetadata.Author = context.Current!.content;
-                                                    context.GoNext();
-                                                }
-                                                break;
-                                            case "Copyright":
-                                                {
-                                                    module.ModuleMetadata.Copyright = context.Current!.content;
-                                                    context.GoNext();
-                                                }
-                                                break;
-                                            case "ModuleVersion":
-                                                {
-                                                    if (Version.TryParse(context.Current!.content, out var result))
-                                                    {
-                                                        module.ModuleMetadata.ModuleVersion = result;
-                                                    }
-                                                    else assembleResult.AddError(new VersionFormatError(context.Current));
-                                                    context.GoNext();
-                                                }
-                                                break;
-                                            case "TargetVersion":
-                                                {
-                                                    if (Version.TryParse(context.Current!.content, out var result))
-                                                    {
-                                                        module.ModuleMetadata.TargetVersion = result;
-                                                    }
-                                                    else assembleResult.AddError(new VersionFormatError(context.Current));
-                                                    context.GoNext();
-                                                }
-                                                break;
-                                            default:
-                                                break;
-                                        }
-                                    }
-                                }
-                                break;
-                            case 1:
-                                {
-                                    if (int.TryParse(context.Current!.content, out var result))
-                                    {
-                                        if (context.GoNext())
-                                        {
-                                            module.Texts.Add(result, context.Current.content);
-                                        }
-                                        else
-                                        {
-                                            assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        assembleResult.AddError(new IntParseError(context.Current));
-                                        break;
-                                    }
-                                }
-                                break;
-                            case 2:
-                                {
-                                    if (int.TryParse(context.Current!.content, out var result))
-                                    {
-                                        if (context.GoNext())
-                                        {
-                                            module.IDs.Add(result, context.Current.content);
-                                        }
-                                        else
-                                        {
-                                            assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        assembleResult.AddError(new IntParseError(context.Current));
-                                        break;
-                                    }
-                                }
-                                break;
-                            case 3:
-                                {
-                                    var matched = context.MatchCollectionMarchReturnName(
-                                        "add", "addi", "sub", "subi", "mul", "muli", "div", "divi",
-                                        "ladd", "laddi", "lsub", "lsubi", "lmul", "lmuli", "ldiv", "ldivi",
-                                        "fadd_s", "faddi_s", "fsub_s", "fsubi_s", "fmul_s", "fmuli_s", "fdiv_s", "fdivi_s"
-                                        );
-                                    //Console.WriteLine( context.Current.content);
-                                    context.GoBack();
-                                    //Console.WriteLine( context.Current.content);
-                                    if (matched.Item1 == MatchResult.Match)
-                                    {
-                                        switch (matched.Item2)
-                                        {
-                                            case "add":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.add };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "addi":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.addi };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, false, 1, true);
-                                                }
-                                                break;
-                                            case "sub":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.sub };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "subi":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.subi };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, false, 1, true);
-                                                }
-                                                break;
-                                            case "mul":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.mul };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "muli":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.muli };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, false, 1, true);
-                                                }
-                                                break;
-                                            case "div":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.div };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "divi":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.divi };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, false, 1, true);
-                                                }
-                                                break;
-                                            case "ladd":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.ladd };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "laddi":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.laddi };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "lsub":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.lsub };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "lsubi":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.lsubi };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "lmul":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.lmul };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "lmuli":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.lmuli };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "ldiv":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.ldiv };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "ldivi":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.ldivi };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "fadd_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fadd_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "faddi_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.faddi_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "fsub_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fsub_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "fsubi_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fsubi_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "fmul_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fmul_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "fmuli_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fmuli_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            case "fdiv_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fdiv_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 1, true, 1, true);
-                                                }
-                                                break;
-                                            case "fdivi_s":
-                                                {
-                                                    var inst = new Instruct { Operation = (int)Inst.fdivi_s };
-                                                    _3Operators(module, assembleResult, context, inst, 1, true, 2, false, 1, true);
-                                                }
-                                                break;
-                                            default:
-                                                break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        bool willIgnore = false;
-                                        if (context.Current != null)
-                                            switch (context.Current.content)
-                                            {
-                                                case "":
-                                                case ";":
-                                                    {
-                                                        willIgnore = true;
-                                                    }
-                                                    break;
-                                                default:
-                                                    break;
-                                            }
-                                        if (!willIgnore)
-                                            assembleResult.AddError(new UnknownInstructionError(context.Current));
-                                        context.GoNext();
-                                        break;
-                                    }
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                        context.GoNext();
+                        _IC = BaseAssemble(module, assembleResult, context, Sections, Labels, _IC);
+
                     }
                     else if (mr == MatchResult.ReachEnd)
                     {
@@ -355,8 +80,395 @@ namespace xCVM.Core.CompilerServices
 
         }
 
-        private static void _3Operators(xCVMModule module, AssembleResult assembleResult, SegmentContext context, Instruct inst, int Reg0Data = 0,
-            bool AcceptReg0 = false, int Reg1Data = 0, bool AcceptReg1 = false, int Reg2Data = 0, bool AcceptReg2 = false)
+        private int BaseAssemble(xCVMModule module,
+                                 AssembleResult assembleResult,
+                                 SegmentContext context,
+                                 int Sections,
+                                 Dictionary<string, int> Labels,
+                                 int _IC)
+        {
+            switch (Sections)
+            {
+                case 0:
+                    {
+                        (var _mr, var _selection) = context.MatchCollectionMarchReturnName("ModuleName", "Author", "Copyright", "ModuleVersion", "TargetVersion");
+                        if (_mr == MatchResult.Match)
+                        {
+                            switch (_selection)
+                            {
+                                case "ModuleName":
+                                    {
+                                        module.ModuleMetadata.ModuleName = context.Current!.content;
+                                        context.GoNext();
+                                    }
+                                    break;
+                                case "Author":
+                                    {
+                                        module.ModuleMetadata.Author = context.Current!.content;
+                                        context.GoNext();
+                                    }
+                                    break;
+                                case "Copyright":
+                                    {
+                                        module.ModuleMetadata.Copyright = context.Current!.content;
+                                        context.GoNext();
+                                    }
+                                    break;
+                                case "ModuleVersion":
+                                    {
+                                        if (Version.TryParse(context.Current!.content, out var result))
+                                        {
+                                            module.ModuleMetadata.ModuleVersion = result;
+                                        }
+                                        else assembleResult.AddError(new VersionFormatError(context.Current));
+                                        context.GoNext();
+                                    }
+                                    break;
+                                case "TargetVersion":
+                                    {
+                                        if (Version.TryParse(context.Current!.content, out var result))
+                                        {
+                                            module.ModuleMetadata.TargetVersion = result;
+                                        }
+                                        else assembleResult.AddError(new VersionFormatError(context.Current));
+                                        context.GoNext();
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    {
+                        if (int.TryParse(context.Current!.content, out var result))
+                        {
+                            if (context.GoNext())
+                            {
+                                module.Texts.Add(result, context.Current.content);
+                            }
+                            else
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            assembleResult.AddError(new IntParseError(context.Current));
+                            break;
+                        }
+                    }
+                    break;
+                case 2:
+                    {
+                        if (int.TryParse(context.Current!.content, out var result))
+                        {
+                            if (context.GoNext())
+                            {
+                                module.IDs.Add(result, context.Current.content);
+                            }
+                            else
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            assembleResult.AddError(new IntParseError(context.Current));
+                            break;
+                        }
+                    }
+                    break;
+                case 3:
+                    {
+
+                        if (AssemblerDefinition == null)
+                        {
+                            _IC = EmbeddedAssemble(module, assembleResult, context, Labels, _IC);
+                        }
+                        else
+                        {
+                            _IC = eXtensibleAssemble(module, assembleResult, context, Labels, _IC);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            context.GoNext();
+            return _IC;
+        }
+
+        private int eXtensibleAssemble(xCVMModule module,
+                                       AssembleResult assembleResult,
+                                       SegmentContext context,
+                                       Dictionary<string, int> Labels,
+                                       int _IC)
+        {
+            var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions);
+            if (a.Item1 == MatchResult.Match)
+            {
+                if (a.Item2 is Instruction3OperatorsDefinition def)
+                {
+                    Instruct instruct = new Instruct();
+                    instruct.Operation = def.ID;
+                    _3Operators(module,
+                                assembleResult,
+                                context,
+                                instruct,
+                                ref _IC,
+                                def.OP0DT,
+                                def.OP0REG,
+                                def.OP1DT,
+                                def.OP1REG,
+                                def.OP2DT,
+                                def.OP2REG);
+                }
+            }
+            else if (a.Item1 == MatchResult.Mismatch)
+            {
+                if (context.MatachNext(":", true) == MatchResult.Match)
+                {
+                    //Label
+                    _IC++;
+                    Labels.Add(context.Last.Prev.content, _IC);
+                }
+                else
+                {
+                    bool willIgnore = false;
+                    if (context.Current != null)
+                        switch (context.Current.content)
+                        {
+                            case "":
+                            case ";":
+                                {
+                                    willIgnore = true;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    if (!willIgnore)
+                        assembleResult.AddError(new UnknownInstructionError(context.Current));
+                    context.GoNext();
+                }
+            }
+
+            return _IC;
+        }
+
+        private static int EmbeddedAssemble(xCVMModule module, AssembleResult assembleResult, SegmentContext context, Dictionary<string, int> Labels, int _IC)
+        {
+            {
+                var matched = context.MatchCollectionMarchReturnName(
+                    "add", "addi", "sub", "subi", "mul", "muli", "div", "divi",
+                    "ladd", "laddi", "lsub", "lsubi", "lmul", "lmuli", "ldiv", "ldivi",
+                    "fadd_s", "faddi_s", "fsub_s", "fsubi_s", "fmul_s", "fmuli_s", "fdiv_s", "fdivi_s"
+                    );
+                //Console.WriteLine( context.Current.content);
+                context.GoBack();
+                //Console.WriteLine( context.Current.content);
+                if (matched.Item1 == MatchResult.Match)
+                {
+
+                    switch (matched.Item2)
+                    {
+                        case "add":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.add };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "addi":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.addi };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                            }
+                            break;
+                        case "sub":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.sub };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "subi":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.subi };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                            }
+                            break;
+                        case "mul":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.mul };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "muli":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.muli };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                            }
+                            break;
+                        case "div":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.div };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "divi":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.divi };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                            }
+                            break;
+                        case "ladd":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.ladd };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "laddi":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.laddi };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "lsub":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.lsub };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "lsubi":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.lsubi };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "lmul":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.lmul };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "lmuli":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.lmuli };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "ldiv":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.ldiv };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "ldivi":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.ldivi };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "fadd_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fadd_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "faddi_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.faddi_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "fsub_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fsub_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "fsubi_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fsubi_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "fmul_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fmul_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "fmuli_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fmuli_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        case "fdiv_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fdiv_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                            }
+                            break;
+                        case "fdivi_s":
+                            {
+                                var inst = new Instruct { Operation = (int)Inst.fdivi_s };
+                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                            }
+                            break;
+                        default:
+
+                            break;
+                    }
+                }
+                else
+                {
+                    if (context.MatachNext(":", true) == MatchResult.Match)
+                    {
+                        //Label
+                        _IC++;
+                        Labels.Add(context.Last.Prev.content, _IC);
+                    }
+                    else
+                    {
+                        bool willIgnore = false;
+                        if (context.Current != null)
+                            switch (context.Current.content)
+                            {
+                                case "":
+                                case ";":
+                                    {
+                                        willIgnore = true;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        if (!willIgnore)
+                            assembleResult.AddError(new UnknownInstructionError(context.Current));
+                        context.GoNext();
+                    }
+                }
+            }
+
+            return _IC;
+        }
+
+        private static void _3Operators(xCVMModule module,
+                                        AssembleResult assembleResult,
+                                        SegmentContext context,
+                                        Instruct inst,
+                                        ref int IC,
+                                        int Reg0Data = 0,
+                                        bool AcceptReg0 = false,
+                                        int Reg1Data = 0,
+                                        bool AcceptReg1 = false,
+                                        int Reg2Data = 0,
+                                        bool AcceptReg2 = false)
         {
             if (NextData(assembleResult, context, AcceptReg0, Reg0Data, out inst.Op0))
             {
@@ -368,6 +480,7 @@ namespace xCVM.Core.CompilerServices
                         if (__re == MatchResult.Match)
                         {
                             module.Instructions.Add(inst);
+                            IC++;
                         }
                         else
                         {
