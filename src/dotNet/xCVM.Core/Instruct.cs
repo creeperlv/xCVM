@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using xCVM.Core.Utilities;
 
 namespace xCVM.Core
 {
@@ -9,6 +13,38 @@ namespace xCVM.Core
         public byte[]? Op0;
         public byte[]? Op1;
         public byte[]? Op2;
+        public List<byte> GetBytes()
+        {
+            List<byte> bytes = new List<byte>();
+            {
+                bytes.Concatenate(BitConverter.GetBytes(Operation));
+            }
+            if (Op0 != null)
+                bytes.Concatenate(BitConverter.GetBytes((short)Op0.Length));
+            else
+                bytes.Concatenate(BitConverter.GetBytes((short)0));
+            if (Op1 != null)
+                bytes.Concatenate(BitConverter.GetBytes((short)Op1.Length));
+            else
+                bytes.Concatenate(BitConverter.GetBytes((short)0));
+            if (Op2 != null)
+                bytes.Concatenate(BitConverter.GetBytes((short)Op2.Length));
+            else
+                bytes.Concatenate(BitConverter.GetBytes((short)0));
+            if (Op0 != null)
+                bytes.Concatenate(Op0);
+            if (Op1 != null)
+                bytes.Concatenate(Op1);
+            if (Op2 != null)
+                bytes.Concatenate(Op2);
+            return bytes;
+        }
+        public void WriteToStream(Stream stream)
+        {
+            var b = GetBytes();
+            stream.Write(BitConverter.GetBytes(b.Count));
+            stream.Write(b.ToArray());
+        }
     }
     public enum ManagedExt
     {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace xCVM.Core
@@ -15,238 +14,29 @@ namespace xCVM.Core
         public List<Instruct> Instructions = new List<Instruct>();
         public void WriteBrinary(Stream stream)
         {
+            var metab = ModuleMetadata.GetBytes();
+            stream.Write(BitConverter.GetBytes(metab.Length));
+            stream.Write(metab);
 
-        }
-    }
-    [Serializable]
-    public class ModuleMetadata
-    {
-        public string? ModuleName;
-        public string? Author;
-        public string? Copyright;
-        public string? Description;
-        public Version? ModuleVersion;
-        public Version? TargetVersion;
-        public static ModuleMetadata FromBytes(byte[] bytes)
-        {
-            ModuleMetadata result = new ModuleMetadata();
-            int StartIndex = 0;
+            stream.Write(BitConverter.GetBytes(IDs.Count));
+            foreach (var item in IDs)
             {
-                var l = BitConverter.ToInt32(bytes, StartIndex);
-                StartIndex += Constants.int_size;
-                if (l > 0)
-                {
-                    result.ModuleName = Encoding.UTF8.GetString(bytes, StartIndex, l);
-                    StartIndex += l;
-                }
+                stream.Write(BitConverter.GetBytes(item.Key));
+                stream.Write(BitConverter.GetBytes(item.Value.Length));
+                stream.Write(Encoding.UTF8.GetBytes(item.Value));
             }
+            stream.Write(BitConverter.GetBytes(Texts.Count));
+            foreach (var item in Texts)
             {
-                var l = BitConverter.ToInt32(bytes, StartIndex);
-                StartIndex += Constants.int_size;
-                if (l > 0)
-                {
-                    result.Author = Encoding.UTF8.GetString(bytes, StartIndex, l);
-                    StartIndex += l;
-                }
+                stream.Write(BitConverter.GetBytes(item.Key));
+                stream.Write(BitConverter.GetBytes(item.Value.Length));
+                stream.Write(Encoding.UTF8.GetBytes(item.Value));
             }
+            stream.Write(BitConverter.GetBytes(Instructions.Count));
+            foreach (var item in Instructions)
             {
-                var l = BitConverter.ToInt32(bytes, StartIndex);
-                StartIndex += Constants.int_size;
-                if (l > 0)
-                {
-                    result.Copyright = Encoding.UTF8.GetString(bytes, StartIndex, l);
-                    StartIndex += l;
-                }
+                item.WriteToStream(stream);
             }
-            {
-                var l = BitConverter.ToInt32(bytes, StartIndex);
-                StartIndex += Constants.int_size;
-                if (l > 0)
-                {
-                    result.Description = Encoding.UTF8.GetString(bytes, StartIndex, l);
-                    StartIndex += l;
-                }
-            }
-            {
-                var l = BitConverter.ToInt32(bytes, StartIndex);
-                StartIndex += Constants.int_size;
-                if (l > 0)
-                {
-                    var major = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    var minor = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    var build = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    var rev = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    result.ModuleVersion = new Version(major, minor, build, rev);
-                }
-            }
-            {
-                var l = BitConverter.ToInt32(bytes, StartIndex);
-                StartIndex += Constants.int_size;
-                if (l > 0)
-                {
-                    var major = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    var minor = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    var build = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    var rev = BitConverter.ToInt32(bytes, StartIndex);
-                    StartIndex += Constants.int_size;
-                    result.TargetVersion = new Version(major, minor, build, rev);
-                }
-            }
-            return result;
-        }
-        public static ModuleMetadata FromStream(Stream stream)
-        {
-            ModuleMetadata result = new ModuleMetadata();
-            byte[] buffer_4 = new byte[4];
-            {
-                stream.Read(buffer_4, 0, 4);
-                var b = BitConverter.ToInt32(buffer_4);
-                if (b > 0)
-                {
-                    byte[] bytes = new byte[b];
-                    stream.Read(bytes, 0, b);
-                    result.ModuleName = Encoding.UTF8.GetString(bytes);
-                }
-            }
-            {
-                stream.Read(buffer_4, 0, 4);
-                var b = BitConverter.ToInt32(buffer_4);
-                if (b > 0)
-                {
-                    byte[] bytes = new byte[b];
-                    stream.Read(bytes, 0, b);
-                    result.Author = Encoding.UTF8.GetString(bytes);
-                }
-            }
-            {
-                stream.Read(buffer_4, 0, 4);
-                var b = BitConverter.ToInt32(buffer_4);
-                if (b > 0)
-                {
-                    byte[] bytes = new byte[b];
-                    stream.Read(bytes, 0, b);
-                    result.Copyright = Encoding.UTF8.GetString(bytes);
-                }
-            }
-            {
-                stream.Read(buffer_4, 0, 4);
-                var b = BitConverter.ToInt32(buffer_4);
-                if (b > 0)
-                {
-                    byte[] bytes = new byte[b];
-                    stream.Read(bytes, 0, b);
-                    result.Description = Encoding.UTF8.GetString(bytes);
-                }
-            }
-            {
-                stream.Read(buffer_4, 0, 4);
-                var b = BitConverter.ToInt32(buffer_4);
-                if (b > 0)
-                {
-                    stream.Read(buffer_4, 0, 4);
-                    int Major = BitConverter.ToInt32(buffer_4);
-                    stream.Read(buffer_4, 0, 4);
-                    int Minor = BitConverter.ToInt32(buffer_4);
-                    stream.Read(buffer_4, 0, 4);
-                    int Build = BitConverter.ToInt32(buffer_4);
-                    stream.Read(buffer_4, 0, 4);
-                    int Rev = BitConverter.ToInt32(buffer_4);
-                    result.ModuleVersion = new Version(Major, Minor, Build, Rev);
-                }
-            }
-            {
-                stream.Read(buffer_4, 0, 4);
-                var b = BitConverter.ToInt32(buffer_4);
-                if (b > 0)
-                {
-                    stream.Read(buffer_4, 0, 4);
-                    int Major = BitConverter.ToInt32(buffer_4);
-                    stream.Read(buffer_4, 0, 4);
-                    int Minor = BitConverter.ToInt32(buffer_4);
-                    stream.Read(buffer_4, 0, 4);
-                    int Build = BitConverter.ToInt32(buffer_4);
-                    stream.Read(buffer_4, 0, 4);
-                    int Rev = BitConverter.ToInt32(buffer_4);
-                    result.TargetVersion = new Version(Major, Minor, Build, Rev);
-                }
-            }
-            return result;
-        }
-        public byte[] GetBytes()
-        {
-            IEnumerable<byte> result = new byte[0];
-            if (ModuleName == null)
-            {
-                result = result.Concat(BitConverter.GetBytes(0));
-            }
-            else
-            {
-                var n = Encoding.UTF8.GetBytes(ModuleName);
-                result = result.Concat(BitConverter.GetBytes(n.Length));
-                result = result.Concat(n);
-            }
-            if (Author == null)
-            {
-                result = result.Concat(BitConverter.GetBytes(0));
-            }
-            else
-            {
-                var n = Encoding.UTF8.GetBytes(Author);
-                result = result.Concat(BitConverter.GetBytes(n.Length));
-                result = result.Concat(n);
-            }
-            if (Copyright == null)
-            {
-                result = result.Concat(BitConverter.GetBytes(0));
-            }
-            else
-            {
-                var n = Encoding.UTF8.GetBytes(Copyright);
-                result = result.Concat(BitConverter.GetBytes(n.Length));
-                result = result.Concat(n);
-            }
-            if (Description == null)
-            {
-                result = result.Concat(BitConverter.GetBytes(0));
-            }
-            else
-            {
-                var n = Encoding.UTF8.GetBytes(Description);
-                result = result.Concat(BitConverter.GetBytes(n.Length));
-                result = result.Concat(n);
-            }
-            if (ModuleVersion == null)
-            {
-                result = result.Concat(BitConverter.GetBytes(0));
-            }
-            else
-            {
-                result = result.Concat(BitConverter.GetBytes(1));
-                result = result.Concat(BitConverter.GetBytes(ModuleVersion.Major));
-                result = result.Concat(BitConverter.GetBytes(ModuleVersion.Minor));
-                result = result.Concat(BitConverter.GetBytes(ModuleVersion.Build));
-                result = result.Concat(BitConverter.GetBytes(ModuleVersion.Revision));
-            }
-            if (TargetVersion == null)
-            {
-                result = result.Concat(BitConverter.GetBytes(0));
-            }
-            else
-            {
-                result = result.Concat(BitConverter.GetBytes(1));
-                result = result.Concat(BitConverter.GetBytes(TargetVersion.Major));
-                result = result.Concat(BitConverter.GetBytes(TargetVersion.Minor));
-                result = result.Concat(BitConverter.GetBytes(TargetVersion.Build));
-                result = result.Concat(BitConverter.GetBytes(TargetVersion.Revision));
-            }
-            return result.ToArray();
         }
     }
 }

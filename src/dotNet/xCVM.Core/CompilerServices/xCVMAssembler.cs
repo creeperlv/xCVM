@@ -11,7 +11,7 @@ namespace xCVM.Core.CompilerServices
 {
     public class xCVMAssembler
     {
-        AssemblerDefinition? AssemblerDefinition;
+        public AssemblerDefinition? AssemblerDefinition;
         public xCVMAssembler(AssemblerDefinition? definition = null)
         {
             AssemblerDefinition = definition;
@@ -120,7 +120,7 @@ namespace xCVM.Core.CompilerServices
                                             }
                                             else
                                             {
-                                                //context.GoNext();
+
                                             }
                                         }
                                     }
@@ -136,7 +136,7 @@ namespace xCVM.Core.CompilerServices
                                             }
                                             else
                                             {
-                                                //context.GoNext();
+
                                             }
                                         }
                                     }
@@ -152,7 +152,7 @@ namespace xCVM.Core.CompilerServices
                                             }
                                             else
                                             {
-                                                //context.GoNext();
+
                                             }
                                         }
                                     }
@@ -187,7 +187,6 @@ namespace xCVM.Core.CompilerServices
                                             }
                                             else
                                             {
-                                                //context.GoNext();
                                             }
                                         }
                                     }
@@ -207,7 +206,6 @@ namespace xCVM.Core.CompilerServices
                                             }
                                             else
                                             {
-                                                //context.GoNext();
                                             }
                                         }
                                     }
@@ -233,7 +231,6 @@ namespace xCVM.Core.CompilerServices
                                     }
                                     else
                                     {
-                                        //context.GoNext();
                                     }
                                 }
                             }
@@ -265,7 +262,6 @@ namespace xCVM.Core.CompilerServices
                                     }
                                     else
                                     {
-                                        //context.GoNext();
                                     }
                                 }
                             }
@@ -309,7 +305,6 @@ namespace xCVM.Core.CompilerServices
                                        int _IC)
         {
             var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions);
-            //Console.WriteLine("x:"+a.Item1+",c:"+a.Item2?.Content);
             if (a.Item1 == MatchResult.Match)
             {
                 if (a.Item2 is Instruction3OperatorsDefinition def)
@@ -331,11 +326,9 @@ namespace xCVM.Core.CompilerServices
             }
             else if (a.Item1 == MatchResult.Mismatch)
             {
-                //Console.WriteLine("x:" + a.Item1 + ",c:" + context.Current.content);
                 var r = context.MatachNext(":", true);
                 if (r == MatchResult.Match)
                 {
-                    //Label
                     Labels.Add(context.Last.Prev.content, _IC + 1);
                 }
                 else if (r == MatchResult.Mismatch)
