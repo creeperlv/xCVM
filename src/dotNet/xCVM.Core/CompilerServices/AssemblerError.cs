@@ -88,4 +88,13 @@ namespace xCVM.Core.CompilerServices
         }
         public override string Message => $"Must end with semicolon error.";
     }
+    public class MustEndWithSpecifiedEndMarkError : AssemblerError
+    {
+        string end_mark;
+        public MustEndWithSpecifiedEndMarkError(Segment? binded, string end_mark) : base(binded, null)
+        {
+            this.end_mark = end_mark;
+        }
+        public override string Message => $"Must end with {end_mark}.";
+    }
 }

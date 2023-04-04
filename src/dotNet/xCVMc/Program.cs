@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using xCVM.Core;
 using xCVM.Core.CompilerServices;
+using xCVMc.Data;
 
 namespace xCVM.Compiler;
 public class Program
@@ -15,7 +16,8 @@ public class Program
         }
 
         {
-            xCVMAssembler xCVMAssembler = new xCVMAssembler();
+            xCVMAssembler xCVMAssembler = new xCVMAssembler(PredefiniedAssemblerDefinition.GetDefinition());
+            //xCVMAssembler xCVMAssembler = new xCVMAssembler(null);
             xCVMModule? xCVMModule = null;
             var result = xCVMAssembler.Assemble(files);
             if (result.Errors.Count > 0)

@@ -1,4 +1,8 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace xCVM.Core
 {
@@ -20,6 +24,7 @@ namespace xCVM.Core
         public string? ModuleName;
         public string? Author;
         public string? Copyright;
+        public string? Description;
         public Version? ModuleVersion;
         public Version? TargetVersion;
         public static ModuleMetadata FromBytes(byte[] bytes)
@@ -50,6 +55,15 @@ namespace xCVM.Core
                 if (l > 0)
                 {
                     result.Copyright = Encoding.UTF8.GetString(bytes, StartIndex, l);
+                    StartIndex += l;
+                }
+            }
+            {
+                var l = BitConverter.ToInt32(bytes, StartIndex);
+                StartIndex += Constants.int_size;
+                if (l > 0)
+                {
+                    result.Description = Encoding.UTF8.GetString(bytes, StartIndex, l);
                     StartIndex += l;
                 }
             }
@@ -126,6 +140,16 @@ namespace xCVM.Core
                 var b = BitConverter.ToInt32(buffer_4);
                 if (b > 0)
                 {
+                    byte[] bytes = new byte[b];
+                    stream.Read(bytes, 0, b);
+                    result.Description = Encoding.UTF8.GetString(bytes);
+                }
+            }
+            {
+                stream.Read(buffer_4, 0, 4);
+                var b = BitConverter.ToInt32(buffer_4);
+                if (b > 0)
+                {
                     stream.Read(buffer_4, 0, 4);
                     int Major = BitConverter.ToInt32(buffer_4);
                     stream.Read(buffer_4, 0, 4);
@@ -185,6 +209,16 @@ namespace xCVM.Core
             else
             {
                 var n = Encoding.UTF8.GetBytes(Copyright);
+                result = result.Concat(BitConverter.GetBytes(n.Length));
+                result = result.Concat(n);
+            }
+            if (Description == null)
+            {
+                result = result.Concat(BitConverter.GetBytes(0));
+            }
+            else
+            {
+                var n = Encoding.UTF8.GetBytes(Description);
                 result = result.Concat(BitConverter.GetBytes(n.Length));
                 result = result.Concat(n);
             }

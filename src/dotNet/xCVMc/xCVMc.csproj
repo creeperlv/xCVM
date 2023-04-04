@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\xCVM.Core\xCVM.Core.csproj" />
+    <ProjectReference Include="..\xCVMc.Data\xCVMc.Data.csproj" />
   </ItemGroup>
 
 </Project>

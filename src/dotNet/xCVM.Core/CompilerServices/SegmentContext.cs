@@ -1,4 +1,5 @@
 ﻿using LibCLCC.NET.TextProcessing;
+using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace xCVM.Core.CompilerServices
