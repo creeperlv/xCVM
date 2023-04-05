@@ -19,6 +19,7 @@ namespace xCVM.Core.CompilerServices
             {
                 WillUseEndMark = definition.UseStatementEndMark;
                 EndMark = definition.StateMentEndMark;
+                AcceptIDAlias = definition.AcceptIDAlias;
             }
         }
         public AssembleResult Assemble(FileInfo file)
@@ -63,6 +64,8 @@ namespace xCVM.Core.CompilerServices
             SegmentContext context = new SegmentContext(current);
             int Sections = 0;
             Dictionary<string, int> Labels = new Dictionary<string, int>();
+            Dictionary<string, int> Texts = new Dictionary<string, int>();
+            Dictionary<string, int> IDs = new Dictionary<string, int>();
             int _IC = 0;
             while (true)
             {
@@ -79,7 +82,7 @@ namespace xCVM.Core.CompilerServices
                     }
                     else if (mr == MatchResult.Mismatch)
                     {
-                        _IC = BaseAssemble(module, assembleResult, context, Sections, Labels, _IC);
+                        _IC = BaseAssemble(module, assembleResult, context, Sections, Labels, Texts, IDs, _IC);
 
                     }
                     else if (mr == MatchResult.ReachEnd)
@@ -92,12 +95,14 @@ namespace xCVM.Core.CompilerServices
             return assembleResult;
 
         }
-
+        bool AcceptIDAlias = true;
         private int BaseAssemble(xCVMModule module,
                                  AssembleResult assembleResult,
                                  SegmentContext context,
                                  int Sections,
                                  Dictionary<string, int> Labels,
+                                 Dictionary<string, int> Texts,
+                                 Dictionary<string, int> IDs,
                                  int _IC)
         {
             switch (Sections)
@@ -242,7 +247,37 @@ namespace xCVM.Core.CompilerServices
                         }
                         else
                         {
-                            assembleResult.AddError(new IntParseError(context.Current));
+
+                            if (AcceptIDAlias)
+                            {
+                                int ID = Texts.Count;
+                                if (!Texts.TryAdd(context.Current!.content, ID))
+                                {
+                                    Texts[context.Current!.content] = ID;
+                                }
+                                if (context.GoNext())
+                                {
+                                    module.Texts.Add(ID, context.Current.content);
+                                    if (WillUseEndMark)
+                                    {
+                                        if (context.MatachNext(EndMark) != MatchResult.Match)
+                                        {
+                                            assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                        }
+                                        else
+                                        {
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+                                    break;
+                                }
+
+                            }
+                            else
+                                assembleResult.AddError(new IntParseError(context.Current));
                             break;
                         }
                     }
@@ -273,7 +308,37 @@ namespace xCVM.Core.CompilerServices
                         }
                         else
                         {
-                            assembleResult.AddError(new IntParseError(context.Current));
+
+                            if (AcceptIDAlias)
+                            {
+                                int ID = IDs.Count;
+                                if (!IDs.TryAdd(context.Current!.content, ID))
+                                {
+                                    IDs[context.Current!.content] = ID;
+                                }
+                                if (context.GoNext())
+                                {
+                                    module.IDs.Add(ID, context.Current.content);
+                                    if (WillUseEndMark)
+                                    {
+                                        if (context.MatachNext(EndMark) != MatchResult.Match)
+                                        {
+                                            assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                        }
+                                        else
+                                        {
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+                                    break;
+                                }
+
+                            }
+                            else
+                                assembleResult.AddError(new IntParseError(context.Current));
                             break;
                         }
                     }
@@ -283,11 +348,11 @@ namespace xCVM.Core.CompilerServices
 
                         if (AssemblerDefinition == null)
                         {
-                            _IC = EmbeddedAssemble(module, assembleResult, context, Labels, _IC);
+                            _IC = EmbeddedAssemble(module, assembleResult, context, Labels, Texts, IDs, _IC);
                         }
                         else
                         {
-                            _IC = eXtensibleAssemble(module, assembleResult, context, Labels, _IC);
+                            _IC = eXtensibleAssemble(module, assembleResult, context, Labels, Texts, IDs, _IC);
                         }
                     }
                     break;
@@ -302,6 +367,8 @@ namespace xCVM.Core.CompilerServices
                                        AssembleResult assembleResult,
                                        SegmentContext context,
                                        Dictionary<string, int> Labels,
+                                       Dictionary<string, int> Texts,
+                                       Dictionary<string, int> IDs,
                                        int _IC)
         {
             var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions);
@@ -315,6 +382,9 @@ namespace xCVM.Core.CompilerServices
                                 assembleResult,
                                 context,
                                 instruct,
+                                Labels,
+                                Texts,
+                                IDs,
                                 ref _IC,
                                 def.OP0DT,
                                 def.OP0REG,
@@ -355,7 +425,13 @@ namespace xCVM.Core.CompilerServices
             return _IC;
         }
 
-        private int EmbeddedAssemble(xCVMModule module, AssembleResult assembleResult, SegmentContext context, Dictionary<string, int> Labels, int _IC)
+        private int EmbeddedAssemble(xCVMModule module,
+                                     AssembleResult assembleResult,
+                                     SegmentContext context,
+                                     Dictionary<string, int> Labels,
+                                     Dictionary<string, int> Texts,
+                                     Dictionary<string, int> IDs,
+                                     int _IC)
         {
             {
                 var matched = context.MatchCollectionMarchReturnName(
@@ -374,145 +450,161 @@ namespace xCVM.Core.CompilerServices
                         case "add":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.add };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module,
+                                            assembleResult,
+                                            context,
+                                            inst,
+                                            Labels,
+                                            Texts,
+                                            IDs,
+                                            ref _IC,
+                                            1,
+                                            true,
+                                            1,
+                                            true,
+                                            1,
+                                            true);
                             }
                             break;
                         case "addi":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.addi };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst,
+                                Labels,
+                                Texts,
+                                IDs, ref _IC, 1, true, 1, false, 1, true);
                             }
                             break;
                         case "sub":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.sub };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "subi":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.subi };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, false, 1, true);
                             }
                             break;
                         case "mul":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.mul };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "muli":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.muli };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, false, 1, true);
                             }
                             break;
                         case "div":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.div };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "divi":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.divi };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, false, 1, true);
                             }
                             break;
                         case "ladd":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.ladd };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "laddi":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.laddi };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "lsub":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.lsub };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "lsubi":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.lsubi };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "lmul":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.lmul };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "lmuli":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.lmuli };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "ldiv":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.ldiv };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "ldivi":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.ldivi };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "fadd_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fadd_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "faddi_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.faddi_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "fsub_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fsub_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "fsubi_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fsubi_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "fmul_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fmul_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "fmuli_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fmuli_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         case "fdiv_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fdiv_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 1, true, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 1, true, 1, true);
                             }
                             break;
                         case "fdivi_s":
                             {
                                 var inst = new Instruct { Operation = (int)Inst.fdivi_s };
-                                _3Operators(module, assembleResult, context, inst, ref _IC, 1, true, 2, false, 1, true);
+                                _3Operators(module, assembleResult, context, inst, Labels, Texts, IDs, ref _IC, 1, true, 2, false, 1, true);
                             }
                             break;
                         default:
@@ -558,22 +650,25 @@ namespace xCVM.Core.CompilerServices
         bool WillUseEndMark = true;
         string EndMark = ";";
         private void _3Operators(xCVMModule module,
-                                        AssembleResult assembleResult,
-                                        SegmentContext context,
-                                        Instruct inst,
-                                        ref int IC,
-                                        int Reg0Data = 0,
-                                        bool AcceptReg0 = false,
-                                        int Reg1Data = 0,
-                                        bool AcceptReg1 = false,
-                                        int Reg2Data = 0,
-                                        bool AcceptReg2 = false)
+                                 AssembleResult assembleResult,
+                                 SegmentContext context,
+                                 Instruct inst,
+                                 Dictionary<string, int> Labels,
+                                 Dictionary<string, int> Texts,
+                                 Dictionary<string, int> IDs,
+                                 ref int IC,
+                                 int Reg0Data = 0,
+                                 bool AcceptReg0 = false,
+                                 int Reg1Data = 0,
+                                 bool AcceptReg1 = false,
+                                 int Reg2Data = 0,
+                                 bool AcceptReg2 = false)
         {
-            if (NextData(assembleResult, context, AcceptReg0, Reg0Data, out inst.Op0))
+            if (NextData(assembleResult, context, AcceptReg0, Reg0Data, Labels, Texts, IDs, out inst.Op0))
             {
-                if (NextData(assembleResult, context, AcceptReg1, Reg1Data, out inst.Op1))
+                if (NextData(assembleResult, context, AcceptReg1, Reg1Data, Labels, Texts, IDs, out inst.Op1))
                 {
-                    if (NextData(assembleResult, context, AcceptReg2, Reg2Data, out inst.Op2))
+                    if (NextData(assembleResult, context, AcceptReg2, Reg2Data, Labels, Texts, IDs, out inst.Op2))
                     {
                         if (WillUseEndMark)
                         {
@@ -602,13 +697,20 @@ namespace xCVM.Core.CompilerServices
             }
         }
 
-        private bool NextData(AssembleResult assembleResult, SegmentContext context, bool AcceptRegister, int dataType, out byte[] reg)
+        private bool NextData(AssembleResult assembleResult,
+                              SegmentContext context,
+                              bool AcceptRegister,
+                              int dataType,
+                              Dictionary<string, int> Labels,
+                              Dictionary<string, int> Texts,
+                              Dictionary<string, int> IDs,
+                              out byte[] reg)
         {
             switch (dataType)
             {
                 case 1:
                     {
-                        if (NextInt(assembleResult, context, AcceptRegister, out var reg0))
+                        if (NextInt(assembleResult, context, AcceptRegister, Labels, Texts, IDs, out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -648,11 +750,61 @@ namespace xCVM.Core.CompilerServices
             reg = new byte[0];
             return false;
         }
-        private bool NextInt(AssembleResult assembleResult, SegmentContext context, bool AcceptRegister, out int reg0)
+        private bool NextInt(AssembleResult assembleResult,
+                             SegmentContext context,
+                             bool AcceptRegister,
+                              Dictionary<string, int> Labels,
+                              Dictionary<string, int> Texts,
+                              Dictionary<string, int> IDs,
+                             out int reg0)
         {
             if (context.GoNext())
             {
                 var _int = context.Current!.content;
+                if (_int.StartsWith("text?"))
+                {
+                    _int = _int.Substring(5);
+                    if (Texts.ContainsKey(_int))
+                    {
+                        reg0 = Texts[_int];
+                        return true;
+                    }
+                    else
+                    {
+                        reg0 = -1;
+                        return false;
+                    }
+                }
+                else
+                if (_int.StartsWith("id?"))
+                {
+                    _int = _int.Substring(3);
+                    if (IDs.ContainsKey(_int))
+                    {
+                        reg0 = IDs[_int];
+                        return true;
+                    }
+                    else
+                    {
+                        reg0 = -1;
+                        return false;
+                    }
+                }
+                else
+                if (_int.StartsWith("lbl?"))
+                {
+                    _int = _int.Substring(4);
+                    if (Labels.ContainsKey(_int))
+                    {
+                        reg0 = Labels[_int];
+                        return true;
+                    }
+                    else
+                    {
+                        reg0 = -1;
+                        return false;
+                    }
+                }
                 if (AcceptRegister)
                 {
                     if (_int.StartsWith("$"))

@@ -2,6 +2,7 @@
 #define GL_SIZE 10
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "Exceptions.h"
 typedef char bool;
 #define true 1

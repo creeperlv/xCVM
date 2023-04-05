@@ -46,7 +46,7 @@ ExceptableResult NewGL(size_t ItemSize)
 ExceptableResult AddGL(GenericList List, void* item)
 {
 	if (List->Count >= List->Size) {
-		void* temp = (void*)realloc(List->HEAD, List->ItemSize * (List->Size + GL_SIZE));
+		void** temp = (void*)realloc(List->HEAD, List->ItemSize * (List->Size + GL_SIZE));
 		if (temp == NULL) {
 			ExceptableResult result = NewER();
 			result->Exception = NewException(GL_REALLOC_FAILED_ID, GL_REALLOC_FAILED_DESC);
@@ -88,7 +88,7 @@ ExceptableResult GLToCStr(GenericList List)
 	}
 	for (size_t i = 0; i < count; i++)
 	{
-		str[i] = List->HEAD[i];
+		str[i] = ((char*)List->HEAD[i])[0];
 	}
 	str[count] = '\0';
 	er->Content = str;

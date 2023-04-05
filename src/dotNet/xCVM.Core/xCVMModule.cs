@@ -17,20 +17,25 @@ namespace xCVM.Core
             var metab = ModuleMetadata.GetBytes();
             stream.Write(BitConverter.GetBytes(metab.Length));
             stream.Write(metab);
+            {
 
-            stream.Write(BitConverter.GetBytes(IDs.Count));
-            foreach (var item in IDs)
-            {
-                stream.Write(BitConverter.GetBytes(item.Key));
-                stream.Write(BitConverter.GetBytes(item.Value.Length));
-                stream.Write(Encoding.UTF8.GetBytes(item.Value));
+                stream.Write(BitConverter.GetBytes(Texts.Count));
+                foreach (var item in Texts)
+                {
+                    stream.Write(BitConverter.GetBytes(item.Key));
+                    stream.Write(BitConverter.GetBytes(item.Value.Length));
+                    stream.Write(Encoding.UTF8.GetBytes(item.Value));
+                }
             }
-            stream.Write(BitConverter.GetBytes(Texts.Count));
-            foreach (var item in Texts)
             {
-                stream.Write(BitConverter.GetBytes(item.Key));
-                stream.Write(BitConverter.GetBytes(item.Value.Length));
-                stream.Write(Encoding.UTF8.GetBytes(item.Value));
+
+                stream.Write(BitConverter.GetBytes(IDs.Count));
+                foreach (var item in IDs)
+                {
+                    stream.Write(BitConverter.GetBytes(item.Key));
+                    stream.Write(BitConverter.GetBytes(item.Value.Length));
+                    stream.Write(Encoding.UTF8.GetBytes(item.Value));
+                }
             }
             stream.Write(BitConverter.GetBytes(Instructions.Count));
             foreach (var item in Instructions)
