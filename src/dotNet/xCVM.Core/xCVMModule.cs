@@ -44,4 +44,21 @@ namespace xCVM.Core
             }
         }
     }
+    public class ExternStruct
+    {
+        public string Name;
+        public Dictionary<string,DataType> Fields=new Dictionary<string, DataType>();
+    }
+    public class ExternFunction
+    {
+        public string Name;
+        public DataType ReturnType;
+        public Dictionary<int, DataType> Registers=new Dictionary<int, DataType>();
+
+    }
+    public class DataType
+    {
+        public int Type;
+        public int AdditionalTypeID;
+    }
 }
