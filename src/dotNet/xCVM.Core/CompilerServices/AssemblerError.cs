@@ -81,6 +81,13 @@ namespace xCVM.Core.CompilerServices
         }
         public override string Message => $"Unknown instruction.";
     }
+    public class UnknownParameterError : AssemblerError
+    {
+        public UnknownParameterError(Segment? binded) : base(binded, null)
+        {
+        }
+        public override string Message => $"Parameter cannot be converted.";
+    }
     public class MustEndWithSemicolonError : AssemblerError
     {
         public MustEndWithSemicolonError(Segment? binded) : base(binded, null)

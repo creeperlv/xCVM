@@ -1,10 +1,17 @@
-﻿namespace xCVM.Core.CompilerServices
+﻿using LibCLCC.NET.TextProcessing;
+using System;
+
+namespace xCVM.Core.CompilerServices
 {
     public class IntermediateInstruct : Instruct
     {
+        [NonSerialized]
         public Instruction3OperatorsDefinition? Definition;
-        public string? Op0;
-        public string? Op1;
-        public string? Op2;
+        [NonSerialized]
+        public Segment? PseudoOp0;
+        [NonSerialized]
+        public Segment? PseudoOp1;
+        [NonSerialized]
+        public Segment? PseudoOp2;
     }
 }

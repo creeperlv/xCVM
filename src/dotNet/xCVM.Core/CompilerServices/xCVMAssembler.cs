@@ -92,6 +92,57 @@ namespace xCVM.Core.CompilerServices
                 }
 
             }
+            foreach (IntermediateInstruct inst in module.Instructions)
+            {
+                PostProcess(inst);
+            }
+            void PostProcess(IntermediateInstruct instruct)
+            {
+
+                if (instruct is IntermediateInstruct ii)
+                {
+                    if (ii.Definition != null)
+                    {
+                        if (ii.PseudoOp0 != null)
+                        {
+                            if (NextData(assembleResult, new SegmentContext(ii.PseudoOp0.Prev), ii.Definition.OP0REG, ii.Definition.OP0DT, Labels, Texts, IDs, false, out ii.Op0))
+                            {
+
+                            }
+                            else
+                            {
+                                assembleResult.AddError(new UnknownParameterError(ii.PseudoOp0));
+                                //Fail.
+                            }
+                        }
+                        if (ii.PseudoOp1 != null)
+                        {
+                            if (NextData(assembleResult, new SegmentContext(ii.PseudoOp1.Prev), ii.Definition.OP1REG, ii.Definition.OP1DT, Labels, Texts, IDs, false, out ii.Op1))
+                            {
+
+                            }
+                            else
+                            {
+                                assembleResult.AddError(new UnknownParameterError(ii.PseudoOp1));
+                                //Fail.
+                            }
+                        }
+                        if (ii.PseudoOp2 != null)
+                        {
+                            if (NextData(assembleResult, new SegmentContext(ii.PseudoOp2.Prev), ii.Definition.OP2REG, ii.Definition.OP2DT, Labels, Texts, IDs, false, out ii.Op2))
+                            {
+
+                            }
+                            else
+                            {
+                                assembleResult.AddError(new UnknownParameterError(ii.PseudoOp2));
+                                //Fail.
+                            }
+                        }
+                    }
+
+                }
+            }
             return assembleResult;
 
         }
@@ -376,8 +427,9 @@ namespace xCVM.Core.CompilerServices
             {
                 if (a.Item2 is Instruction3OperatorsDefinition def)
                 {
-                    Instruct instruct = new Instruct();
+                    IntermediateInstruct instruct = new IntermediateInstruct();
                     instruct.Operation = def.ID;
+                    instruct.Definition = def;
                     _3Operators(module,
                                 assembleResult,
                                 context,
@@ -391,7 +443,8 @@ namespace xCVM.Core.CompilerServices
                                 def.OP1DT,
                                 def.OP1REG,
                                 def.OP2DT,
-                                def.OP2REG);
+                                def.OP2REG,
+                                true);
                 }
             }
             else if (a.Item1 == MatchResult.Mismatch)
@@ -399,7 +452,8 @@ namespace xCVM.Core.CompilerServices
                 var r = context.MatachNext(":", true);
                 if (r == MatchResult.Match)
                 {
-                    Labels.Add(context.Last.Prev.content, _IC + 1);
+                    string name = context.Current.Prev.content;
+                    Labels.Add(name, _IC + 1);
                 }
                 else if (r == MatchResult.Mismatch)
                 {
@@ -662,41 +716,72 @@ namespace xCVM.Core.CompilerServices
                                  int Reg1Data = 0,
                                  bool AcceptReg1 = false,
                                  int Reg2Data = 0,
-                                 bool AcceptReg2 = false)
+                                 bool AcceptReg2 = false,
+                                 bool SupressError = false)
         {
-            if (NextData(assembleResult, context, AcceptReg0, Reg0Data, Labels, Texts, IDs, out inst.Op0))
+            if (NextData(assembleResult, context, AcceptReg0, Reg0Data, Labels, Texts, IDs, SupressError, out inst.Op0))
             {
-                if (NextData(assembleResult, context, AcceptReg1, Reg1Data, Labels, Texts, IDs, out inst.Op1))
+            }
+            else if (SupressError)
+            {
+                if (inst is IntermediateInstruct ii)
                 {
-                    if (NextData(assembleResult, context, AcceptReg2, Reg2Data, Labels, Texts, IDs, out inst.Op2))
-                    {
-                        if (WillUseEndMark)
-                        {
-                            var __re = context.MatachNext(EndMark);
-                            if (__re == MatchResult.Match)
-                            {
-                                module.Instructions.Add(inst);
-                                IC++;
-                                //context.GoNext();
-                            }
-                            else
-                            {
-                                assembleResult.AddError(new MustEndWithSemicolonError(context.Last));
-                            }
-                        }
-                        else
-                        {
-                            module.Instructions.Add(inst);
-                            IC++;
-                        }
-                    }
-                    else
-                    {
-                    }
+                    ii.PseudoOp0 = context.Current;
                 }
             }
-        }
+            else
+            {
+                return;
+            }
 
+            if (NextData(assembleResult, context, AcceptReg1, Reg1Data, Labels, Texts, IDs, SupressError, out inst.Op1))
+            {
+            }
+            else if (SupressError)
+            {
+                if (inst is IntermediateInstruct ii)
+                {
+                    ii.PseudoOp1 = context.Current;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            if (NextData(assembleResult, context, AcceptReg2, Reg2Data, Labels, Texts, IDs, SupressError, out inst.Op2))
+            {
+            }
+            else if (SupressError)
+            {
+                if (inst is IntermediateInstruct ii)
+                {
+                    ii.PseudoOp2 = context.Current;
+                }
+            }
+            else
+            {
+            }
+            if (WillUseEndMark)
+            {
+                var __re = context.MatachNext(EndMark);
+                if (__re == MatchResult.Match)
+                {
+                    module.Instructions.Add(inst);
+                    IC++;
+                    //context.GoNext();
+                }
+                else
+                {
+                    assembleResult.AddError(new MustEndWithSemicolonError(context.Last));
+                }
+            }
+            else
+            {
+                module.Instructions.Add(inst);
+                IC++;
+            }
+        }
         private bool NextData(AssembleResult assembleResult,
                               SegmentContext context,
                               bool AcceptRegister,
@@ -704,13 +789,14 @@ namespace xCVM.Core.CompilerServices
                               Dictionary<string, int> Labels,
                               Dictionary<string, int> Texts,
                               Dictionary<string, int> IDs,
+                              bool SupressError,
                               out byte[] reg)
         {
             switch (dataType)
             {
                 case 1:
                     {
-                        if (NextInt(assembleResult, context, AcceptRegister, Labels, Texts, IDs, out var reg0))
+                        if (NextInt(assembleResult, context, AcceptRegister, Labels, Texts, IDs, SupressError, out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -719,7 +805,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 2:
                     {
-                        if (NextLong(assembleResult, context, AcceptRegister, out var reg0))
+                        if (NextLong(assembleResult, context, AcceptRegister, SupressError, out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -728,7 +814,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 3:
                     {
-                        if (NextFloat(assembleResult, context, out var reg0))
+                        if (NextFloat(assembleResult, context, SupressError, out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -737,7 +823,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 4:
                     {
-                        if (NextDouble(assembleResult, context, out var reg0))
+                        if (NextDouble(assembleResult, context, SupressError, out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -756,6 +842,7 @@ namespace xCVM.Core.CompilerServices
                               Dictionary<string, int> Labels,
                               Dictionary<string, int> Texts,
                               Dictionary<string, int> IDs,
+                              bool SupressError,
                              out int reg0)
         {
             if (context.GoNext())
@@ -813,7 +900,8 @@ namespace xCVM.Core.CompilerServices
                     }
                     else
                     {
-                        assembleResult.AddError(new RegisterFormatError(context.Last));
+                        if (!SupressError)
+                            assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
                 if (int.TryParse(_int, out var data))
@@ -834,11 +922,13 @@ namespace xCVM.Core.CompilerServices
                             }
                             else
                             {
-                                assembleResult.AddError(new IntParseError(context.Last));
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
                             }
                         }
                     }
                     else
+                        if (!SupressError)
                         assembleResult.AddError(new IntParseError(context.Last));
                 }
             }
@@ -850,7 +940,11 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextLong(AssembleResult assembleResult, SegmentContext context, bool AcceptRegister, out long reg0)
+        private bool NextLong(AssembleResult assembleResult,
+                              SegmentContext context,
+                              bool AcceptRegister,
+                              bool SupressError,
+                              out long reg0)
         {
             if (context.GoNext())
             {
@@ -884,11 +978,13 @@ namespace xCVM.Core.CompilerServices
                             }
                             else
                             {
-                                assembleResult.AddError(new IntParseError(context.Last));
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
                             }
                         }
                     }
                     else
+                        if (!SupressError)
                         assembleResult.AddError(new LongParseError(context.Last));
                 }
             }
@@ -900,7 +996,8 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextFloat(AssembleResult assembleResult, SegmentContext context, out float reg0)
+        private bool NextFloat(AssembleResult assembleResult, SegmentContext context,
+                              bool SupressError, out float reg0)
         {
             if (context.GoNext())
             {
@@ -923,11 +1020,13 @@ namespace xCVM.Core.CompilerServices
                             }
                             else
                             {
-                                assembleResult.AddError(new IntParseError(context.Last));
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
                             }
                         }
                     }
                     else
+                        if (!SupressError)
                         assembleResult.AddError(new FloatParseError(context.Last));
                 }
             }
@@ -939,7 +1038,8 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextDouble(AssembleResult assembleResult, SegmentContext context, out double reg0)
+        private bool NextDouble(AssembleResult assembleResult, SegmentContext context,
+                              bool SupressError, out double reg0)
         {
             if (context.GoNext())
             {
@@ -962,12 +1062,16 @@ namespace xCVM.Core.CompilerServices
                             }
                             else
                             {
-                                assembleResult.AddError(new IntParseError(context.Last));
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
                             }
                         }
                     }
                     else
-                        assembleResult.AddError(new DoubleParseError(context.Last));
+                    {
+                        if (!SupressError)
+                            assembleResult.AddError(new DoubleParseError(context.Last));
+                    }
                 }
             }
             else

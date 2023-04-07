@@ -85,6 +85,10 @@ namespace xCVM.Compiler
                     {
                         xCVMModule = result.module;
                     }
+                    else
+                    {
+                        return;
+                    }
                 }
                 else
                 {
