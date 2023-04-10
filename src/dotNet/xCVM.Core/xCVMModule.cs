@@ -2,21 +2,51 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using xCVM.Core.Utilities;
 
 namespace xCVM.Core
 {
     public class xCVMModule
     {
         public ModuleMetadata ModuleMetadata = new ModuleMetadata();
+
+        public ModuleSecurity moduleSecurity = new ModuleSecurity();
+        public byte[] Keys=new byte[0];
+        public byte[] Hash=new byte[0];
+
         public Dictionary<int, string> IDs = new Dictionary<int, string>();
         public Dictionary<int, string> Texts = new Dictionary<int, string>();
         public Dictionary<int, string> UsingFunctions = new Dictionary<int, string>();
         public List<Instruct> Instructions = new List<Instruct>();
         public void WriteBrinary(Stream stream)
         {
-            var metab = ModuleMetadata.GetBytes();
-            stream.Write(BitConverter.GetBytes(metab.Length));
-            stream.Write(metab);
+            {
+                //Header
+                var arr = BinaryUtilities.ToByteArray('x', 'C', 'V', 'M');
+                stream.Write(arr);
+            }
+            {
+                switch (moduleSecurity)
+                {
+                    case ModuleSecurity.NoSecurity:
+                        {
+                            var arr = BinaryUtilities.ToByteArray('N', 'O', 'S', 'E', 'C');
+                            stream.WriteBytes(arr);
+                        }
+                        break;
+                    case ModuleSecurity.Signed_SHA256:
+                        {
+                            var arr = BinaryUtilities.ToByteArray('S', 'I', 'G', 'N', 'S','2','5','6');
+                            stream.WriteBytes(arr);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                
+            }
+            var MetaBytes = ModuleMetadata.GetBytes();
+            stream.WriteBytes(MetaBytes);
             {
 
                 stream.Write(BitConverter.GetBytes(Texts.Count));
@@ -43,6 +73,11 @@ namespace xCVM.Core
                 item.WriteToStream(stream);
             }
         }
+    }
+
+    public enum ModuleSecurity
+    {
+        NoSecurity, Signed_SHA256,
     }
     public class ExternStruct
     {
