@@ -84,43 +84,90 @@ namespace xCVM.Core.CompilerServices
             }
             return (MatchResult.Mismatch, null);
         }
-        public (MatchResult, int) MatchCollectionMarchWithMatchNext(string Next, params string[] matches)
+        public (MatchResult, int) MatchCollectionMarchWithMatchNext(string Next,bool CaseSensitive=true, params string[] matches)
         {
-            if (Current == null) return (MatchResult.ReachEnd, -1);
-            for (int i = 0; i < matches.Length; i++)
+            if(CaseSensitive)
             {
-                if (Current.content == matches[i])
+                if (Current == null) return (MatchResult.ReachEnd, -1);
+                for (int i = 0; i < matches.Length; i++)
                 {
-                    if (Current.Next != null)
+                    if (Current.content == matches[i])
                     {
-                        if (Current.Next.content == Next)
+                        if (Current.Next != null)
                         {
-                            GoNext();
-                            GoNext();
-                            return (MatchResult.Match, i);
+                            if (Current.Next.content == Next)
+                            {
+                                GoNext();
+                                GoNext();
+                                return (MatchResult.Match, i);
+                            }
                         }
                     }
                 }
+                return (MatchResult.Mismatch, -1);
             }
-            return (MatchResult.Mismatch, -1);
-        }
-        public MatchResult MatchMarch(string Name, bool WillGoNext = true)
-        {
-            if (Current != null)
+            else
             {
-                if (Current.content == Name)
+                if (Current == null) return (MatchResult.ReachEnd, -1);
+                var focus = Current.content.ToUpper();
+                for (int i = 0; i < matches.Length; i++)
                 {
-                    if (WillGoNext)
-                        GoNext();
-                    return MatchResult.Match;
-
+                    if (focus== matches[i].ToUpper())
+                    {
+                        if (Current.Next != null)
+                        {
+                            if (Current.Next.content == Next)
+                            {
+                                GoNext();
+                                GoNext();
+                                return (MatchResult.Match, i);
+                            }
+                        }
+                    }
                 }
-                else
-                {
-                    return MatchResult.Mismatch;
-                }
+                return (MatchResult.Mismatch, -1);
             }
-            return MatchResult.ReachEnd;
+
+        }
+        public MatchResult MatchMarch(string Name, bool WillGoNext = true, bool CaseSensitive=true)
+        {
+            if (CaseSensitive)
+            {
+                if (Current != null)
+                {
+                    if (Current.content == Name)
+                    {
+                        if (WillGoNext)
+                            GoNext();
+                        return MatchResult.Match;
+
+                    }
+                    else
+                    {
+                        return MatchResult.Mismatch;
+                    }
+                }
+                return MatchResult.ReachEnd;
+            }
+            else
+            {
+                if (Current != null)
+                {
+                    if (Current.content.ToUpper() == Name.ToUpper())
+                    {
+                        if (WillGoNext)
+                            GoNext();
+                        return MatchResult.Match;
+
+                    }
+                    else
+                    {
+                        return MatchResult.Mismatch;
+                    }
+                }
+                return MatchResult.ReachEnd;
+            }
+
         }
         public MatchResult MatachNext(string Name, bool WillGoBack = true)
         {

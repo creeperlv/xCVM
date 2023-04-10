@@ -12,6 +12,7 @@ namespace xCVM.Core.CompilerServices
     public class xCVMAssembler
     {
         public AssemblerDefinition? AssemblerDefinition;
+        bool CaseSensitiveSegmentationIdentifiers = false;
         public xCVMAssembler(AssemblerDefinition? definition = null)
         {
             AssemblerDefinition = definition;
@@ -20,6 +21,7 @@ namespace xCVM.Core.CompilerServices
                 WillUseEndMark = definition.UseStatementEndMark;
                 EndMark = definition.StateMentEndMark;
                 AcceptIDAlias = definition.AcceptIDAlias;
+                CaseSensitiveSegmentationIdentifiers = definition.CaseSensitiveSegmentationIdentifiers;
             }
         }
         public AssembleResult Assemble(FileInfo file)
@@ -74,7 +76,12 @@ namespace xCVM.Core.CompilerServices
                     break;
                 {
 
-                    (var mr, var section) = context.MatchCollectionMarchWithMatchNext(":", ".module", ".text", ".ids", ".codes");
+                    (var mr, var section) = context.MatchCollectionMarchWithMatchNext(":",
+                                                                                      CaseSensitiveSegmentationIdentifiers,
+                                                                                      ".module",
+                                                                                      ".text",
+                                                                                      ".ids",
+                                                                                      ".codes");
                     //Console.WriteLine(mr + ":" + section);
                     if (mr == MatchResult.Match)
                     {
@@ -105,7 +112,15 @@ namespace xCVM.Core.CompilerServices
                     {
                         if (ii.PseudoOp0 != null)
                         {
-                            if (NextData(assembleResult, new SegmentContext(ii.PseudoOp0.Prev), ii.Definition.OP0REG, ii.Definition.OP0DT, Labels, Texts, IDs, false, out ii.Op0))
+                            if (NextData(assembleResult,
+                                         new SegmentContext(ii.PseudoOp0.Prev),
+                                         ii.Definition.OP0REG,
+                                         ii.Definition.OP0DT,
+                                         Labels,
+                                         Texts,
+                                         IDs,
+                                         false,
+                                         out ii.Op0))
                             {
 
                             }
@@ -117,7 +132,15 @@ namespace xCVM.Core.CompilerServices
                         }
                         if (ii.PseudoOp1 != null)
                         {
-                            if (NextData(assembleResult, new SegmentContext(ii.PseudoOp1.Prev), ii.Definition.OP1REG, ii.Definition.OP1DT, Labels, Texts, IDs, false, out ii.Op1))
+                            if (NextData(assembleResult,
+                                         new SegmentContext(ii.PseudoOp1.Prev),
+                                         ii.Definition.OP1REG,
+                                         ii.Definition.OP1DT,
+                                         Labels,
+                                         Texts,
+                                         IDs,
+                                         false,
+                                         out ii.Op1))
                             {
 
                             }
@@ -129,7 +152,15 @@ namespace xCVM.Core.CompilerServices
                         }
                         if (ii.PseudoOp2 != null)
                         {
-                            if (NextData(assembleResult, new SegmentContext(ii.PseudoOp2.Prev), ii.Definition.OP2REG, ii.Definition.OP2DT, Labels, Texts, IDs, false, out ii.Op2))
+                            if (NextData(assembleResult,
+                                         new SegmentContext(ii.PseudoOp2.Prev),
+                                         ii.Definition.OP2REG,
+                                         ii.Definition.OP2DT,
+                                         Labels,
+                                         Texts,
+                                         IDs,
+                                         false,
+                                         out ii.Op2))
                             {
 
                             }
