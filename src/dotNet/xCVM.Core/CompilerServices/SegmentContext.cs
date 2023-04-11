@@ -20,17 +20,34 @@ namespace xCVM.Core.CompilerServices
 
         public Segment? Current => _Current;
         public Segment? Last => _Last;
-        public (MatchResult, IContentable?)MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches)
+        public (MatchResult, IContentable?)MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches, bool CaseSensitive = true)
         {
-            if (Current == null) return (MatchResult.ReachEnd, null);
-            foreach (var item in matches)
+            if (CaseSensitive)
             {
-                if(Current.content==item.Content)
+                if (Current == null) return (MatchResult.ReachEnd, null);
+                foreach (var item in matches)
                 {
-                    return (MatchResult.Match, item);
+                    if (Current.content == item.Content)
+                    {
+                        return (MatchResult.Match, item);
+                    }
                 }
+                return (MatchResult.Mismatch, null);
             }
-            return (MatchResult.Mismatch, null);
+            else
+            {
+                if (Current == null) return (MatchResult.ReachEnd, null);
+                var concern = Current.content.ToUpper();
+                foreach (var item in matches)
+                {
+                    if (concern == item.Content.ToUpper())
+                    {
+                        return (MatchResult.Match, item);
+                    }
+                }
+                return (MatchResult.Mismatch, null);
+            }
+
         }
         public (MatchResult, string?) MatchCollectionMarchReturnName(params string[] matches)
         {

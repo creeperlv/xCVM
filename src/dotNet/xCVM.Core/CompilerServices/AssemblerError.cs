@@ -104,4 +104,11 @@ namespace xCVM.Core.CompilerServices
         }
         public override string Message => $"Must end with {end_mark}.";
     }
+    public class AssemblerNotDefinedError : AssemblerError
+    {
+        public AssemblerNotDefinedError(Segment? binded) : base(binded, null)
+        {
+        }
+        public override string Message => $"Assembler Not Defined.";
+    }
 }

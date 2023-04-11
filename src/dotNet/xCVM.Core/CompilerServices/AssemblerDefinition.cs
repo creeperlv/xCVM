@@ -7,6 +7,7 @@ namespace xCVM.Core.CompilerServices
     public class AssemblerDefinition
     {
         public bool CaseSensitiveSegmentationIdentifiers=false;
+        public bool CaseSensitiveInstructions=false;
         public bool AcceptIDAlias=true;
         public bool UseStatementEndMark=true;
         public string StateMentEndMark = ";";
