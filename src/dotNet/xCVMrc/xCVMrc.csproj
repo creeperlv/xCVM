@@ -9,4 +9,9 @@
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\xCVM.Core.CompilerServices\xCVM.Core.CompilerServices.csproj" />
+	  <ProjectReference Include="..\xCVM.Core\xCVM.Core.csproj" />
+	</ItemGroup>
+
 </Project>

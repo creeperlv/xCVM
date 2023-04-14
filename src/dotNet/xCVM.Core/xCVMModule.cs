@@ -11,8 +11,8 @@ namespace xCVM.Core
         public ModuleMetadata ModuleMetadata = new ModuleMetadata();
 
         public ModuleSecurity moduleSecurity = new ModuleSecurity();
-        public byte[] Keys=new byte[0];
-        public byte[] Hash=new byte[0];
+        public byte[] Keys = new byte[0];
+        public byte[] Hash = new byte[0];
 
         public Dictionary<int, string> IDs = new Dictionary<int, string>();
         public Dictionary<int, string> Texts = new Dictionary<int, string>();
@@ -36,14 +36,14 @@ namespace xCVM.Core
                         break;
                     case ModuleSecurity.Signed_SHA256:
                         {
-                            var arr = BinaryUtilities.ToByteArray('S', 'I', 'G', 'N', 'S','2','5','6');
+                            var arr = BinaryUtilities.ToByteArray('S', 'I', 'G', 'N', 'S', '2', '5', '6');
                             stream.WriteBytes(arr);
                         }
                         break;
                     default:
                         break;
                 }
-                
+
             }
             var MetaBytes = ModuleMetadata.GetBytes();
             stream.WriteBytes(MetaBytes);
@@ -74,10 +74,7 @@ namespace xCVM.Core
             }
         }
     }
-    public class xCVMResource {
-        public Dictionary<int, byte[]> Datas=new Dictionary<int, byte[]>();
-    }
-    
+
     public enum ModuleSecurity
     {
         NoSecurity, Signed_SHA256,
@@ -86,14 +83,14 @@ namespace xCVM.Core
     {
         public string Name;
         public bool RuntimeStruct;
-        public Dictionary<string,DataType> Fields=new Dictionary<string, DataType>();
+        public Dictionary<string, DataType> Fields = new Dictionary<string, DataType>();
     }
     public class ExternFunction
     {
         public string Name;
         public int Label;
         public DataType ReturnType;
-        public Dictionary<int, DataType> Registers=new Dictionary<int, DataType>();
+        public Dictionary<int, DataType> Registers = new Dictionary<int, DataType>();
 
     }
     public class DataType

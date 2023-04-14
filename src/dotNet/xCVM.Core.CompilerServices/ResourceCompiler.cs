@@ -8,7 +8,7 @@ namespace xCVM.Core.CompilerServices
 
     public class ResourceCompiler
     {
-        public ResourceCompilationResult Compile(params FileInfo[] MapFiles)
+        public ResourceCompilationResult Compile(ResourceCompilerOptions options,params FileInfo[] MapFiles)
         {
             ResourceDevDef Definition = new ResourceDevDef();
             CompiledxCVMResource compiled_res = new CompiledxCVMResource();
@@ -19,11 +19,12 @@ namespace xCVM.Core.CompilerServices
     [Serializable]
     public class ResourceCompilerOptions
     {
-        public bool DumpResourceToFileInsteadOfRemainInMemory = true;
+        public bool CompileToMemory = false;
+        public string? Destination;
     }
     public class CompiledxCVMResource
     {
-        public xCVMResource? xCVMResource;
+        public XCVMResource? xCVMResource;
         public FileInfo? RealFile;
     }
     public class ResourceCompilationResult
