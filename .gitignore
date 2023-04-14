@@ -5,3 +5,4 @@
 /.vs
 **/build/
 **/*/.kdev4
+/bin

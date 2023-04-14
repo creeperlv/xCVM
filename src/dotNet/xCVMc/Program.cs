@@ -100,6 +100,14 @@ namespace xCVM.Compiler
                     {
                         case OutputType.Binary:
                             {
+
+                                var s=Console.OpenStandardOutput();
+                                xCVMModule.WriteBrinary(s);
+                                s.Flush();
+                            }
+                            break;
+                        case OutputType.HEX:
+                            {
                                 var s = new HEXStream { UnderlyingWriter = Console.Out };
                                 xCVMModule.WriteBrinary(s);
                                 s.Flush();
@@ -127,6 +135,23 @@ namespace xCVM.Compiler
                                 }
                             }
                             break;
+
+                        case OutputType.HEX:
+                            {
+                                using (var fs = File.OpenWrite(arguments.Output))
+                                {
+                                    using (var fw = new StreamWriter(fs))
+                                    {
+                                        using (var s = new HEXStream { UnderlyingWriter = fw })
+                                        {
+
+                                            xCVMModule.WriteBrinary(s);
+                                            s.Flush();
+                                        }
+                                    }
+                                }
+                            }
+                            break;
                         case OutputType.Json:
                             {
                                 File.WriteAllText(arguments.Output, JsonConvert.SerializeObject(xCVMModule, Formatting.Indented));
@@ -141,7 +166,7 @@ namespace xCVM.Compiler
     }
     public enum OutputType
     {
-        Binary, Json
+        Binary, Json, HEX
     }
     public class Arguments
     {
@@ -188,6 +213,10 @@ namespace xCVM.Compiler
                     case "-B":
                     case "--binary":
                         arguments.OutputType = OutputType.Binary;
+                        break;
+                    case "-H":
+                    case "--hex":
+                        arguments.OutputType = OutputType.HEX;
                         break;
                     default:
                         {
