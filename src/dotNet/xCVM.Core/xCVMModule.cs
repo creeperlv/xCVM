@@ -74,7 +74,10 @@ namespace xCVM.Core
             }
         }
     }
-
+    public class xCVMResource {
+        public Dictionary<int, byte[]> Datas=new Dictionary<int, byte[]>();
+    }
+    
     public enum ModuleSecurity
     {
         NoSecurity, Signed_SHA256,
