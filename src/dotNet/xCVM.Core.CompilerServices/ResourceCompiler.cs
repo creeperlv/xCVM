@@ -17,28 +17,6 @@ namespace xCVM.Core.CompilerServices
         }
     }
     [Serializable]
-    public class ResourceCompilerOptions
-    {
-        public bool CompileToMemory = false;
-        public string? Destination;
-    }
-    public class CompiledxCVMResource
-    {
-        public XCVMResource? xCVMResource;
-        public FileInfo? RealFile;
-    }
-    public class ResourceCompilationResult
-    {
-        public ResourceDevDef Definition;
-        public CompiledxCVMResource? resource;
-
-        public ResourceCompilationResult(ResourceDevDef definition, CompiledxCVMResource? resource)
-        {
-            Definition = definition;
-            this.resource = resource;
-        }
-    }
-    [Serializable]
     public class ResourceDevDef
     {
         public Dictionary<string, int> Mapping = new Dictionary<string, int>();

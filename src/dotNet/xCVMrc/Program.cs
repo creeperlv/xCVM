@@ -30,22 +30,29 @@ namespace xCVMrc
             ResourceCompilerOptions options = new ResourceCompilerOptions();
             if (arguments.Output == "null")
             {
+                options.CompileToMemory = true;
                 options.Destination = null;
             }
             else
             {
+                options.CompileToMemory = false;
                 options.Destination = arguments.Output;
             }
             ResourceCompiler resourceCompiler = new ResourceCompiler();
-            List<FileInfo > files = new List<FileInfo>();
+            List<FileInfo> files = new List<FileInfo>();
             foreach (var file in arguments.Inputs)
             {
                 files.Add(new FileInfo(file));
             }
-            var result=resourceCompiler.Compile(options,files.ToArray());
+            var result = resourceCompiler.Compile(options, files.ToArray());
             if (arguments.Output == "null")
             {
-                //result.resource.xCVMResource
+                if (result.resource != null)
+                {
+                    if (result.resource.xCVMResource != null)
+                    {
+                    }
+                }
             }
         }
     }
