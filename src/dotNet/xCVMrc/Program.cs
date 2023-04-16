@@ -47,9 +47,9 @@ namespace xCVMrc
             var result = resourceCompiler.Compile(options, files.ToArray());
             if (arguments.Output == "null")
             {
-                if (result.resource != null)
+                if (result.Result != null)
                 {
-                    if (result.resource.xCVMResource != null)
+                    if (result.Result.resource!= null)
                     {
                     }
                 }
