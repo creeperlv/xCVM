@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibCLCC.NET.TextProcessing;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -8,12 +9,26 @@ namespace xCVM.Core.CompilerServices
 
     public class ResourceCompiler
     {
-        public ResourceCompilationResult Compile(ResourceCompilerOptions options,params FileInfo[] MapFiles)
+        public CompileResult<ResourceCompilationResult> Compile(ResourceCompilerOptions options, params FileInfo[] MapFiles)
         {
             ResourceDevDef Definition = new ResourceDevDef();
             CompiledxCVMResource compiled_res = new CompiledxCVMResource();
+            ResourceDictionary resourceDictionary = new ResourceDictionary();
 
-            return new ResourceCompilationResult(Definition, compiled_res);
+            var cresult = new ResourceCompilationResult(Definition, compiled_res);
+            var result = new CompileResult<ResourceCompilationResult>(cresult);
+            foreach (var item in MapFiles)
+            {
+                var compileResult = ResourceDictionary.FromTextReader(item.OpenText(), item.Name);
+                if (compileResult.Errors.Count > 0)
+                {
+                    result.Errors.ConnectAfterEnd(compileResult.Errors);
+                    break;
+                }
+                resourceDictionary.Merge(compileResult.Result, ResourceDictionary.DefaultMerger);
+            }
+
+            return result;
         }
     }
     [Serializable]
@@ -21,9 +36,15 @@ namespace xCVM.Core.CompilerServices
     {
         public Dictionary<string, int> Mapping = new Dictionary<string, int>();
     }
-    [Serializable]
-    public class ResourceDictionary
+    public class ResourceManifestParser : GeneralPurposeParser
     {
-        public Dictionary<string, string> Name_File_Mapping = new Dictionary<string, string>();
+        public ResourceManifestParser()
+        {
+            PredefinedSegmentCharacters.Add('=');
+            lineCommentIdentifiers.Add(new LineCommentIdentifier { StartSequence = "#" });
+            lineCommentIdentifiers.Add(new LineCommentIdentifier { StartSequence = "//" });
+            lineCommentIdentifiers.Add(new LineCommentIdentifier { StartSequence = ";" });
+        }
+
     }
 }

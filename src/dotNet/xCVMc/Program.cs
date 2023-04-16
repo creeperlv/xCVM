@@ -83,7 +83,7 @@ namespace xCVM.Compiler
                     }
                     if (arguments.IgnoreError)
                     {
-                        xCVMModule = result.module;
+                        xCVMModule = result.Result;
                     }
                     else
                     {
@@ -92,7 +92,7 @@ namespace xCVM.Compiler
                 }
                 else
                 {
-                    xCVMModule = result.module;
+                    xCVMModule = result.Result;
                 }
                 if (arguments.Output == "STDOUT" || arguments.Output == "null")
                 {

@@ -24,13 +24,13 @@ namespace xCVM.Core.CompilerServices
                 CaseSensitiveSegmentationIdentifiers = definition.CaseSensitiveSegmentationIdentifiers;
             }
         }
-        public AssembleResult Assemble(FileInfo file)
+        public CompileResult<xCVMModule> Assemble(FileInfo file)
         {
             using var sr = file.OpenText();
             var content = sr.ReadToEnd();
             return Assemble(parser.Parse(content, false, file.FullName));
         }
-        public AssembleResult Assemble(List<FileInfo> files)
+        public CompileResult<xCVMModule> Assemble(List<FileInfo> files)
         {
             Segment? s = null;
             foreach (var item in files)
@@ -41,10 +41,10 @@ namespace xCVM.Core.CompilerServices
                 if (s is null) s = _s;
                 else s.Concatenate(_s);
             }
-            if (s is null) return new AssembleResult(new xCVMModule());
+            if (s is null) return new CompileResult<xCVMModule>(new xCVMModule());
             return Assemble(s);
         }
-        public AssembleResult Assemble(Stream stream)
+        public CompileResult<xCVMModule> Assemble(Stream stream)
         {
             using (StreamReader sr = new StreamReader(stream))
             {
@@ -57,11 +57,11 @@ namespace xCVM.Core.CompilerServices
             HEAD.content = Regex.Unescape(HEAD.content);
             if (HEAD.Next != null) Preprocess(HEAD.Next);
         }
-        public AssembleResult Assemble(Segment segments)
+        public CompileResult<xCVMModule> Assemble(Segment segments)
         {
             Preprocess(segments);
             xCVMModule module = new xCVMModule();
-            AssembleResult assembleResult = new AssembleResult(module);
+            CompileResult<xCVMModule> assembleResult = new CompileResult<xCVMModule>(module);
             var current = segments;
             SegmentContext context = new SegmentContext(current);
             int Sections = 0;
@@ -179,7 +179,7 @@ namespace xCVM.Core.CompilerServices
         }
         bool AcceptIDAlias = true;
         private int BaseAssemble(xCVMModule module,
-                                 AssembleResult assembleResult,
+                                 CompileResult<xCVMModule> assembleResult,
                                  SegmentContext context,
                                  int Sections,
                                  Dictionary<string, int> Labels,
@@ -447,7 +447,7 @@ namespace xCVM.Core.CompilerServices
         }
 
         private int eXtensibleAssemble(xCVMModule module,
-                                       AssembleResult assembleResult,
+                                       CompileResult<xCVMModule> assembleResult,
                                        SegmentContext context,
                                        Dictionary<string, int> Labels,
                                        Dictionary<string, int> Texts,
@@ -515,7 +515,7 @@ namespace xCVM.Core.CompilerServices
         bool WillUseEndMark = true;
         string EndMark = ";";
         private void _3Operators(xCVMModule module,
-                                 AssembleResult assembleResult,
+                                 CompileResult<xCVMModule> assembleResult,
                                  SegmentContext context,
                                  Instruct inst,
                                  Dictionary<string, int> Labels,
@@ -593,7 +593,7 @@ namespace xCVM.Core.CompilerServices
                 IC++;
             }
         }
-        private bool NextData(AssembleResult assembleResult,
+        private bool NextData(CompileResult<xCVMModule> assembleResult,
                               SegmentContext context,
                               bool AcceptRegister,
                               int dataType,
@@ -647,7 +647,7 @@ namespace xCVM.Core.CompilerServices
             reg = new byte[0];
             return false;
         }
-        private bool NextInt(AssembleResult assembleResult,
+        private bool NextInt(CompileResult<xCVMModule> assembleResult,
                              SegmentContext context,
                              bool AcceptRegister,
                               Dictionary<string, int> Labels,
@@ -751,7 +751,7 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextLong(AssembleResult assembleResult,
+        private bool NextLong(CompileResult<xCVMModule> assembleResult,
                               SegmentContext context,
                               bool AcceptRegister,
                               bool SupressError,
@@ -807,7 +807,7 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextFloat(AssembleResult assembleResult, SegmentContext context,
+        private bool NextFloat(CompileResult<xCVMModule> assembleResult, SegmentContext context,
                               bool SupressError, out float reg0)
         {
             if (context.GoNext())
@@ -849,7 +849,7 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextDouble(AssembleResult assembleResult, SegmentContext context,
+        private bool NextDouble(CompileResult<xCVMModule> assembleResult, SegmentContext context,
                               bool SupressError, out double reg0)
         {
             if (context.GoNext())
@@ -894,7 +894,7 @@ namespace xCVM.Core.CompilerServices
             return false;
         }
 
-        public AssembleResult Assemble(string content)
+        public CompileResult<xCVMModule> Assemble(string content)
         {
             var segments = parser.Parse(content, false);
             return Assemble(segments);
