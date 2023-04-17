@@ -5,6 +5,7 @@
 #include <string.h>
 #include "Exceptions.h"
 typedef char bool;
+typedef char byte;
 #define true 1
 #define True 1
 #define TRUE 1
@@ -17,6 +18,11 @@ typedef struct seg {
 	char* content;
 	int Line;
 }*Segment;
+typedef struct BS{
+    byte* HEAD;
+    size_t Size;
+    size_t Count;
+}* Bytes;
 typedef struct GL {
 	void** HEAD;
 	int Size;
@@ -37,6 +43,8 @@ Exception NewException(int ID,char* Descrption);
 bool HasException(ExceptableResult ER);
 ExceptableResult NewER();
 ExceptableResult NewGL(size_t ItemSize);
+ExceptableResult NewBytes();
+ExceptableResult AddByte(Bytes List, byte b);
 ExceptableResult AddGL(GenericList List, void* item);
 ExceptableResult DestoryGLWithoutDestoryChildren(GenericList List);
 ExceptableResult DestoryGLWithDestoryChildren(GenericList List);

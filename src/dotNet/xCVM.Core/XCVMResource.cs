@@ -5,12 +5,12 @@ using xCVM.Core.Utilities;
 
 namespace xCVM.Core
 {
-    public class XCVMResource
+    public class xCVMResource
     {
         public Dictionary<int, byte[]> Datas = new Dictionary<int, byte[]>();
-        public static XCVMResource FromStream(Stream stream)
+        public static xCVMResource FromStream(Stream stream)
         {
-            XCVMResource xCVMResource = new XCVMResource();
+            xCVMResource xCVMResource = new xCVMResource();
             List<int> IDs = new List<int>();
             {
                 var RC__HEADER = stream.ReadBytes();

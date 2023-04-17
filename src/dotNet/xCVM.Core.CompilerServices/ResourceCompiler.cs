@@ -1,8 +1,11 @@
 ﻿using LibCLCC.NET.TextProcessing;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using xCVM.Core.Utilities;
 
 namespace xCVM.Core.CompilerServices
 {
@@ -19,13 +22,53 @@ namespace xCVM.Core.CompilerServices
             var result = new CompileResult<ResourceCompilationResult>(cresult);
             foreach (var item in MapFiles)
             {
-                var compileResult = ResourceDictionary.FromTextReader(item.OpenText(), item.Name);
+                var compileResult = ResourceDictionary.FromTextReader(item.OpenText(),item.Directory, item.Name);
                 if (compileResult.Errors.Count > 0)
                 {
                     result.Errors.ConnectAfterEnd(compileResult.Errors);
                     break;
                 }
                 resourceDictionary.Merge(compileResult.Result, ResourceDictionary.DefaultMerger);
+            }
+            if (options.CompileToMemory == false && options.Destination != null)
+            {
+                List<int> Headers = new List<int>();
+                int ID = 0;
+                foreach (var item in resourceDictionary.Name_File_Mapping)
+                {
+                    Headers.Add(ID);
+                    ID++;
+                }
+                using (var stream = File.OpenWrite(options.Destination))
+                {
+
+                    byte[] Header;
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        foreach (var item in Headers)
+                        {
+                            memoryStream.Write(BitConverter.GetBytes(item));
+                        }
+                        Header = memoryStream.GetBuffer();
+                    }
+                    stream.WriteBytes(Header);
+                    foreach (var item in resourceDictionary.Name_File_Mapping)
+                    {
+                        var bytes = File.ReadAllBytes(item.Value);
+                        stream.WriteBytes(bytes);
+                    }
+                }
+            }
+            else
+            {
+                xCVMResource resource = new xCVMResource();
+                int ID = 0;
+                foreach (var item in resourceDictionary.Name_File_Mapping)
+                {
+                    var bytes = File.ReadAllBytes(item.Value);
+                    resource.Datas.Add(ID, bytes);
+                    ID++;
+                }
             }
 
             return result;

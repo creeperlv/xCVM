@@ -49,10 +49,18 @@ namespace xCVMrc
             {
                 if (result.Result != null)
                 {
-                    if (result.Result.resource!= null)
+                    if (result.Result.resource != null)
                     {
+                        if (result.Result.resource.xCVMResource != null)
+                        {
+                            result.Result.resource.xCVMResource.WriteToStream(Console.OpenStandardOutput());
+                        }
                     }
                 }
+            }
+            else
+            {
+
             }
         }
     }

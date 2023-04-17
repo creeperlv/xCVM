@@ -4,7 +4,7 @@ namespace xCVM.Core.CompilerServices
 {
     public class CompiledxCVMResource
     {
-        public XCVMResource? xCVMResource;
+        public xCVMResource? xCVMResource;
         public FileInfo? RealFile;
     }
 }

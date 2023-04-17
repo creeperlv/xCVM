@@ -31,16 +31,16 @@ namespace xCVM.Core.CompilerServices
                 }
             }
         }
-        public static CompileResult<ResourceDictionary> FromTextReader(TextReader reader, string? ID = null)
+        public static CompileResult<ResourceDictionary> FromTextReader(TextReader reader, DirectoryInfo Parent, string? ID = null)
         {
             ResourceManifestParser parser = new ResourceManifestParser();
             var content = reader.ReadToEnd();
             var segments = parser.Parse(content, false, ID);
             SegmentContext context = new SegmentContext(segments);
-            var result = Parse(context);
+            var result = Parse(context,Parent);
             return result;
         }
-        static CompileResult<ResourceDictionary> Parse(SegmentContext context)
+        static CompileResult<ResourceDictionary> Parse(SegmentContext context, DirectoryInfo Parent)
         {
             ResourceDictionary dictionary = new ResourceDictionary();
             CompileResult<ResourceDictionary> result = new CompileResult<ResourceDictionary>(dictionary);
@@ -60,7 +60,7 @@ namespace xCVM.Core.CompilerServices
                 if (match_result == MatchResult.Match)
                 {
                     var Value = context.Current.content;
-                    dictionary.Name_File_Mapping.Add(Key, Value);
+                    dictionary.Name_File_Mapping.Add(Key, Path.Combine(Parent.FullName, Value));
                 }
                 else if (match_result == MatchResult.Mismatch)
                 {
