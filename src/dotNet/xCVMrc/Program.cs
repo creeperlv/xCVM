@@ -45,22 +45,46 @@ namespace xCVMrc
                 files.Add(new FileInfo(file));
             }
             var result = resourceCompiler.Compile(options, files.ToArray());
-            if (arguments.Output == "null")
+            if (result.Errors.Count > 0)
             {
-                if (result.Result != null)
+                foreach (var err in result.Errors)
                 {
-                    if (result.Result.resource != null)
+                    Console.Write("Error:");
+                    Console.WriteLine(err.Message);
+                    if (err.Segment is not null)
                     {
-                        if (result.Result.resource.xCVMResource != null)
-                        {
-                            result.Result.resource.xCVMResource.WriteToStream(Console.OpenStandardOutput());
-                        }
+                        Console.Write("\tAt:");
+                        Console.Write(err.Segment.ID);
+                        Console.Write(":");
+                        Console.Write(err.Segment.LineNumber);
+                        Console.WriteLine();
+                        Console.Write("\t\t-->");
+                        Console.Write(err.Segment.content);
+                        Console.WriteLine();
                     }
                 }
+
             }
             else
             {
 
+                if (arguments.Output == "null")
+                {
+                    if (result.Result != null)
+                    {
+                        if (result.Result.resource != null)
+                        {
+                            if (result.Result.resource.xCVMResource != null)
+                            {
+                                result.Result.resource.xCVMResource.WriteToStream(Console.OpenStandardOutput());
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
+                }
             }
         }
     }

@@ -37,7 +37,7 @@ namespace xCVM.Core.CompilerServices
             var content = reader.ReadToEnd();
             var segments = parser.Parse(content, false, ID);
             SegmentContext context = new SegmentContext(segments);
-            var result = Parse(context,Parent);
+            var result = Parse(context, Parent);
             return result;
         }
         static CompileResult<ResourceDictionary> Parse(SegmentContext context, DirectoryInfo Parent)
@@ -55,12 +55,16 @@ namespace xCVM.Core.CompilerServices
                     break;
                 }
                 var Key = context.Current.content;
-                context.GoNext();
+                //context.GoNext();
+                if (Key == null) break;
+                if (Key == "") { context.GoNext(); continue; }
                 var match_result = context.MatachNext("=");
                 if (match_result == MatchResult.Match)
                 {
+                    context.GoNext();
                     var Value = context.Current.content;
                     dictionary.Name_File_Mapping.Add(Key, Path.Combine(Parent.FullName, Value));
+                    context.GoNext();
                 }
                 else if (match_result == MatchResult.Mismatch)
                 {
