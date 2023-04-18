@@ -2,6 +2,7 @@
 using System;
 using xCVM.Core;
 using xCVM.Core.CompilerServices;
+using xCVM.ShellUtilities;
 using xCVMc.Data;
 
 namespace xCVM.Compiler
@@ -10,21 +11,233 @@ namespace xCVM.Compiler
     {
         public static void ShowVersion()
         {
-            Console.WriteLine("Common Extensible Virtual Machine Compiler");
-            Console.Write("CLI:");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(typeof(Arguments).Assembly.GetName().Version);
-            Console.ResetColor();
-            Console.WriteLine();
-            Console.Write("xCVM.Core:");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(typeof(xCVMCore).Assembly.GetName().Version);
-            Console.ResetColor();
-            Console.WriteLine();
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 0,
+                Words = new List<Term> {
+                    new Term { Content = "Extensible Common Virtual Machine Compiler" } }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 0,
+                Words = new List<Term> {
+                    new Term { Content = "CLI:" },
+                    new Term { Content = typeof(Arguments).Assembly.GetName().Version+"", Color= ConsoleColor.Green },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 0,
+                Words = new List<Term> {
+                    new Term { Content = "xCVM.Core:" },
+                    new Term { Content = typeof(xCVMCore).Assembly.GetName().Version+"", Color= ConsoleColor.Green },
+                    new Term { Content = ""},
+                }
+            });
+        }
+        static void Help()
+        {
+
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 0,
+                Words = new List<Term> {
+                    new Term { Content = "Extensible Common Virtual Machine Resource Compiler v" },
+                    new Term { Content = typeof(Arguments).Assembly.GetName().Version+"", Color= ConsoleColor.Green },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 0,
+                PaddingTop = 1,
+                PaddingBottom = 1,
+                Words = new List<Term> {
+                    new Term { Content = "Usage: " },
+                    new Term { Content = "xCVMc [options...] input_file..." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 0,
+                Words = new List<Term> {
+                    new Term { Content = "Options:" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-o" },
+                    new Term { Content = "|" },
+                    new Term { Content = "--output" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "<path-to-file>|null" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Specify where to write the produced file. Using null or not specifying will write the result to the standard output." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-V" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "--version" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Print the version info." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-J" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "--json" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Output as json." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-B" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "--binary" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Output as binary. (Used by default)" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-H" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "--hex" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Output as binary, in hex format." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-d" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "--dev" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "--dev-definition" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Will produce the development definition. It is enabled by default." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-D" },
+                    new Term { Content = "|" },
+                    new Term { Content = "--definition" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "file_of_definition" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Use another xCVM assembler definition." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 1,
+                PaddingTop = 1,
+                Words = new List<Term> {
+                    new Term { Content = "-E" },
+                    new Term { Content = "|" },
+                    new Term { Content = "--export-definition" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "file_of_definition" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true,
+                Intend = 2,
+                Words = new List<Term> {
+                    new Term { Content = "Export current xCVM assembler definition." },
+                }
+            });
         }
         public static void Main(string[] args)
         {
             Arguments arguments = Arguments.FromStringArray(args);
+            if (arguments.ShowHelp)
+            {
+                Help();
+                return;
+            }
             if (arguments.VersionInfo)
             {
                 ShowVersion();
@@ -60,6 +273,7 @@ namespace xCVM.Compiler
                         textWriter.Write(JsonConvert.SerializeObject(xCVMAssembler.AssemblerDefinition, Formatting.Indented));
                         if (arguments.OutDefinition != "STDOUT" && arguments.OutDefinition != "null") textWriter.Close();
                     }
+                    return;
                 }
                 xCVMModule? xCVMModule = null;
                 var result = xCVMAssembler.Assemble(files);
@@ -101,7 +315,7 @@ namespace xCVM.Compiler
                         case OutputType.Binary:
                             {
 
-                                var s=Console.OpenStandardOutput();
+                                var s = Console.OpenStandardOutput();
                                 xCVMModule.WriteBrinary(s);
                                 s.Flush();
                             }
@@ -175,6 +389,7 @@ namespace xCVM.Compiler
         public string UseAlternativeDefinition = "DEFAULT";
         public string OutDefinition = null;
         public bool IgnoreError;
+        public bool ShowHelp;
         public bool VersionInfo;
         public OutputType OutputType = OutputType.Binary;
         public static Arguments FromStringArray(string[] strings)
@@ -186,6 +401,14 @@ namespace xCVM.Compiler
                 var item = strings[i];
                 switch (item)
                 {
+                    case "-?":
+                    case "-h":
+                    case "-help":
+                    case "--help":
+                        {
+                            arguments.ShowHelp = true;
+                        }
+                        break;
                     case "-o":
                         mode = 1;
                         break;
@@ -228,16 +451,19 @@ namespace xCVM.Compiler
                                 case 1:
                                     {
                                         arguments.Output = item;
+                                        mode = 0;
                                     }
                                     break;
                                 case 2:
                                     {
                                         arguments.UseAlternativeDefinition = item;
+                                        mode = 0;
                                     }
                                     break;
                                 case 3:
                                     {
                                         arguments.OutDefinition = item;
+                                        mode = 0;
                                     }
                                     break;
                                 default:

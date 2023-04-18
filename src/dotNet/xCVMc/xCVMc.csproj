@@ -16,6 +16,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\xCVM.Core.CompilerServices\xCVM.Core.CompilerServices.csproj" />
 		<ProjectReference Include="..\xCVM.Core\xCVM.Core.csproj" />
+		<ProjectReference Include="..\xCVM.ShellUtilities\xCVM.ShellUtilities.csproj" />
 		<ProjectReference Include="..\xCVMc.Data\xCVMc.Data.csproj" />
 	</ItemGroup>
 
