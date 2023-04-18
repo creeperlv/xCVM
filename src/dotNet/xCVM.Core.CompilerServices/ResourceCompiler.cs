@@ -84,8 +84,6 @@ namespace xCVM.Core.CompilerServices
                         stream.WriteBytes(bytes);
                     }
                 }
-                {
-                }
             }
             else
             {
@@ -98,6 +96,8 @@ namespace xCVM.Core.CompilerServices
                     resource.Datas.Add(ID, bytes);
                     ID++;
                 }
+                result.Result.resource=new CompiledxCVMResource();
+                result.Result.resource.xCVMResource = resource;
             }
 
             return result;
