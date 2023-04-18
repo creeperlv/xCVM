@@ -12,6 +12,29 @@ namespace xCVM.Core.CompilerServices
 
     public class ResourceCompiler
     {
+        public CompileResult<ResourceDevDef> CompileDevDefinition(ResourceCompilerOptions options, params FileInfo[] MapFiles)
+        {
+            ResourceDevDef DevDef = new ResourceDevDef();
+            var result = new CompileResult<ResourceDevDef>(DevDef);
+            ResourceDictionary resourceDictionary = new ResourceDictionary();
+            foreach (var item in MapFiles)
+            {
+                var compileResult = ResourceDictionary.FromTextReader(item.OpenText(), item.Directory, item.Name);
+                if (compileResult.Errors.Count > 0)
+                {
+                    result.Errors.ConnectAfterEnd(compileResult.Errors);
+                    break;
+                }
+                resourceDictionary.Merge(compileResult.Result, ResourceDictionary.DefaultMerger);
+            }
+            int ID = 0;
+            foreach (var item in resourceDictionary.Name_File_Mapping)
+            {
+                DevDef.Mapping.Add(item.Key, ID);
+                ID++;
+            }
+            return result;
+        }
         public CompileResult<ResourceCompilationResult> Compile(ResourceCompilerOptions options, params FileInfo[] MapFiles)
         {
             ResourceDevDef Definition = new ResourceDevDef();
@@ -31,6 +54,7 @@ namespace xCVM.Core.CompilerServices
                 resourceDictionary.Merge(compileResult.Result, ResourceDictionary.DefaultMerger);
             }
             ResourceDevDef resourceDevDef = new ResourceDevDef();
+            cresult.Definition = resourceDevDef;
             if (options.CompileToMemory == false && options.Destination != null)
             {
                 List<int> Headers = new List<int>();
@@ -85,21 +109,20 @@ namespace xCVM.Core.CompilerServices
         public Dictionary<string, int> Mapping = new Dictionary<string, int>();
         public void WriteWriter(TextWriter writer)
         {
-            foreach(var item in Mapping)
+            foreach (var item in Mapping)
             {
                 writer.Write("\"");
                 writer.Write(item.Key);
                 writer.Write("\"");
-                writer.Write(item.Value+"");
+                writer.Write(item.Value + "");
                 writer.Write("\t");
-                writer.Write(item.Value+"");
             }
         }
         public void WriteToFile(string path)
         {
             using (var fs = File.OpenWrite(path))
             {
-                using(StreamWriter sw = new StreamWriter(fs))
+                using (StreamWriter sw = new StreamWriter(fs))
                 {
                     WriteWriter(sw);
                 }
@@ -109,7 +132,35 @@ namespace xCVM.Core.CompilerServices
         {
             ResourceDevDef def = new ResourceDevDef();
             CompileResult<ResourceDevDef> result = new CompileResult<ResourceDevDef>(def);
+            ResourceManifestParser parser = new ResourceManifestParser();
+            SegmentContext context = new SegmentContext(parser.Parse(stream.ReadToEnd(), false, ID));
+            while (true)
+            {
+                if (context.ReachEnd)
+                {
+                    break;
+                }
+                if (context.Current == null) break;
+                if (context.Current.content == "")
+                {
+                    context.GoNext();
+                    continue;
+                }
+                var K = context.Current.content;
+                context.GoNext();
+                var V = context.Current.content;
+                if (int.TryParse(V, out var value))
+                {
+                    def.Mapping.Add(K, value);
+                    context.GoNext();
+                }
+                else
+                {
+                    result.AddError(new IntParseError(context.Current));
+                    break;
+                }
 
+            }
             return result;
         }
     }
