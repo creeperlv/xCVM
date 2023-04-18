@@ -76,12 +76,15 @@ namespace xCVM.Core.CompilerServices
                     break;
                 {
 
-                    (var mr, var section) = context.MatchCollectionMarchWithMatchNext(":",
-                                                                                      CaseSensitiveSegmentationIdentifiers,
-                                                                                      ".module",
-                                                                                      ".text",
-                                                                                      ".ids",
-                                                                                      ".codes");
+                    (var mr, var section) =
+                        context.MatchCollectionMarchWithMatchNext(":",
+                                                                  CaseSensitiveSegmentationIdentifiers,
+                                                                  ".module",
+                                                                  ".text",
+                                                                  ".ids",
+                                                                  ".codes",
+                                                                  ".extern_func",
+                                                                  ".extern_struct");
                     //Console.WriteLine(mr + ":" + section);
                     if (mr == MatchResult.Match)
                     {
@@ -89,7 +92,14 @@ namespace xCVM.Core.CompilerServices
                     }
                     else if (mr == MatchResult.Mismatch)
                     {
-                        _IC = BaseAssemble(module, assembleResult, context, Sections, Labels, Texts, IDs, _IC);
+                        _IC = BaseAssemble(module,
+                                           assembleResult,
+                                           context,
+                                           Sections,
+                                           Labels,
+                                           Texts,
+                                           IDs,
+                                           _IC);
 
                     }
                     else if (mr == MatchResult.ReachEnd)
@@ -437,6 +447,11 @@ namespace xCVM.Core.CompilerServices
                         {
                             _IC = eXtensibleAssemble(module, assembleResult, context, Labels, Texts, IDs, _IC);
                         }
+                    }
+                    break;
+                case 4:
+                    {
+
                     }
                     break;
                 default:

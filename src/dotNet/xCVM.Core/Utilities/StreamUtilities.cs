@@ -12,12 +12,23 @@ namespace xCVM.Core.Utilities
         }
         public static byte[] ReadBytes(this Stream stream)
         {
-            byte[] b=new byte[4];
-            stream.Read(b,0,4);
+            byte[] b = new byte[4];
+            stream.Read(b, 0, 4);
             int L = BitConverter.ToInt32(b);
             byte[] result = new byte[L];
-            stream.Read(result,0,L);
+            stream.Read(result, 0, L);
             return result;
+        }
+    }
+    public static class ByteUtilities
+    {
+        public static byte[] GetBytes(this int v)
+        {
+            return BitConverter.GetBytes(v);
+        }
+        public static byte[] GetBytes(this float v)
+        {
+            return BitConverter.GetBytes(v);
         }
     }
 }
