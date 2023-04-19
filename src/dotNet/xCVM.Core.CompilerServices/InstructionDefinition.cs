@@ -3,7 +3,7 @@
 namespace xCVM.Core.CompilerServices
 {
     [Serializable]
-    public class Instruction3OperatorsDefinition : IContentable
+    public class InstructionDefinition : IContentable
     {
         public string Name;
         public int ID;

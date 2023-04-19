@@ -451,7 +451,12 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 4:
                     {
+                        //Func
+                        var result=context.MatachNext((AssemblerDefinition?.FunctionIdentifier)??"fn");
+                        if(result== MatchResult.Match)
+                        {
 
+                        }
                     }
                     break;
                 default:
@@ -469,10 +474,11 @@ namespace xCVM.Core.CompilerServices
                                        Dictionary<string, int> IDs,
                                        int _IC)
         {
-            var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions,AssemblerDefinition!.CaseSensitiveInstructions);
+            var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions,
+                                                                   AssemblerDefinition!.CaseSensitiveInstructions);
             if (a.Item1 == MatchResult.Match)
             {
-                if (a.Item2 is Instruction3OperatorsDefinition def)
+                if (a.Item2 is InstructionDefinition def)
                 {
                     IntermediateInstruct instruct = new IntermediateInstruct();
                     instruct.Operation = def.ID;
@@ -665,10 +671,10 @@ namespace xCVM.Core.CompilerServices
         private bool NextInt(CompileResult<xCVMModule> assembleResult,
                              SegmentContext context,
                              bool AcceptRegister,
-                              Dictionary<string, int> Labels,
-                              Dictionary<string, int> Texts,
-                              Dictionary<string, int> IDs,
-                              bool SupressError,
+                             Dictionary<string, int> Labels,
+                             Dictionary<string, int> Texts,
+                             Dictionary<string, int> IDs,
+                             bool SupressError,
                              out int reg0)
         {
             if (context.GoNext())

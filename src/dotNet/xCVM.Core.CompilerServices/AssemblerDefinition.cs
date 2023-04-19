@@ -11,7 +11,9 @@ namespace xCVM.Core.CompilerServices
         public bool AcceptIDAlias=true;
         public bool UseStatementEndMark=true;
         public string StateMentEndMark = ";";
+        public string FunctionIdentifier = "fn";        
+        public string StructIdentifier = "st";        
         public Dictionary<string,string> PredefinedSymbols = new Dictionary<string,string>();
-        public List<Instruction3OperatorsDefinition> Definitions = new List<Instruction3OperatorsDefinition>();
+        public List<InstructionDefinition> Definitions = new List<InstructionDefinition>();
     }
 }

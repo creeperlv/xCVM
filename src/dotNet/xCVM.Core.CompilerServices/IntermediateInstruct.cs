@@ -6,7 +6,7 @@ namespace xCVM.Core.CompilerServices
     public class IntermediateInstruct : Instruct
     {
         [NonSerialized]
-        public Instruction3OperatorsDefinition? Definition;
+        public InstructionDefinition? Definition;
         [NonSerialized]
         public Segment? PseudoOp0;
         [NonSerialized]
