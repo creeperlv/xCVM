@@ -452,8 +452,8 @@ namespace xCVM.Core.CompilerServices
                 case 4:
                     {
                         //Func
-                        var result=context.MatachNext((AssemblerDefinition?.FunctionIdentifier)??"fn");
-                        if(result== MatchResult.Match)
+                        var result = context.MatachNext((AssemblerDefinition?.FunctionIdentifier) ?? "fn");
+                        if (result == MatchResult.Match)
                         {
 
                         }
@@ -662,6 +662,24 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
+                case 5:
+                    {
+                        if (NextUInt(assembleResult, context, AcceptRegister, Labels, Texts, IDs, SupressError, out var reg0))
+                        {
+                            reg = BitConverter.GetBytes(reg0);
+                            return true;
+                        }
+                    }
+                    break;
+                case 6:
+                    {
+                        if (NextULong(assembleResult, context, AcceptRegister, SupressError, out var reg0))
+                        {
+                            reg = BitConverter.GetBytes(reg0);
+                            return true;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -772,6 +790,137 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
+        private bool NextUInt(CompileResult<xCVMModule> assembleResult,
+                             SegmentContext context,
+                             bool AcceptRegister,
+                             Dictionary<string, int> Labels,
+                             Dictionary<string, int> Texts,
+                             Dictionary<string, int> IDs,
+                             bool SupressError,
+                             out uint reg0)
+        {
+            if (context.GoNext())
+            {
+                var _int = context.Current!.content;
+                if (_int.StartsWith("text?"))
+                {
+                    _int = _int.Substring(5);
+                    if (Texts.ContainsKey(_int))
+                    {
+                        if (Texts[_int] > 0)
+                        {
+                            reg0 = (uint)Texts[_int];
+                            return true;
+                        }
+                        else
+                        {
+                            reg0 = 0;
+                            assembleResult.AddError(new UIntParseError(context.Current));
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        reg0 = 0;
+                        return false;
+                    }
+                }
+                else
+                if (_int.StartsWith("id?"))
+                {
+                    _int = _int.Substring(3);
+                    if (IDs.ContainsKey(_int))
+                    {
+                        if (IDs[_int] > 0)
+                        {
+                            reg0 = (uint)IDs[_int];
+                            return true;
+                        }
+                        else
+                        {
+                            reg0 = 0;
+                            assembleResult.AddError(new UIntParseError(context.Current));
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        reg0 = 0;
+                        return false;
+                    }
+                }
+                else
+                if (_int.StartsWith("lbl?"))
+                {
+                    _int = _int.Substring(4);
+                    if (Labels.ContainsKey(_int))
+                    {
+                        if (Labels[_int] > 0)
+                        {
+                            reg0 = (uint)Labels[_int];
+                            return true;
+                        }
+                        else
+                        {
+                            reg0 = 0;
+                            assembleResult.AddError(new UIntParseError(context.Current));
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        reg0 = 0;
+                        return false;
+                    }
+                }
+                if (AcceptRegister)
+                {
+                    if (_int.StartsWith("$"))
+                    {
+                        _int = _int.Substring(1);
+                    }
+                    else
+                    {
+                        if (!SupressError)
+                            assembleResult.AddError(new RegisterFormatError(context.Last));
+                    }
+                }
+                if (uint.TryParse(_int, out var data))
+                {
+                    reg0 = data;
+                    return true;
+                }
+                else
+                {
+                    if (AssemblerDefinition != null)
+                    {
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _int))
+                        {
+                            if (uint.TryParse(_int, out data))
+                            {
+                                reg0 = data;
+                                return true;
+                            }
+                            else
+                            {
+                                if (!SupressError)
+                                    assembleResult.AddError(new UIntParseError(context.Last));
+                            }
+                        }
+                    }
+                    else
+                        if (!SupressError)
+                        assembleResult.AddError(new IntParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = 0;
+            return false;
+        }
         private bool NextLong(CompileResult<xCVMModule> assembleResult,
                               SegmentContext context,
                               bool AcceptRegister,
@@ -804,6 +953,62 @@ namespace xCVM.Core.CompilerServices
                         if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _long))
                         {
                             if (long.TryParse(_long, out data))
+                            {
+                                reg0 = data;
+                                return true;
+                            }
+                            else
+                            {
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
+                            }
+                        }
+                    }
+                    else
+                        if (!SupressError)
+                        assembleResult.AddError(new LongParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = -1;
+            return false;
+        }
+        private bool NextULong(CompileResult<xCVMModule> assembleResult,
+                              SegmentContext context,
+                              bool AcceptRegister,
+                              bool SupressError,
+                              out ulong reg0)
+        {
+            if (context.GoNext())
+            {
+                var _long = context.Current!.content;
+                if (AcceptRegister)
+                {
+                    if (_long.StartsWith("$"))
+                    {
+                        _long = _long.Substring(1);
+                    }
+                    else
+                    {
+                        assembleResult.AddError(new RegisterFormatError(context.Last));
+                    }
+                }
+                if (ulong.TryParse(_long, out var data))
+                {
+                    reg0 = data;
+                    return true;
+                }
+                else
+                {
+                    if (AssemblerDefinition != null)
+                    {
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _long))
+                        {
+                            if (ulong.TryParse(_long, out data))
                             {
                                 reg0 = data;
                                 return true;

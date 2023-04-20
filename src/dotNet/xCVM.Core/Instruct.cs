@@ -64,6 +64,11 @@ namespace xCVM.Core
         mul = 0x0005, muli = 0x0006,
         div = 0x0007, divi = 0x0008,
 
+        uadd = 0x0071, uaddi = 0x0072,
+        usub = 0x0073, usubi = 0x0074,
+        umul = 0x0075, umuli = 0x0076,
+        udiv = 0x0077, udivi = 0x0078,
+
         fadd_s = 0x0011, faddi_s = 0x0012,
         fsub_s = 0x0013, fsubi_s = 0x0014,
         fmul_s = 0x0015, fmuli_s = 0x0016,
@@ -85,6 +90,12 @@ namespace xCVM.Core
         lsub = 0x0053, lsubi = 0x0054,
         lmul = 0x0055, lmuli = 0x0056,
         ldiv = 0x0057, ldivi = 0x0058,
+
+        uladd = 0x0081, uladdi = 0x0082,
+        ulsub = 0x0083, ulsubi = 0x0084,
+        ulmul = 0x0085, ulmuli = 0x0086,
+        uldiv = 0x0087, uldivi = 0x0088,
+
         lcmp = 0x0059,
         lcmpi = 0x005A,
 
@@ -134,5 +145,6 @@ namespace xCVM.Core
         /// Save octal words.
         /// </summary>
         sow = 0x0069,
+        
     }
 }

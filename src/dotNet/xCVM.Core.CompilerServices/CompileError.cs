@@ -42,6 +42,14 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to Int32.";
     }
+    public class UIntParseError : CompileError
+    {
+        public UIntParseError(Segment? binded) : base(binded, null)
+        {
+        }
+
+        public override string Message => $"Cannot convert content to unsigned int32.";
+    }
     public class LongParseError : CompileError
     {
         public LongParseError(Segment? binded) : base(binded, null)
