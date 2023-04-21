@@ -102,7 +102,12 @@ namespace xCVM.Core
         jump = 0x0040, ret = 0x0041, cvt_sf_i = 0x0030, cvt_i_sf = 0x0031, cvt_df_i = 0x0032, cvt_i_df = 0x0033,
         sqrt = 0x000B, fsqrt_s = 0x001B, fsqrt_d = 0x002B,
 
-        call = 0x0042, mv = 0x0043, syscall = 0x0044,
+        call = 0x0042, mv = 0x0043, syscall = 0x0044, 
+        /// <summary>
+        /// Copy Resource to new memory area.
+        /// rescp resource_type:TEXT|XCVMRES ID $ReciverRegister
+        /// </summary>
+        rescp=0x051,
         /// <summary>
         /// wf - word, first (first 4 bytes)
         /// </summary>

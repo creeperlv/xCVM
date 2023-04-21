@@ -1030,7 +1030,7 @@ namespace xCVM.Core.CompilerServices
                 assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
             }
 
-            reg0 = -1;
+            reg0 = 0;
             return false;
         }
         private bool NextFloat(CompileResult<xCVMModule> assembleResult, SegmentContext context,
