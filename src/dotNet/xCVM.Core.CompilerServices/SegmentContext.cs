@@ -20,7 +20,7 @@ namespace xCVM.Core.CompilerServices
 
         public Segment? Current => _Current;
         public Segment? Last => _Last;
-        public (MatchResult, IContentable?)MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches, bool CaseSensitive = true)
+        public (MatchResult, IContentable?) MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches, bool CaseSensitive = true)
         {
             if (CaseSensitive)
             {
@@ -101,9 +101,9 @@ namespace xCVM.Core.CompilerServices
             }
             return (MatchResult.Mismatch, null);
         }
-        public (MatchResult, int) MatchCollectionMarchWithMatchNext(string Next,bool CaseSensitive=true, params string[] matches)
+        public (MatchResult, int) MatchCollectionMarchWithMatchNext(string Next, bool CaseSensitive = true, params string[] matches)
         {
-            if(CaseSensitive)
+            if (CaseSensitive)
             {
                 if (Current == null) return (MatchResult.ReachEnd, -1);
                 for (int i = 0; i < matches.Length; i++)
@@ -129,7 +129,7 @@ namespace xCVM.Core.CompilerServices
                 var focus = Current.content.ToUpper();
                 for (int i = 0; i < matches.Length; i++)
                 {
-                    if (focus== matches[i].ToUpper())
+                    if (focus == matches[i].ToUpper())
                     {
                         if (Current.Next != null)
                         {
@@ -146,7 +146,7 @@ namespace xCVM.Core.CompilerServices
             }
 
         }
-        public MatchResult MatchMarch(string Name, bool WillGoNext = true, bool CaseSensitive=true)
+        public MatchResult MatchMarch(string Name, bool WillGoNext = true, bool CaseSensitive = true)
         {
             if (CaseSensitive)
             {
@@ -220,7 +220,14 @@ namespace xCVM.Core.CompilerServices
             _Current = _Current.Next;
             return _Current != null;
         }
-        public bool ReachEnd => _Current == null;
+        public bool ReachEnd
+        {
+            get
+            {
+                if (_Current == null) return true;
+                return _Current.content == "" && _Current.Next == null;
+            }
+        }
     }
     public enum MatchResult
     {

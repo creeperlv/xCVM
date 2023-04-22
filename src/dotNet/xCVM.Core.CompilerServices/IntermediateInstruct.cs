@@ -14,4 +14,9 @@ namespace xCVM.Core.CompilerServices
         [NonSerialized]
         public Segment? PseudoOp2;
     }
+    public class IntermediateExternFunction: ExternFunction
+    {
+        [NonSerialized]
+        public Segment? PseudoLabel;
+    }
 }

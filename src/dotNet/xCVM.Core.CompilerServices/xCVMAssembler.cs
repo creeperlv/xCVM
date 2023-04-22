@@ -19,7 +19,7 @@ namespace xCVM.Core.CompilerServices
             if (definition != null)
             {
                 WillUseEndMark = definition.UseStatementEndMark;
-                EndMark = definition.StateMentEndMark;
+                EndMark = definition.StatementEndMark;
                 AcceptIDAlias = definition.AcceptIDAlias;
                 CaseSensitiveSegmentationIdentifiers = definition.CaseSensitiveSegmentationIdentifiers;
             }
@@ -452,11 +452,29 @@ namespace xCVM.Core.CompilerServices
                 case 4:
                     {
                         //Func
-                        var result = context.MatachNext((AssemblerDefinition?.FunctionIdentifier) ?? "fn");
+                        var result = context.MatchMarch((AssemblerDefinition?.FunctionIdentifier) ?? "fn", true, AssemblerDefinition?.CaseSensitiveExternIdentifiers ?? true);
                         if (result == MatchResult.Match)
+                        {
+                            if (context.ReachEnd)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                return _IC;
+                            }
+                            var Name = context.Current!.content;
+                            context.GoNext();
+                            if (context.ReachEnd)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                return _IC;
+                            }
+                            module.ExternFunctions.Add(new IntermediateExternFunction { Name = Name, PseudoLabel = context.Current });
+
+                        }
+                        else if (result == MatchResult.Mismatch)
                         {
 
                         }
+
                     }
                     break;
                 default:

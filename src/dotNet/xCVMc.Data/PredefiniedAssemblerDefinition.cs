@@ -8,7 +8,7 @@ namespace xCVMc.Data
     {
         public static AssemblerDefinition GetDefinition()
         {
-            AssemblerDefinition assemblerDefinition = new AssemblerDefinition { StateMentEndMark = ";", UseStatementEndMark = true };
+            AssemblerDefinition assemblerDefinition = new AssemblerDefinition { StatementEndMark = ";", UseStatementEndMark = true };
             assemblerDefinition.PredefinedSymbols = new Dictionary<string, string> { 
                 { "stdin", "0" },
                 { "stdout", "1" },
