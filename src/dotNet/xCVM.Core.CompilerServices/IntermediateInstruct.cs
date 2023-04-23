@@ -19,4 +19,13 @@ namespace xCVM.Core.CompilerServices
         [NonSerialized]
         public Segment? PseudoLabel;
     }
+    public class IntermediateDataType : DataType {
+
+        [NonSerialized]
+        public Segment? PseudoType;
+
+        [NonSerialized]
+        public Segment? PseudoAdditionalType;
+    }
+
 }
