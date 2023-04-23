@@ -8,10 +8,23 @@ namespace xCVMc.Data
     {
         public static AssemblerDefinition GetDefinition()
         {
-            AssemblerDefinition assemblerDefinition = new AssemblerDefinition { StatementEndMark = ";", UseStatementEndMark = true };
-            assemblerDefinition.PredefinedSymbols = new Dictionary<string, string> { 
+            AssemblerDefinition assemblerDefinition = new AssemblerDefinition { StatementEndMark = ";" , UseStatementEndMark = true };
+            assemblerDefinition.PredefinedSymbols = new Dictionary<string , string> {
                 { "stdin", "0" },
                 { "stdout", "1" },
+            };
+            assemblerDefinition.PredefinedTypeMapping = new Dictionary<string , int>
+            {
+                { "struct" , -2 },
+                { "void" , -1 },
+                { "cli" , 0 },
+                { "int" , 1 },
+                { "long" , 2 },
+                { "float" , 3 },
+                { "double" , 4 },
+                { "uint" , 5 },
+                { "unsigned_int" , 5 },
+                { "ulong" , 6 },
             };
             assemblerDefinition.Definitions = new List<InstructionDefinition>
             {

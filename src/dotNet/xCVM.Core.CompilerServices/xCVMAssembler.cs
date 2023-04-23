@@ -468,7 +468,23 @@ namespace xCVM.Core.CompilerServices
                                 return _IC;
                             }
                             module.ExternFunctions.Add(new IntermediateExternFunction { Name = Name, PseudoLabel = context.Current });
+                            if (AssemblerDefinition?.UseExternStartMark ?? true == true)
+                            {
+                                result = context.MatchMarch((AssemblerDefinition?.ExternStartMark) ?? ":", true, true);
+                                if(result== MatchResult.Match)
+                                {
 
+                                }
+                                else if (result == MatchResult.Mismatch)
+                                {
+                                    assembleResult.AddError(new ExpectAMarkError(context.Last, (AssemblerDefinition?.ExternStartMark) ?? ":"));
+                                }else if (result == MatchResult.ReachEnd)
+                                {
+                                    assembleResult.AddError(new UnexpectedEndOfFileError (context.Current));
+                                }
+
+
+                            }
                         }
                         else if (result == MatchResult.Mismatch)
                         {
