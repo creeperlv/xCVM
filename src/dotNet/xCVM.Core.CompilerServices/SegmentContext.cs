@@ -20,7 +20,7 @@ namespace xCVM.Core.CompilerServices
 
         public Segment? Current => _Current;
         public Segment? Last => _Last;
-        public (MatchResult, IContentable?) MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches, bool CaseSensitive = true)
+        public (MatchResult, IContentable?) MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches , bool CaseSensitive = true)
         {
             if (CaseSensitive)
             {
@@ -49,44 +49,81 @@ namespace xCVM.Core.CompilerServices
             }
 
         }
-        public (MatchResult, string?) MatchCollectionMarchReturnName(params string[] matches)
+        public (MatchResult, string?) MatchCollectionMarchReturnName(params string [ ] matches)
         {
             if (Current == null) return (MatchResult.ReachEnd, null);
-            for (int i = 0; i < matches.Length; i++)
+            for (int i = 0 ; i < matches.Length ; i++)
             {
-                if (Current.content == matches[i])
+                if (Current.content == matches [ i ])
                 {
                     if (Current.Next != null)
                     {
                         GoNext();
-                        return (MatchResult.Match, matches[i]);
                     }
+                    return (MatchResult.Match, matches [ i ]);
                 }
             }
             return (MatchResult.Mismatch, null);
         }
-        public (MatchResult, int) MatchCollectionMarch(params string[] matches)
+        public (MatchResult, int) MatchCollectionMarch(bool CaseSensitive = true , params string [ ] matches)
         {
+
             if (Current == null) return (MatchResult.ReachEnd, -1);
-            for (int i = 0; i < matches.Length; i++)
+            if (CaseSensitive)
             {
-                if (Current.content == matches[i])
+
+                for (int i = 0 ; i < matches.Length ; i++)
                 {
-                    if (Current.Next != null)
+                    if (Current.content == matches [ i ])
                     {
-                        GoNext();
+                        if (Current.Next != null)
+                        {
+                            GoNext();
+                        }
                         return (MatchResult.Match, i);
                     }
                 }
             }
+            else
+            {
+                var curr = Current.content.ToUpper();
+                for (int i = 0 ; i < matches.Length ; i++)
+                {
+                    if (curr == matches [ i ].ToUpper())
+                    {
+                        if (Current.Next != null)
+                        {
+                            GoNext();
+                        }
+                        return (MatchResult.Match, i);
+                    }
+                }
+                return (MatchResult.Mismatch, -1);
+            }
             return (MatchResult.Mismatch, -1);
         }
-        public (MatchResult, string?) MatchCollectionMarchWithMatchNextReturnName(string Next, params string[] matches)
+        public (MatchResult, int) MatchCollectionMarch(params string [ ] matches)
+        {
+            if (Current == null) return (MatchResult.ReachEnd, -1);
+            for (int i = 0 ; i < matches.Length ; i++)
+            {
+                if (Current.content == matches [ i ])
+                {
+                    if (Current.Next != null)
+                    {
+                        GoNext();
+                    }
+                    return (MatchResult.Match, i);
+                }
+            }
+            return (MatchResult.Mismatch, -1);
+        }
+        public (MatchResult, string?) MatchCollectionMarchWithMatchNextReturnName(string Next , params string [ ] matches)
         {
             if (Current == null) return (MatchResult.ReachEnd, null);
-            for (int i = 0; i < matches.Length; i++)
+            for (int i = 0 ; i < matches.Length ; i++)
             {
-                if (Current.content == matches[i])
+                if (Current.content == matches [ i ])
                 {
                     if (Current.Next != null)
                     {
@@ -94,21 +131,21 @@ namespace xCVM.Core.CompilerServices
                         {
                             GoNext();
                             GoNext();
-                            return (MatchResult.Match, matches[i]);
+                            return (MatchResult.Match, matches [ i ]);
                         }
                     }
                 }
             }
             return (MatchResult.Mismatch, null);
         }
-        public (MatchResult, int) MatchCollectionMarchWithMatchNext(string Next, bool CaseSensitive = true, params string[] matches)
+        public (MatchResult, int) MatchCollectionMarchWithMatchNext(string Next , bool CaseSensitive = true , params string [ ] matches)
         {
             if (CaseSensitive)
             {
                 if (Current == null) return (MatchResult.ReachEnd, -1);
-                for (int i = 0; i < matches.Length; i++)
+                for (int i = 0 ; i < matches.Length ; i++)
                 {
-                    if (Current.content == matches[i])
+                    if (Current.content == matches [ i ])
                     {
                         if (Current.Next != null)
                         {
@@ -127,9 +164,9 @@ namespace xCVM.Core.CompilerServices
             {
                 if (Current == null) return (MatchResult.ReachEnd, -1);
                 var focus = Current.content.ToUpper();
-                for (int i = 0; i < matches.Length; i++)
+                for (int i = 0 ; i < matches.Length ; i++)
                 {
-                    if (focus == matches[i].ToUpper())
+                    if (focus == matches [ i ].ToUpper())
                     {
                         if (Current.Next != null)
                         {
@@ -146,7 +183,7 @@ namespace xCVM.Core.CompilerServices
             }
 
         }
-        public MatchResult MatchMarch(string Name, bool WillGoNext = true, bool CaseSensitive = true)
+        public MatchResult MatchMarch(string Name , bool WillGoNext = true , bool CaseSensitive = true)
         {
             if (CaseSensitive)
             {
@@ -186,7 +223,7 @@ namespace xCVM.Core.CompilerServices
             }
 
         }
-        public MatchResult MatachNext(string Name, bool WillGoBack = true)
+        public MatchResult MatachNext(string Name , bool WillGoBack = true)
         {
             if (GoNext())
             {

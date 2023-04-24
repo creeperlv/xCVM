@@ -24,27 +24,27 @@ namespace xCVM.Core.CompilerServices
                 CaseSensitiveSegmentationIdentifiers = definition.CaseSensitiveSegmentationIdentifiers;
             }
         }
-        public CompileResult<xCVMModule> Assemble(FileInfo file)
+        public CompileResult<xCVMModule> Assemble(FileInfo file , ResourceDevDef? resourceDef = null)
         {
             using var sr = file.OpenText();
             var content = sr.ReadToEnd();
-            return Assemble(parser.Parse(content, false, file.FullName));
+            return Assemble(parser.Parse(content , false , file.FullName));
         }
-        public CompileResult<xCVMModule> Assemble(List<FileInfo> files)
+        public CompileResult<xCVMModule> Assemble(List<FileInfo> files , ResourceDevDef? resourceDef = null)
         {
             Segment? s = null;
             foreach (var item in files)
             {
                 using var sr = item.OpenText();
                 var content = sr.ReadToEnd();
-                var _s = parser.Parse(content, false, item.FullName);
+                var _s = parser.Parse(content , false , item.FullName);
                 if (s is null) s = _s;
                 else s.Concatenate(_s);
             }
             if (s is null) return new CompileResult<xCVMModule>(new xCVMModule());
             return Assemble(s);
         }
-        public CompileResult<xCVMModule> Assemble(Stream stream)
+        public CompileResult<xCVMModule> Assemble(Stream stream , ResourceDevDef? resourceDef = null)
         {
             using (StreamReader sr = new StreamReader(stream))
             {
@@ -57,17 +57,19 @@ namespace xCVM.Core.CompilerServices
             HEAD.content = Regex.Unescape(HEAD.content);
             if (HEAD.Next != null) Preprocess(HEAD.Next);
         }
-        public CompileResult<xCVMModule> Assemble(Segment segments)
+        ResourceDevDef? resourceDef = null;
+        public CompileResult<xCVMModule> Assemble(Segment segments , ResourceDevDef? resourceDef = null)
         {
+            this.resourceDef = resourceDef;
             Preprocess(segments);
             xCVMModule module = new xCVMModule();
             CompileResult<xCVMModule> assembleResult = new CompileResult<xCVMModule>(module);
             var current = segments;
             SegmentContext context = new SegmentContext(current);
             int Sections = 0;
-            Dictionary<string, int> Labels = new Dictionary<string, int>();
-            Dictionary<string, int> Texts = new Dictionary<string, int>();
-            Dictionary<string, int> IDs = new Dictionary<string, int>();
+            Dictionary<string , int> Labels = new Dictionary<string , int>();
+            Dictionary<string , int> Texts = new Dictionary<string , int>();
+            Dictionary<string , int> IDs = new Dictionary<string , int>();
             int _IC = 0;
             while (true)
             {
@@ -77,13 +79,13 @@ namespace xCVM.Core.CompilerServices
                 {
 
                     (var mr, var section) =
-                        context.MatchCollectionMarchWithMatchNext(":",
-                                                                  CaseSensitiveSegmentationIdentifiers,
-                                                                  ".module",
-                                                                  ".text",
-                                                                  ".ids",
-                                                                  ".codes",
-                                                                  ".extern_func",
+                        context.MatchCollectionMarchWithMatchNext(":" ,
+                                                                  CaseSensitiveSegmentationIdentifiers ,
+                                                                  ".module" ,
+                                                                  ".text" ,
+                                                                  ".ids" ,
+                                                                  ".codes" ,
+                                                                  ".extern_func" ,
                                                                   ".extern_struct");
                     //Console.WriteLine(mr + ":" + section);
                     if (mr == MatchResult.Match)
@@ -92,13 +94,13 @@ namespace xCVM.Core.CompilerServices
                     }
                     else if (mr == MatchResult.Mismatch)
                     {
-                        _IC = BaseAssemble(module,
-                                           assembleResult,
-                                           context,
-                                           Sections,
-                                           Labels,
-                                           Texts,
-                                           IDs,
+                        _IC = BaseAssemble(module ,
+                                           assembleResult ,
+                                           context ,
+                                           Sections ,
+                                           Labels ,
+                                           Texts ,
+                                           IDs ,
                                            _IC);
 
                     }
@@ -113,6 +115,63 @@ namespace xCVM.Core.CompilerServices
             {
                 PostProcess(inst);
             }
+            foreach (var _st in module.ExternStructs)
+            {
+                foreach (var item in _st.Fields.Values)
+                {
+                    if (item is IntermediateDataType DT)
+                    {
+                        PostProcessDT(DT);
+                    }
+                }
+            }
+            foreach (var _fn in module.ExternFunctions)
+            {
+                foreach (var item in _fn.Registers.Values)
+                {
+                    if (item is IntermediateDataType DT)
+                    {
+                        PostProcessDT(DT);
+                    }
+
+                }
+                {
+                    if (_fn.ReturnType is IntermediateDataType DT)
+                    {
+                        PostProcessDT(DT);
+                    }
+                }
+            }
+            void PostProcessDT(IntermediateDataType intermediateDataType)
+            {
+                if (intermediateDataType.PseudoType == null) return;
+                string L = intermediateDataType.PseudoType.content;
+                if (AssemblerDefinition?.CaseSensitiveInternalTypeIdentifier ?? true == true)
+                {
+                    L = L.ToUpper();
+                }
+                string R = AssemblerDefinition?.InternalTypeIdentifier ?? "internal";
+                if (AssemblerDefinition?.CaseSensitiveInternalTypeIdentifier ?? true == true)
+                {
+                    R = R.ToUpper();
+                }
+                if (L == R)
+                {
+                    if (AssemblerDefinition != null)
+                        if (intermediateDataType.PseudoAdditionalType != null)
+                            foreach (var item in AssemblerDefinition.PredefinedTypeMapping)
+                            {
+                                if (AssemblerDefinition?.CaseSensitiveInternalTypeIdentifier ?? true == true)
+                                {
+                                    if (intermediateDataType.PseudoAdditionalType.content == item.Key)
+                                    {
+                                        intermediateDataType.Type = item.Value;
+                                        break;
+                                    }
+                                }
+                            }
+                }
+            }
             void PostProcess(IntermediateInstruct instruct)
             {
 
@@ -122,14 +181,14 @@ namespace xCVM.Core.CompilerServices
                     {
                         if (ii.PseudoOp0 != null)
                         {
-                            if (NextData(assembleResult,
-                                         new SegmentContext(ii.PseudoOp0.Prev),
-                                         ii.Definition.OP0REG,
-                                         ii.Definition.OP0DT,
-                                         Labels,
-                                         Texts,
-                                         IDs,
-                                         false,
+                            if (NextData(assembleResult ,
+                                         new SegmentContext(ii.PseudoOp0.Prev) ,
+                                         ii.Definition.OP0REG ,
+                                         ii.Definition.OP0DT ,
+                                         Labels ,
+                                         Texts ,
+                                         IDs ,
+                                         false ,
                                          out ii.Op0))
                             {
 
@@ -142,14 +201,14 @@ namespace xCVM.Core.CompilerServices
                         }
                         if (ii.PseudoOp1 != null)
                         {
-                            if (NextData(assembleResult,
-                                         new SegmentContext(ii.PseudoOp1.Prev),
-                                         ii.Definition.OP1REG,
-                                         ii.Definition.OP1DT,
-                                         Labels,
-                                         Texts,
-                                         IDs,
-                                         false,
+                            if (NextData(assembleResult ,
+                                         new SegmentContext(ii.PseudoOp1.Prev) ,
+                                         ii.Definition.OP1REG ,
+                                         ii.Definition.OP1DT ,
+                                         Labels ,
+                                         Texts ,
+                                         IDs ,
+                                         false ,
                                          out ii.Op1))
                             {
 
@@ -162,14 +221,14 @@ namespace xCVM.Core.CompilerServices
                         }
                         if (ii.PseudoOp2 != null)
                         {
-                            if (NextData(assembleResult,
-                                         new SegmentContext(ii.PseudoOp2.Prev),
-                                         ii.Definition.OP2REG,
-                                         ii.Definition.OP2DT,
-                                         Labels,
-                                         Texts,
-                                         IDs,
-                                         false,
+                            if (NextData(assembleResult ,
+                                         new SegmentContext(ii.PseudoOp2.Prev) ,
+                                         ii.Definition.OP2REG ,
+                                         ii.Definition.OP2DT ,
+                                         Labels ,
+                                         Texts ,
+                                         IDs ,
+                                         false ,
                                          out ii.Op2))
                             {
 
@@ -188,20 +247,20 @@ namespace xCVM.Core.CompilerServices
 
         }
         bool AcceptIDAlias = true;
-        private int BaseAssemble(xCVMModule module,
-                                 CompileResult<xCVMModule> assembleResult,
-                                 SegmentContext context,
-                                 int Sections,
-                                 Dictionary<string, int> Labels,
-                                 Dictionary<string, int> Texts,
-                                 Dictionary<string, int> IDs,
+        private int BaseAssemble(xCVMModule module ,
+                                 CompileResult<xCVMModule> assembleResult ,
+                                 SegmentContext context ,
+                                 int Sections ,
+                                 Dictionary<string , int> Labels ,
+                                 Dictionary<string , int> Texts ,
+                                 Dictionary<string , int> IDs ,
                                  int _IC)
         {
             switch (Sections)
             {
                 case 0:
                     {
-                        (var _mr, var _selection) = context.MatchCollectionMarchReturnName("ModuleName", "Author", "Copyright", "Description", "ModuleVersion", "TargetVersion");
+                        (var _mr, var _selection) = context.MatchCollectionMarchReturnName("ModuleName" , "Author" , "Copyright" , "Description" , "ModuleVersion" , "TargetVersion");
                         if (_mr == MatchResult.Match)
                         {
                             switch (_selection)
@@ -213,7 +272,7 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             if (context.MatachNext(EndMark) != MatchResult.Match)
                                             {
-                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
                                             else
                                             {
@@ -229,7 +288,7 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             if (context.MatachNext(EndMark) != MatchResult.Match)
                                             {
-                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
                                             else
                                             {
@@ -245,7 +304,7 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             if (context.MatachNext(EndMark) != MatchResult.Match)
                                             {
-                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
                                             else
                                             {
@@ -261,7 +320,7 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             if (context.MatachNext(EndMark) != MatchResult.Match)
                                             {
-                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
                                             else
                                             {
@@ -271,7 +330,7 @@ namespace xCVM.Core.CompilerServices
                                     break;
                                 case "ModuleVersion":
                                     {
-                                        if (Version.TryParse(context.Current!.content, out var result))
+                                        if (Version.TryParse(context.Current!.content , out var result))
                                         {
                                             module.ModuleMetadata.ModuleVersion = result;
                                         }
@@ -280,7 +339,7 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             if (context.MatachNext(EndMark) != MatchResult.Match)
                                             {
-                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
                                             else
                                             {
@@ -290,7 +349,7 @@ namespace xCVM.Core.CompilerServices
                                     break;
                                 case "TargetVersion":
                                     {
-                                        if (Version.TryParse(context.Current!.content, out var result))
+                                        if (Version.TryParse(context.Current!.content , out var result))
                                         {
                                             module.ModuleMetadata.TargetVersion = result;
                                         }
@@ -299,7 +358,7 @@ namespace xCVM.Core.CompilerServices
                                         {
                                             if (context.MatachNext(EndMark) != MatchResult.Match)
                                             {
-                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                                assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
                                             else
                                             {
@@ -315,16 +374,16 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 1:
                     {
-                        if (int.TryParse(context.Current!.content, out var result))
+                        if (int.TryParse(context.Current!.content , out var result))
                         {
                             if (context.GoNext())
                             {
-                                module.Texts.Add(result, context.Current.content);
+                                module.Texts.Add(result , context.Current.content);
                                 if (WillUseEndMark)
                                 {
                                     if (context.MatachNext(EndMark) != MatchResult.Match)
                                     {
-                                        assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                        assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                     }
                                     else
                                     {
@@ -343,18 +402,18 @@ namespace xCVM.Core.CompilerServices
                             if (AcceptIDAlias)
                             {
                                 int ID = Texts.Count;
-                                if (!Texts.TryAdd(context.Current!.content, ID))
+                                if (!Texts.TryAdd(context.Current!.content , ID))
                                 {
-                                    Texts[context.Current!.content] = ID;
+                                    Texts [ context.Current!.content ] = ID;
                                 }
                                 if (context.GoNext())
                                 {
-                                    module.Texts.Add(ID, context.Current.content);
+                                    module.Texts.Add(ID , context.Current.content);
                                     if (WillUseEndMark)
                                     {
                                         if (context.MatachNext(EndMark) != MatchResult.Match)
                                         {
-                                            assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                            assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                         }
                                         else
                                         {
@@ -376,16 +435,16 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 2:
                     {
-                        if (int.TryParse(context.Current!.content, out var result))
+                        if (int.TryParse(context.Current!.content , out var result))
                         {
                             if (context.GoNext())
                             {
-                                module.IDs.Add(result, context.Current.content);
+                                module.IDs.Add(result , context.Current.content);
                                 if (WillUseEndMark)
                                 {
                                     if (context.MatachNext(EndMark) != MatchResult.Match)
                                     {
-                                        assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                        assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                     }
                                     else
                                     {
@@ -404,18 +463,18 @@ namespace xCVM.Core.CompilerServices
                             if (AcceptIDAlias)
                             {
                                 int ID = IDs.Count;
-                                if (!IDs.TryAdd(context.Current!.content, ID))
+                                if (!IDs.TryAdd(context.Current!.content , ID))
                                 {
-                                    IDs[context.Current!.content] = ID;
+                                    IDs [ context.Current!.content ] = ID;
                                 }
                                 if (context.GoNext())
                                 {
-                                    module.IDs.Add(ID, context.Current.content);
+                                    module.IDs.Add(ID , context.Current.content);
                                     if (WillUseEndMark)
                                     {
                                         if (context.MatachNext(EndMark) != MatchResult.Match)
                                         {
-                                            assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current, EndMark));
+                                            assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                         }
                                         else
                                         {
@@ -445,14 +504,14 @@ namespace xCVM.Core.CompilerServices
                         }
                         else
                         {
-                            _IC = eXtensibleAssemble(module, assembleResult, context, Labels, Texts, IDs, _IC);
+                            _IC = eXtensibleAssemble(module , assembleResult , context , Labels , Texts , IDs , _IC);
                         }
                     }
                     break;
                 case 4:
                     {
                         //Func
-                        var result = context.MatchMarch((AssemblerDefinition?.FunctionIdentifier) ?? "fn", true, AssemblerDefinition?.CaseSensitiveExternIdentifiers ?? true);
+                        var result = context.MatchMarch((AssemblerDefinition?.FunctionIdentifier) ?? "fn" , true , AssemblerDefinition?.CaseSensitiveExternIdentifiers ?? true);
                         if (result == MatchResult.Match)
                         {
                             if (context.ReachEnd)
@@ -460,27 +519,30 @@ namespace xCVM.Core.CompilerServices
                                 assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
                                 return _IC;
                             }
-                            var Name = context.Current!.content;
+                            var Name = context.Current;
                             context.GoNext();
                             if (context.ReachEnd)
                             {
                                 assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
                                 return _IC;
                             }
-                            module.ExternFunctions.Add(new IntermediateExternFunction { Name = Name, PseudoLabel = context.Current });
+                            var Label = context.Current;
+                            module.ExternFunctions.Add(new IntermediateExternFunction { Name = Name.content , PseudoLabel = context.Current });
+                            context.GoNext();
                             if (AssemblerDefinition?.UseExternStartMark ?? true == true)
                             {
-                                result = context.MatchMarch((AssemblerDefinition?.ExternStartMark) ?? ":", true, true);
-                                if(result== MatchResult.Match)
+                                result = context.MatchMarch((AssemblerDefinition?.ExternStartMark) ?? ":" , true , true);
+                                if (result == MatchResult.Match)
                                 {
-
+                                    context.GoBack();
                                 }
                                 else if (result == MatchResult.Mismatch)
                                 {
-                                    assembleResult.AddError(new ExpectAMarkError(context.Last, (AssemblerDefinition?.ExternStartMark) ?? ":"));
-                                }else if (result == MatchResult.ReachEnd)
+                                    assembleResult.AddError(new ExpectAMarkError(context.Last , (AssemblerDefinition?.ExternStartMark) ?? ":"));
+                                }
+                                else if (result == MatchResult.ReachEnd)
                                 {
-                                    assembleResult.AddError(new UnexpectedEndOfFileError (context.Current));
+                                    assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
                                 }
 
 
@@ -488,9 +550,136 @@ namespace xCVM.Core.CompilerServices
                         }
                         else if (result == MatchResult.Mismatch)
                         {
+                            //ReturnIdentifier
+                            result = context.MatchMarch((AssemblerDefinition?.ReturnIdentifier) ?? "return" , true , AssemblerDefinition?.CaseSensitiveReturnIdentifier ?? true);
+                            if (result == MatchResult.Match)
+                            {
+                                var MainType = context.Current;
+                                context.GoNext();
+                                var AType = context.Current;
+                                context.GoNext();
+                                var fn = module.ExternFunctions.Last();
+                                fn.ReturnType = (new IntermediateDataType { PseudoType = MainType , PseudoAdditionalType = AType });
+                                if (AssemblerDefinition?.UseStatementEndMark ?? true == true)
+                                {
+                                    result = context.MatchMarch((AssemblerDefinition?.StatementEndMark) ?? ";" , true , true);
+                                    if (result == MatchResult.Match)
+                                    {
+                                        context.GoBack();
+                                    }
+                                    else if (result == MatchResult.Mismatch)
+                                    {
+                                        assembleResult.AddError(new ExpectAMarkError(context.Last , (AssemblerDefinition?.StatementEndMark) ?? ";"));
+                                    }
+                                    else if (result == MatchResult.ReachEnd)
+                                    {
+                                        assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                    }
+                                }
 
+                            }
+                            else if (result == MatchResult.Mismatch)
+                            {
+                                var MainType = context.Current;
+                                context.GoNext();
+                                var AType = context.Current;
+                                context.GoNext();
+                                var fn = module.ExternFunctions.Last();
+                                fn.Registers.Add(fn.Registers.Count , new IntermediateDataType { PseudoType = MainType , PseudoAdditionalType = AType });
+                                if (AssemblerDefinition?.UseStatementEndMark ?? true == true)
+                                {
+                                    result = context.MatchMarch((AssemblerDefinition?.StatementEndMark) ?? ";" , true , true);
+                                    if (result == MatchResult.Match)
+                                    {
+                                        context.GoBack();
+                                    }
+                                    else if (result == MatchResult.Mismatch)
+                                    {
+                                        assembleResult.AddError(new ExpectAMarkError(context.Last , (AssemblerDefinition?.StatementEndMark) ?? ";"));
+                                    }
+                                    else if (result == MatchResult.ReachEnd)
+                                    {
+                                        assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                    }
+                                }
+
+                            }
                         }
 
+                    }
+                    break;
+                case 5:
+                    {
+                        var result = context.MatchCollectionMarch(AssemblerDefinition?.CaseSensitiveExternIdentifiers ?? true ,
+                                                                  (AssemblerDefinition?.StructIdentifier) ?? "st" ,
+                                                                  (AssemblerDefinition?.RuntimeStructIdentifier) ?? "rst");
+                        //var result = context.MatchMarch((AssemblerDefinition?.StructIdentifier) ?? "st" ,
+                        //                                true ,
+                        //                                AssemblerDefinition?.CaseSensitiveExternIdentifiers ?? true);
+                        if (result.Item1 == MatchResult.Match)
+                        {
+                            if (context.ReachEnd)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                return _IC;
+                            }
+                            var Name = context.Current;
+                            context.GoNext();
+                            if (context.ReachEnd)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                return _IC;
+                            }
+                            module.ExternStructs.Add(new ExternStruct { Name = Name.content });
+                            if (result.Item2 == 1) { module.ExternStructs.Last().RuntimeStruct = true; }
+                            if (AssemblerDefinition?.UseExternStartMark ?? true == true)
+                            {
+                                var result0 = context.MatchMarch((AssemblerDefinition?.ExternStartMark) ?? ":" , true , true);
+                                if (result0 == MatchResult.Match)
+                                {
+                                    context.GoBack();
+                                }
+                                else if (result0 == MatchResult.Mismatch)
+                                {
+                                    assembleResult.AddError(new ExpectAMarkError(context.Last , (AssemblerDefinition?.ExternStartMark) ?? ":"));
+                                }
+                                else if (result0 == MatchResult.ReachEnd)
+                                {
+                                    assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                }
+
+
+                            }
+                        }
+                        else if (result.Item1 == MatchResult.Mismatch)
+                        {
+                            //ReturnIdentifier
+                            {
+                                var MainType = context.Current;
+                                context.GoNext();
+                                var AType = context.Current;
+                                context.GoNext();
+                                var fn = module.ExternStructs.Last();
+                                fn.Fields.Add(fn.Fields.Count , new IntermediateDataType { PseudoType = MainType , PseudoAdditionalType = AType });
+                                if (AssemblerDefinition?.UseStatementEndMark ?? true == true)
+                                {
+                                    var result0 = context.MatchMarch((AssemblerDefinition?.StatementEndMark) ?? ";" , true , true);
+                                    if (result0 == MatchResult.Match)
+                                    {
+                                        context.GoBack();
+                                    }
+                                    else if (result0 == MatchResult.Mismatch)
+                                    {
+                                        assembleResult.AddError(new ExpectAMarkError(context.Last , (AssemblerDefinition?.StatementEndMark) ?? ";"));
+                                    }
+                                    else if (result0 == MatchResult.ReachEnd)
+                                    {
+                                        assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                    }
+                                }
+
+                            }
+                        }
                     }
                     break;
                 default:
@@ -500,15 +689,15 @@ namespace xCVM.Core.CompilerServices
             return _IC;
         }
 
-        private int eXtensibleAssemble(xCVMModule module,
-                                       CompileResult<xCVMModule> assembleResult,
-                                       SegmentContext context,
-                                       Dictionary<string, int> Labels,
-                                       Dictionary<string, int> Texts,
-                                       Dictionary<string, int> IDs,
+        private int eXtensibleAssemble(xCVMModule module ,
+                                       CompileResult<xCVMModule> assembleResult ,
+                                       SegmentContext context ,
+                                       Dictionary<string , int> Labels ,
+                                       Dictionary<string , int> Texts ,
+                                       Dictionary<string , int> IDs ,
                                        int _IC)
         {
-            var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions,
+            var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions ,
                                                                    AssemblerDefinition!.CaseSensitiveInstructions);
             if (a.Item1 == MatchResult.Match)
             {
@@ -517,30 +706,30 @@ namespace xCVM.Core.CompilerServices
                     IntermediateInstruct instruct = new IntermediateInstruct();
                     instruct.Operation = def.ID;
                     instruct.Definition = def;
-                    _3Operators(module,
-                                assembleResult,
-                                context,
-                                instruct,
-                                Labels,
-                                Texts,
-                                IDs,
-                                ref _IC,
-                                def.OP0DT,
-                                def.OP0REG,
-                                def.OP1DT,
-                                def.OP1REG,
-                                def.OP2DT,
-                                def.OP2REG,
+                    _3Operators(module ,
+                                assembleResult ,
+                                context ,
+                                instruct ,
+                                Labels ,
+                                Texts ,
+                                IDs ,
+                                ref _IC ,
+                                def.OP0DT ,
+                                def.OP0REG ,
+                                def.OP1DT ,
+                                def.OP1REG ,
+                                def.OP2DT ,
+                                def.OP2REG ,
                                 true);
                 }
             }
             else if (a.Item1 == MatchResult.Mismatch)
             {
-                var r = context.MatachNext(":", true);
+                var r = context.MatachNext(":" , true);
                 if (r == MatchResult.Match)
                 {
                     string name = context.Current.Prev.content;
-                    Labels.Add(name, _IC + 1);
+                    Labels.Add(name , _IC + 1);
                 }
                 else if (r == MatchResult.Mismatch)
                 {
@@ -569,23 +758,23 @@ namespace xCVM.Core.CompilerServices
 
         bool WillUseEndMark = true;
         string EndMark = ";";
-        private void _3Operators(xCVMModule module,
-                                 CompileResult<xCVMModule> assembleResult,
-                                 SegmentContext context,
-                                 Instruct inst,
-                                 Dictionary<string, int> Labels,
-                                 Dictionary<string, int> Texts,
-                                 Dictionary<string, int> IDs,
-                                 ref int IC,
-                                 int Reg0Data = 0,
-                                 bool AcceptReg0 = false,
-                                 int Reg1Data = 0,
-                                 bool AcceptReg1 = false,
-                                 int Reg2Data = 0,
-                                 bool AcceptReg2 = false,
+        private void _3Operators(xCVMModule module ,
+                                 CompileResult<xCVMModule> assembleResult ,
+                                 SegmentContext context ,
+                                 Instruct inst ,
+                                 Dictionary<string , int> Labels ,
+                                 Dictionary<string , int> Texts ,
+                                 Dictionary<string , int> IDs ,
+                                 ref int IC ,
+                                 int Reg0Data = 0 ,
+                                 bool AcceptReg0 = false ,
+                                 int Reg1Data = 0 ,
+                                 bool AcceptReg1 = false ,
+                                 int Reg2Data = 0 ,
+                                 bool AcceptReg2 = false ,
                                  bool SupressError = false)
         {
-            if (NextData(assembleResult, context, AcceptReg0, Reg0Data, Labels, Texts, IDs, SupressError, out inst.Op0))
+            if (NextData(assembleResult , context , AcceptReg0 , Reg0Data , Labels , Texts , IDs , SupressError , out inst.Op0))
             {
             }
             else if (SupressError)
@@ -600,7 +789,7 @@ namespace xCVM.Core.CompilerServices
                 return;
             }
 
-            if (NextData(assembleResult, context, AcceptReg1, Reg1Data, Labels, Texts, IDs, SupressError, out inst.Op1))
+            if (NextData(assembleResult , context , AcceptReg1 , Reg1Data , Labels , Texts , IDs , SupressError , out inst.Op1))
             {
             }
             else if (SupressError)
@@ -615,7 +804,7 @@ namespace xCVM.Core.CompilerServices
                 return;
             }
 
-            if (NextData(assembleResult, context, AcceptReg2, Reg2Data, Labels, Texts, IDs, SupressError, out inst.Op2))
+            if (NextData(assembleResult , context , AcceptReg2 , Reg2Data , Labels , Texts , IDs , SupressError , out inst.Op2))
             {
             }
             else if (SupressError)
@@ -648,21 +837,21 @@ namespace xCVM.Core.CompilerServices
                 IC++;
             }
         }
-        private bool NextData(CompileResult<xCVMModule> assembleResult,
-                              SegmentContext context,
-                              bool AcceptRegister,
-                              int dataType,
-                              Dictionary<string, int> Labels,
-                              Dictionary<string, int> Texts,
-                              Dictionary<string, int> IDs,
-                              bool SupressError,
-                              out byte[] reg)
+        private bool NextData(CompileResult<xCVMModule> assembleResult ,
+                              SegmentContext context ,
+                              bool AcceptRegister ,
+                              int dataType ,
+                              Dictionary<string , int> Labels ,
+                              Dictionary<string , int> Texts ,
+                              Dictionary<string , int> IDs ,
+                              bool SupressError ,
+                              out byte [ ] reg)
         {
             switch (dataType)
             {
                 case 1:
                     {
-                        if (NextInt(assembleResult, context, AcceptRegister, Labels, Texts, IDs, SupressError, out var reg0))
+                        if (NextInt(assembleResult , context , AcceptRegister , Labels , Texts , IDs , SupressError , out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -671,7 +860,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 2:
                     {
-                        if (NextLong(assembleResult, context, AcceptRegister, SupressError, out var reg0))
+                        if (NextLong(assembleResult , context , AcceptRegister , SupressError , out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -680,7 +869,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 3:
                     {
-                        if (NextFloat(assembleResult, context, SupressError, out var reg0))
+                        if (NextFloat(assembleResult , context , SupressError , out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -689,7 +878,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 4:
                     {
-                        if (NextDouble(assembleResult, context, SupressError, out var reg0))
+                        if (NextDouble(assembleResult , context , SupressError , out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -698,7 +887,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 5:
                     {
-                        if (NextUInt(assembleResult, context, AcceptRegister, Labels, Texts, IDs, SupressError, out var reg0))
+                        if (NextUInt(assembleResult , context , AcceptRegister , Labels , Texts , IDs , SupressError , out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -707,7 +896,7 @@ namespace xCVM.Core.CompilerServices
                     break;
                 case 6:
                     {
-                        if (NextULong(assembleResult, context, AcceptRegister, SupressError, out var reg0))
+                        if (NextULong(assembleResult , context , AcceptRegister , SupressError , out var reg0))
                         {
                             reg = BitConverter.GetBytes(reg0);
                             return true;
@@ -717,16 +906,16 @@ namespace xCVM.Core.CompilerServices
                 default:
                     break;
             }
-            reg = new byte[0];
+            reg = new byte [ 0 ];
             return false;
         }
-        private bool NextInt(CompileResult<xCVMModule> assembleResult,
-                             SegmentContext context,
-                             bool AcceptRegister,
-                             Dictionary<string, int> Labels,
-                             Dictionary<string, int> Texts,
-                             Dictionary<string, int> IDs,
-                             bool SupressError,
+        private bool NextInt(CompileResult<xCVMModule> assembleResult ,
+                             SegmentContext context ,
+                             bool AcceptRegister ,
+                             Dictionary<string , int> Labels ,
+                             Dictionary<string , int> Texts ,
+                             Dictionary<string , int> IDs ,
+                             bool SupressError ,
                              out int reg0)
         {
             if (context.GoNext())
@@ -737,7 +926,7 @@ namespace xCVM.Core.CompilerServices
                     _int = _int.Substring(5);
                     if (Texts.ContainsKey(_int))
                     {
-                        reg0 = Texts[_int];
+                        reg0 = Texts [ _int ];
                         return true;
                     }
                     else
@@ -752,7 +941,7 @@ namespace xCVM.Core.CompilerServices
                     _int = _int.Substring(3);
                     if (IDs.ContainsKey(_int))
                     {
-                        reg0 = IDs[_int];
+                        reg0 = IDs [ _int ];
                         return true;
                     }
                     else
@@ -767,7 +956,7 @@ namespace xCVM.Core.CompilerServices
                     _int = _int.Substring(4);
                     if (Labels.ContainsKey(_int))
                     {
-                        reg0 = Labels[_int];
+                        reg0 = Labels [ _int ];
                         return true;
                     }
                     else
@@ -788,7 +977,7 @@ namespace xCVM.Core.CompilerServices
                             assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
-                if (int.TryParse(_int, out var data))
+                if (int.TryParse(_int , out var data))
                 {
                     reg0 = data;
                     return true;
@@ -797,9 +986,9 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (AssemblerDefinition != null)
                     {
-                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _int))
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _int))
                         {
-                            if (int.TryParse(_int, out data))
+                            if (int.TryParse(_int , out data))
                             {
                                 reg0 = data;
                                 return true;
@@ -824,13 +1013,13 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextUInt(CompileResult<xCVMModule> assembleResult,
-                             SegmentContext context,
-                             bool AcceptRegister,
-                             Dictionary<string, int> Labels,
-                             Dictionary<string, int> Texts,
-                             Dictionary<string, int> IDs,
-                             bool SupressError,
+        private bool NextUInt(CompileResult<xCVMModule> assembleResult ,
+                             SegmentContext context ,
+                             bool AcceptRegister ,
+                             Dictionary<string , int> Labels ,
+                             Dictionary<string , int> Texts ,
+                             Dictionary<string , int> IDs ,
+                             bool SupressError ,
                              out uint reg0)
         {
             if (context.GoNext())
@@ -841,9 +1030,9 @@ namespace xCVM.Core.CompilerServices
                     _int = _int.Substring(5);
                     if (Texts.ContainsKey(_int))
                     {
-                        if (Texts[_int] > 0)
+                        if (Texts [ _int ] > 0)
                         {
-                            reg0 = (uint)Texts[_int];
+                            reg0 = (uint)Texts [ _int ];
                             return true;
                         }
                         else
@@ -865,9 +1054,9 @@ namespace xCVM.Core.CompilerServices
                     _int = _int.Substring(3);
                     if (IDs.ContainsKey(_int))
                     {
-                        if (IDs[_int] > 0)
+                        if (IDs [ _int ] > 0)
                         {
-                            reg0 = (uint)IDs[_int];
+                            reg0 = (uint)IDs [ _int ];
                             return true;
                         }
                         else
@@ -889,9 +1078,9 @@ namespace xCVM.Core.CompilerServices
                     _int = _int.Substring(4);
                     if (Labels.ContainsKey(_int))
                     {
-                        if (Labels[_int] > 0)
+                        if (Labels [ _int ] > 0)
                         {
-                            reg0 = (uint)Labels[_int];
+                            reg0 = (uint)Labels [ _int ];
                             return true;
                         }
                         else
@@ -919,7 +1108,7 @@ namespace xCVM.Core.CompilerServices
                             assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
-                if (uint.TryParse(_int, out var data))
+                if (uint.TryParse(_int , out var data))
                 {
                     reg0 = data;
                     return true;
@@ -928,9 +1117,9 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (AssemblerDefinition != null)
                     {
-                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _int))
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _int))
                         {
-                            if (uint.TryParse(_int, out data))
+                            if (uint.TryParse(_int , out data))
                             {
                                 reg0 = data;
                                 return true;
@@ -955,10 +1144,10 @@ namespace xCVM.Core.CompilerServices
             reg0 = 0;
             return false;
         }
-        private bool NextLong(CompileResult<xCVMModule> assembleResult,
-                              SegmentContext context,
-                              bool AcceptRegister,
-                              bool SupressError,
+        private bool NextLong(CompileResult<xCVMModule> assembleResult ,
+                              SegmentContext context ,
+                              bool AcceptRegister ,
+                              bool SupressError ,
                               out long reg0)
         {
             if (context.GoNext())
@@ -975,7 +1164,7 @@ namespace xCVM.Core.CompilerServices
                         assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
-                if (long.TryParse(_long, out var data))
+                if (long.TryParse(_long , out var data))
                 {
                     reg0 = data;
                     return true;
@@ -984,9 +1173,9 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (AssemblerDefinition != null)
                     {
-                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _long))
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _long))
                         {
-                            if (long.TryParse(_long, out data))
+                            if (long.TryParse(_long , out data))
                             {
                                 reg0 = data;
                                 return true;
@@ -1011,10 +1200,10 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextULong(CompileResult<xCVMModule> assembleResult,
-                              SegmentContext context,
-                              bool AcceptRegister,
-                              bool SupressError,
+        private bool NextULong(CompileResult<xCVMModule> assembleResult ,
+                              SegmentContext context ,
+                              bool AcceptRegister ,
+                              bool SupressError ,
                               out ulong reg0)
         {
             if (context.GoNext())
@@ -1031,7 +1220,7 @@ namespace xCVM.Core.CompilerServices
                         assembleResult.AddError(new RegisterFormatError(context.Last));
                     }
                 }
-                if (ulong.TryParse(_long, out var data))
+                if (ulong.TryParse(_long , out var data))
                 {
                     reg0 = data;
                     return true;
@@ -1040,9 +1229,9 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (AssemblerDefinition != null)
                     {
-                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _long))
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _long))
                         {
-                            if (ulong.TryParse(_long, out data))
+                            if (ulong.TryParse(_long , out data))
                             {
                                 reg0 = data;
                                 return true;
@@ -1067,13 +1256,13 @@ namespace xCVM.Core.CompilerServices
             reg0 = 0;
             return false;
         }
-        private bool NextFloat(CompileResult<xCVMModule> assembleResult, SegmentContext context,
-                              bool SupressError, out float reg0)
+        private bool NextFloat(CompileResult<xCVMModule> assembleResult , SegmentContext context ,
+                              bool SupressError , out float reg0)
         {
             if (context.GoNext())
             {
                 var _float = context.Current!.content;
-                if (float.TryParse(_float, out var data))
+                if (float.TryParse(_float , out var data))
                 {
                     reg0 = data;
                     return true;
@@ -1082,9 +1271,9 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (AssemblerDefinition != null)
                     {
-                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _float))
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _float))
                         {
-                            if (float.TryParse(_float, out data))
+                            if (float.TryParse(_float , out data))
                             {
                                 reg0 = data;
                                 return true;
@@ -1109,13 +1298,13 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
-        private bool NextDouble(CompileResult<xCVMModule> assembleResult, SegmentContext context,
-                              bool SupressError, out double reg0)
+        private bool NextDouble(CompileResult<xCVMModule> assembleResult , SegmentContext context ,
+                              bool SupressError , out double reg0)
         {
             if (context.GoNext())
             {
                 var _double = context.Current!.content;
-                if (double.TryParse(_double, out var data))
+                if (double.TryParse(_double , out var data))
                 {
                     reg0 = data;
                     return true;
@@ -1124,9 +1313,9 @@ namespace xCVM.Core.CompilerServices
                 {
                     if (AssemblerDefinition != null)
                     {
-                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content, out _double))
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _double))
                         {
-                            if (double.TryParse(_double, out data))
+                            if (double.TryParse(_double , out data))
                             {
                                 reg0 = data;
                                 return true;
@@ -1156,7 +1345,7 @@ namespace xCVM.Core.CompilerServices
 
         public CompileResult<xCVMModule> Assemble(string content)
         {
-            var segments = parser.Parse(content, false);
+            var segments = parser.Parse(content , false);
             return Assemble(segments);
         }
     }

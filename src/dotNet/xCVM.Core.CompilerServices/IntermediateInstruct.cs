@@ -19,6 +19,11 @@ namespace xCVM.Core.CompilerServices
         [NonSerialized]
         public Segment? PseudoLabel;
     }
+    public class IntermediateExternStruct : ExternStruct
+    {
+        [NonSerialized]
+        public Segment? PseudoName;
+    }
     public class IntermediateDataType : DataType {
 
         [NonSerialized]
