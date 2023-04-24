@@ -125,8 +125,16 @@ namespace xCVM.Core.CompilerServices
                     }
                 }
             }
-            foreach (var _fn in module.ExternFunctions)
+            foreach (IntermediateExternFunction _fn in module.ExternFunctions)
             {
+                if (_fn.PseudoLabel != null)
+                {
+                    if (!NextInt(assembleResult , new SegmentContext(_fn.PseudoLabel.Prev) , true , Labels , Texts , IDs ,
+                                 false , out _fn.Label))
+                    {
+                        assembleResult.AddError(new IntParseError(_fn.PseudoLabel));
+                    }
+                }
                 foreach (var item in _fn.Registers.Values)
                 {
                     if (item is IntermediateDataType DT)
@@ -158,7 +166,9 @@ namespace xCVM.Core.CompilerServices
                 if (L == R)
                 {
                     if (AssemblerDefinition != null)
+                    {
                         if (intermediateDataType.PseudoAdditionalType != null)
+                        {
                             foreach (var item in AssemblerDefinition.PredefinedTypeMapping)
                             {
                                 if (AssemblerDefinition?.CaseSensitiveInternalTypeIdentifier ?? true == true)
@@ -170,6 +180,8 @@ namespace xCVM.Core.CompilerServices
                                     }
                                 }
                             }
+                        }
+                    }
                 }
             }
             void PostProcess(IntermediateInstruct instruct)
@@ -181,15 +193,8 @@ namespace xCVM.Core.CompilerServices
                     {
                         if (ii.PseudoOp0 != null)
                         {
-                            if (NextData(assembleResult ,
-                                         new SegmentContext(ii.PseudoOp0.Prev) ,
-                                         ii.Definition.OP0REG ,
-                                         ii.Definition.OP0DT ,
-                                         Labels ,
-                                         Texts ,
-                                         IDs ,
-                                         false ,
-                                         out ii.Op0))
+                            if (NextData(assembleResult , new SegmentContext(ii.PseudoOp0.Prev) , ii.Definition.OP0REG ,
+                                         ii.Definition.OP0DT , Labels , Texts , IDs , false , out ii.Op0))
                             {
 
                             }
@@ -527,7 +532,7 @@ namespace xCVM.Core.CompilerServices
                                 return _IC;
                             }
                             var Label = context.Current;
-                            module.ExternFunctions.Add(new IntermediateExternFunction { Name = Name.content , PseudoLabel = context.Current });
+                            module.ExternFunctions.Add(new IntermediateExternFunction { Name = Name.content , PseudoLabel = Label });
                             context.GoNext();
                             if (AssemblerDefinition?.UseExternStartMark ?? true == true)
                             {
