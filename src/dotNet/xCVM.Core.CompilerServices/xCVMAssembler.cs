@@ -970,6 +970,24 @@ namespace xCVM.Core.CompilerServices
                         return false;
                     }
                 }
+                else
+                if (_int.StartsWith("res?"))
+                {
+                    _int = _int.Substring(4);
+                    if (resourceDef != null)
+                    {
+                        if (resourceDef.Mapping.ContainsKey(_int))
+                        {
+                            reg0 = resourceDef.Mapping [ _int ];
+                            return true;
+                        }
+                        else
+                        {
+                            reg0 = -1;
+                            return false;
+                        }
+                    }
+                }
                 if (AcceptRegister)
                 {
                     if (_int.StartsWith("$"))
