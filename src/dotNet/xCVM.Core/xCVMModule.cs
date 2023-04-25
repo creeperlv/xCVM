@@ -87,8 +87,7 @@ namespace xCVM.Core
                 foreach (var item in Texts)
                 {
                     stream.Write(BitConverter.GetBytes(item.Key));
-                    stream.Write(BitConverter.GetBytes(item.Value.Length));
-                    stream.Write(Encoding.UTF8.GetBytes(item.Value));
+                    stream.WriteBytes(Encoding.UTF8.GetBytes(item.Value));
                 }
             }
             {
@@ -97,8 +96,7 @@ namespace xCVM.Core
                 foreach (var item in IDs)
                 {
                     stream.Write(BitConverter.GetBytes(item.Key));
-                    stream.Write(BitConverter.GetBytes(item.Value.Length));
-                    stream.Write(Encoding.UTF8.GetBytes(item.Value));
+                    stream.WriteBytes(Encoding.UTF8.GetBytes(item.Value));
                 }
             }
             stream.Write(BitConverter.GetBytes(Instructions.Count));
@@ -145,11 +143,12 @@ namespace xCVM.Core
                 var b = stream.ReadBytes();
                 using (MemoryStream ms = new MemoryStream(b))
                 {
-                    var bb = ms.ReadBytes();
-                    int Count = BitConverter.ToInt32(bb , 0);
+                    byte [ ] bytes = new byte [ 4 ];
+                    ms.Read(bytes , 0 , 4);
+                    int Count = BitConverter.ToInt32(bytes , 0);
                     for (int i = 0 ; i < Count ; i++)
                     {
-                        bb = ms.ReadBytes();
+                        var bb = ms.ReadBytes();
                         xCVMModule.ExternFunctions.Add(ExternFunction.FromBytes(bb));
                     }
                 }
@@ -158,15 +157,56 @@ namespace xCVM.Core
                 var b = stream.ReadBytes();
                 using (MemoryStream ms = new MemoryStream(b))
                 {
-                    var bb = ms.ReadBytes();
-                    int Count = BitConverter.ToInt32(bb , 0);
+                    byte [ ] bytes = new byte [ 4 ];
+                    ms.Read(bytes , 0 , 4);
+                    int Count = BitConverter.ToInt32(bytes , 0);
                     for (int i = 0 ; i < Count ; i++)
                     {
-                        bb = ms.ReadBytes();
+                        var bb = ms.ReadBytes();
                         xCVMModule.ExternStructs.Add(ExternStruct.FromBytes(bb));
                     }
                 }
             }
+            {
+                byte [ ] bytes = new byte [ 4 ];
+                stream.Read(bytes , 0 , 4);
+                int Count = BitConverter.ToInt32(bytes , 0);
+                for (int i = 0 ; i < Count ; i++)
+                {
+
+                    stream.Read(bytes , 0 , 4);
+                    int ID = BitConverter.ToInt32(bytes , 0);
+                    var b = stream.ReadBytes();
+                    string t = Encoding.UTF8.GetString(b);
+                    xCVMModule.Texts.Add(ID , t);
+                }
+            }
+            {
+                byte [ ] bytes = new byte [ 4 ];
+                stream.Read(bytes , 0 , 4);
+                int Count = BitConverter.ToInt32(bytes , 0);
+                for (int i = 0 ; i < Count ; i++)
+                {
+
+                    stream.Read(bytes , 0 , 4);
+                    int ID = BitConverter.ToInt32(bytes , 0);
+                    var b = stream.ReadBytes();
+                    string t = Encoding.UTF8.GetString(b);
+                    xCVMModule.IDs.Add(ID , t);
+                }
+            }
+            {
+                byte [ ] bytes = new byte [ 4 ];
+                stream.Read(bytes , 0 , 4);
+                int Count = BitConverter.ToInt32(bytes , 0);
+                for (int i = 0 ; i < Count ; i++)
+                {
+                    var b = stream.ReadBytes();
+                    xCVMModule.Instructions.Add(Instruct.FromBytes(b));
+                }
+            }
+            if (stream.Position + 1 < stream.Length)
+                xCVMModule.xCVMResource = xCVMResource.FromStream(stream);
             return xCVMModule;
         }
     }

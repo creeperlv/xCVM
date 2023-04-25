@@ -10,9 +10,9 @@ namespace xCVM.Core
     public class Instruct
     {
         public int Operation;
-        public byte[]? Op0;
-        public byte[]? Op1;
-        public byte[]? Op2;
+        public byte [ ]? Op0;
+        public byte [ ]? Op1;
+        public byte [ ]? Op2;
         public List<byte> GetBytes()
         {
             List<byte> bytes = new List<byte>();
@@ -39,11 +39,36 @@ namespace xCVM.Core
                 bytes.Concatenate(Op2);
             return bytes;
         }
+        public static Instruct FromBytes(byte [ ] bytes)
+        {
+            Instruct instruct = new Instruct();
+            int Offset = 0;
+            instruct.Operation = BitConverter.ToInt32(bytes [ Offset..(Offset + Constants.int_size) ]);
+            Offset += Constants.int_size;
+            int OP_LEN = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
+            Offset += Constants.short_size;
+            if (OP_LEN > 0)
+            {
+                instruct.Op0 = bytes [ Offset..(Offset + OP_LEN) ];
+            }
+            OP_LEN = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
+            Offset += Constants.short_size;
+            if (OP_LEN > 0)
+            {
+                instruct.Op1 = bytes [ Offset..(Offset + OP_LEN) ];
+            }
+            OP_LEN = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
+            Offset += Constants.short_size;
+            if (OP_LEN > 0)
+            {
+                instruct.Op2 = bytes [ Offset..(Offset + OP_LEN) ];
+            }
+            return instruct;
+        }
         public void WriteToStream(Stream stream)
         {
             var b = GetBytes();
-            stream.Write(BitConverter.GetBytes(b.Count));
-            stream.Write(b.ToArray());
+            stream.WriteBytes(b.ToArray());
         }
     }
     public enum ManagedExt
@@ -102,12 +127,12 @@ namespace xCVM.Core
         jump = 0x0040, ret = 0x0041, cvt_sf_i = 0x0030, cvt_i_sf = 0x0031, cvt_df_i = 0x0032, cvt_i_df = 0x0033,
         sqrt = 0x000B, fsqrt_s = 0x001B, fsqrt_d = 0x002B,
 
-        call = 0x0042, mv = 0x0043, syscall = 0x0044, 
+        call = 0x0042, mv = 0x0043, syscall = 0x0044,
         /// <summary>
         /// Copy Resource to new memory area.
         /// rescp resource_type:TEXT|XCVMRES ID $ReciverRegister
         /// </summary>
-        rescp=0x051,
+        rescp = 0x051,
         /// <summary>
         /// wf - word, first (first 4 bytes)
         /// </summary>
@@ -150,6 +175,6 @@ namespace xCVM.Core
         /// Save octal words.
         /// </summary>
         sow = 0x0069,
-        
+
     }
 }
