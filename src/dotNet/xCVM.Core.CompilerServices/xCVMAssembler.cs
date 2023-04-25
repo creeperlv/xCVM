@@ -779,49 +779,58 @@ namespace xCVM.Core.CompilerServices
                                  bool AcceptReg2 = false ,
                                  bool SupressError = false)
         {
-            if (NextData(assembleResult , context , AcceptReg0 , Reg0Data , Labels , Texts , IDs , SupressError , out inst.Op0))
+            if (Reg0Data != -2)
             {
-            }
-            else if (SupressError)
-            {
-                if (inst is IntermediateInstruct ii)
+
+                if (NextData(assembleResult , context , AcceptReg0 , Reg0Data , Labels , Texts , IDs , SupressError , out inst.Op0))
                 {
-                    ii.PseudoOp0 = context.Current;
+                }
+                else if (SupressError)
+                {
+                    if (inst is IntermediateInstruct ii)
+                    {
+                        ii.PseudoOp0 = context.Current;
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
-            else
+            if (Reg1Data != -2)
             {
-                return;
+                if (NextData(assembleResult , context , AcceptReg1 , Reg1Data , Labels , Texts , IDs , SupressError , out inst.Op1))
+                {
+                }
+                else if (SupressError)
+                {
+                    if (inst is IntermediateInstruct ii)
+                    {
+                        ii.PseudoOp1 = context.Current;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+            if (Reg2Data != -2)
+            {
+                if (NextData(assembleResult , context , AcceptReg2 , Reg2Data , Labels , Texts , IDs , SupressError , out inst.Op2))
+                {
+                }
+                else if (SupressError)
+                {
+                    if (inst is IntermediateInstruct ii)
+                    {
+                        ii.PseudoOp2 = context.Current;
+                    }
+                }
+                else
+                {
+                }
             }
 
-            if (NextData(assembleResult , context , AcceptReg1 , Reg1Data , Labels , Texts , IDs , SupressError , out inst.Op1))
-            {
-            }
-            else if (SupressError)
-            {
-                if (inst is IntermediateInstruct ii)
-                {
-                    ii.PseudoOp1 = context.Current;
-                }
-            }
-            else
-            {
-                return;
-            }
-
-            if (NextData(assembleResult , context , AcceptReg2 , Reg2Data , Labels , Texts , IDs , SupressError , out inst.Op2))
-            {
-            }
-            else if (SupressError)
-            {
-                if (inst is IntermediateInstruct ii)
-                {
-                    ii.PseudoOp2 = context.Current;
-                }
-            }
-            else
-            {
-            }
             if (WillUseEndMark)
             {
                 var __re = context.MatachNext(EndMark);

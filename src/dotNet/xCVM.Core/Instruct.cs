@@ -134,6 +134,18 @@ namespace xCVM.Core
         /// </summary>
         rescp = 0x051,
         /// <summary>
+        /// malloc $register_contains_size $register_to_store_pointer
+        /// </summary>
+        malloc=0x052,
+        /// <summary>
+        /// realloc $register_contain_original_pointer $register_contains_new_size $register_to_store_pointer
+        /// </summary>
+        realloc = 0x053,
+        /// <summary>
+        /// free $register_contains_the_pointer $register_to_store_result
+        /// </summary>
+        free=0x054,
+        /// <summary>
         /// wf - word, first (first 4 bytes)
         /// </summary>
         andwf = 0x0045,

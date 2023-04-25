@@ -28,6 +28,10 @@ namespace xCVMc.Data
             };
             assemblerDefinition.Definitions = new List<InstructionDefinition>
             {
+                new InstructionDefinition{ Name="malloc",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name="realloc",  ID=(int)Inst.realloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="free",  ID=(int)Inst.free, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
+
                 new InstructionDefinition{ Name="add",  ID=(int)Inst.add, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="addi", ID=(int)Inst.addi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="sub",  ID=(int)Inst.sub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
