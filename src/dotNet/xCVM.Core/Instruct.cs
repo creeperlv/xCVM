@@ -136,15 +136,15 @@ namespace xCVM.Core
         /// <summary>
         /// malloc $register_contains_size $register_to_store_pointer
         /// </summary>
-        malloc=0x052,
+        malloc=0x05B,
         /// <summary>
         /// realloc $register_contain_original_pointer $register_contains_new_size $register_to_store_pointer
         /// </summary>
-        realloc = 0x053,
+        realloc = 0x05C,
         /// <summary>
         /// free $register_contains_the_pointer $register_to_store_result
         /// </summary>
-        free=0x054,
+        free=0x05D,
         /// <summary>
         /// wf - word, first (first 4 bytes)
         /// </summary>

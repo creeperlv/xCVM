@@ -127,8 +127,8 @@ namespace xCVM.Core
                             }
                 if (!Pass)
                 {
-
-                    return null;
+                    //Should throw error.
+                    return xCVMModule;
                 }
             }
             {
@@ -217,7 +217,7 @@ namespace xCVM.Core
     }
     public class ExternStruct
     {
-        public string Name;
+        public string Name="";
         public bool RuntimeStruct;
         public Dictionary<int , DataType> Fields = new Dictionary<int , DataType>();
         public void WriteToStream(Stream stream)
@@ -289,9 +289,9 @@ namespace xCVM.Core
     }
     public class ExternFunction
     {
-        public string Name;
+        public string Name= "";
         public int Label;
-        public DataType ReturnType;
+        public DataType ReturnType = new DataType { Type = -1 };
         public Dictionary<int , DataType> Registers = new Dictionary<int , DataType>();
         public void WriteToStream(Stream stream)
         {
