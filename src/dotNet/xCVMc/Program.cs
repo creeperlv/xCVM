@@ -307,6 +307,11 @@ namespace xCVM.Compiler
                 else
                 {
                     xCVMModule = result.Result;
+                    if(arguments.ResourceFile != null)
+                    {
+                        var res=xCVMResource.FromStream(File.Open(arguments.ResourceFile , FileMode.Open));
+                        xCVMModule.xCVMResource = res;
+                    }
                 }
                 if (arguments.Output == "STDOUT" || arguments.Output == "null")
                 {
@@ -388,6 +393,7 @@ namespace xCVM.Compiler
         public string Output = "STDOUT";
         public string UseAlternativeDefinition = "DEFAULT";
         public string OutDefinition = null;
+        public string ResourceFile = null;
         public bool IgnoreError;
         public bool ShowHelp;
         public bool VersionInfo;
@@ -418,6 +424,10 @@ namespace xCVM.Compiler
                     case "-D":
                     case "--definition":
                         mode = 2;
+                        break;
+                    case "-R":
+                    case "--resource":
+                        mode = 4;
                         break;
                     case "-E":
                     case "--export-definition":
@@ -463,6 +473,12 @@ namespace xCVM.Compiler
                                 case 3:
                                     {
                                         arguments.OutDefinition = item;
+                                        mode = 0;
+                                    }
+                                    break;
+                                case 4:
+                                    {
+                                        arguments.ResourceFile = item;
                                         mode = 0;
                                     }
                                     break;
