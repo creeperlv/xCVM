@@ -512,7 +512,7 @@ namespace xCVM.Core
                         int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
                         int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
                         int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(MemoryBlocks.REALLOC(OP0,OP1)).CopyTo(Registers.data , op2);
+                        BitConverter.GetBytes(MemoryBlocks.REALLOC(OP0 , OP1)).CopyTo(Registers.data , op2);
                     }
                     break;
                 case (int)Inst.free:
@@ -520,6 +520,25 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
                         int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
                         MemoryBlocks.FREE(OP0);
+                    }
+                    break;
+                case (int)Inst.lwr:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
+                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
+                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        int OP2 = BitConverter.ToInt32(Registers.data [ op2..(op2 + Constants.int_size) ]);
+                        MemoryBlocks.Datas [ OP1 ].data [ (OP2 * RegisterSize)..(OP2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
+                    }
+                    break;
+                case (int)Inst.lwi:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
+                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
+                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        MemoryBlocks.Datas [ OP1 ].data [ (op2 * RegisterSize)..(op2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
                 case (int)ManagedExt.mcall:

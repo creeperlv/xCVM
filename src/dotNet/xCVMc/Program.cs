@@ -189,9 +189,9 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-D" },
                     new Term { Content = "|" },
@@ -202,10 +202,31 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Use another xCVM assembler definition." },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
+                Words = new List<Term> {
+                    new Term { Content = "-R" },
+                    new Term { Content = "|" },
+                    new Term { Content = "--resource" },
+                    new Term { Content = "\t" },
+                    new Term { Content = "file_of_resource" },
+                }
+            });
+            Shell.Say(new Sentence
+            {
+                EndWithNewLine = true ,
+                Intend = 2 ,
+                Words = new List<Term> {
+                    new Term { Content = "Specify which resource file to combine." },
                 }
             });
             Shell.Say(new Sentence
