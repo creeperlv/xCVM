@@ -136,7 +136,7 @@ namespace xCVM.Core
         /// <summary>
         /// malloc $register_contains_size $register_to_store_pointer
         /// </summary>
-        malloc=0x05B,
+        malloc = 0x05B,
         /// <summary>
         /// realloc $register_contain_original_pointer $register_contains_new_size $register_to_store_pointer
         /// </summary>
@@ -144,49 +144,46 @@ namespace xCVM.Core
         /// <summary>
         /// free $register_contains_the_pointer $register_to_store_result
         /// </summary>
-        free=0x05D,
+        free = 0x05D,
         /// <summary>
-        /// wf - word, first (first 4 bytes)
+        /// AND Word full Register
+        /// andw $L $R $Save
         /// </summary>
-        andwf = 0x0045,
-        orwf = 0x0045,
-        xorwf = 0x0046,
-        notwf = 0x0048,
+        andwr = 0x0045,
+        /// <summary>
+        /// OR Word full Register
+        /// orwr $L $R $Save
+        /// </summary>
+        orwr = 0x0045,
+        xorwr = 0x0046,
+        notwr = 0x0048,
         /// <summary>
         /// ws - word, second (second 4 bytes)
         /// </summary>
-        andws = 0x0049,
-        orws = 0x004A,
-        xorws = 0x004B,
-        notws = 0x004C,
-        andow = 0x004D,
-        orow = 0x004E,
-        xorow = 0x004F,
-        notow = 0x0050,
+        andwi = 0x0049,
+        orwi = 0x004A,
+        xorwi = 0x004B,
+        notwi = 0x004C,
         /// <summary>
-        /// Load word first.
+        /// Load Word full Register.
+        /// lwr $register_save_value $register_to_memory $register_to_offset
         /// </summary>
-        lwf = 0x0060,
+        lwr = 0x0060,
         /// <summary>
-        /// Load word second
+        /// Load Word Immediate
+        /// lwi $register_save_value $register_to_memory offset
         /// </summary>
-        lws = 0x0061,
+        lwi = 0x0061,
         /// <summary>
-        /// Save word first
+        /// Save word full Register
+        /// swr $register_read_value $register_to_memory $register_to_offset
         /// </summary>
-        swf = 0x0064,
+        swr = 0x0064,
         /// <summary>
-        /// Save word second
+        /// Save word Immediate
+        /// swi $register_read_value $register_to_memory offset
         /// </summary>
-        sws = 0x0065,
-        /// <summary>
-        /// Load octal words.
-        /// </summary>
-        low = 0x0068,
-        /// <summary>
-        /// Save octal words.
-        /// </summary>
-        sow = 0x0069,
+        swi = 0x0065,
 
     }
 }

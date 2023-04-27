@@ -501,10 +501,25 @@ namespace xCVM.Core
                     {
                         int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
                         int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
+                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
+                        BitConverter.GetBytes(MemoryBlocks.MALLOC(OP0)).CopyTo(Registers.data , op1);
+                    }
+                    break;
+                case (int)Inst.realloc:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
                         int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
                         int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
                         int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-
+                        BitConverter.GetBytes(MemoryBlocks.REALLOC(OP0,OP1)).CopyTo(Registers.data , op2);
+                    }
+                    break;
+                case (int)Inst.free:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
+                        MemoryBlocks.FREE(OP0);
                     }
                     break;
                 case (int)ManagedExt.mcall:
@@ -573,5 +588,30 @@ namespace xCVM.Core
     public class xCVMemBlock
     {
         public Dictionary<int , xCVMem> Datas = new Dictionary<int , xCVMem>();
+        public int MALLOC(int Size)
+        {
+            int K = Datas.Count + 1;
+            Datas.Add(K , new xCVMem(new byte [ Size ]));
+            return K;
+        }
+        public void FREE(int Key)
+        {
+            if (Datas.ContainsKey(Key))
+            {
+                Datas.Remove(Key);
+            }
+        }
+        public int REALLOC(int Key , int NewSize)
+        {
+            var newD = new xCVMem(new byte [ NewSize ]);
+            if (!Datas.ContainsKey(Key)) return 0;
+            var old = Datas [ Key ];
+            var L = Math.Min(old.data.Length , NewSize);
+            for (int i = 0 ; i < L ; i++)
+            {
+                newD.data [ i ] = old.data [ i ];
+            }
+            return Key;
+        }
     }
 }
