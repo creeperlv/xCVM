@@ -541,6 +541,40 @@ namespace xCVM.Core
                         MemoryBlocks.Datas [ OP1 ].data [ (op2 * RegisterSize)..(op2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
+                case (int)Inst.swr:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
+                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
+                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
+                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        int OP2 = BitConverter.ToInt32(Registers.data [ op2..(op2 + Constants.int_size) ]);
+                        Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(MemoryBlocks.Datas [ OP1 ].data , OP2);
+                    }
+                    break;
+                case (int)Inst.swi:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
+                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
+                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
+                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(MemoryBlocks.Datas [ OP1 ].data , op2);
+                    }
+                    break;
+                case (int)Inst.jmp:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        PC = op0;
+                    }
+                    break;
+                case (int)Inst.jmpr:
+                    {
+                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
+                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
+                        PC = OP0;
+                    }
+                    break;
                 case (int)ManagedExt.mcall:
                     {
 
@@ -550,13 +584,13 @@ namespace xCVM.Core
                     break;
             }
         }
+        int PC = 0;
         public void Run()
         {
             if (program == null) return;
             while (true)
             {
                 byte [ ] PCbytes = Registers.data [ 0..3 ];
-                int PC = 0;
 #if UNSAFE
                 unsafe
                 {

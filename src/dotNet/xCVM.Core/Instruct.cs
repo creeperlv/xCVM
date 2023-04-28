@@ -123,11 +123,33 @@ namespace xCVM.Core
 
         lcmp = 0x0059,
         lcmpi = 0x005A,
-
-        jump = 0x0040, ret = 0x0041, cvt_sf_i = 0x0030, cvt_i_sf = 0x0031, cvt_df_i = 0x0032, cvt_i_df = 0x0033,
+        /// <summary>
+        /// Jump to an absolute instruct.
+        /// jmp value
+        /// </summary>
+        jmp = 0x0040,
+        /// <summary>
+        /// Jump to an absolute instruct which is in the register.
+        /// jmpr $register
+        /// </summary>
+        jmpr = 0x0066,
+        /// <summary>
+        /// IFJump
+        /// ifj $condition value
+        /// </summary>
+        ifj= 0x0067,
+        /// <summary>
+        /// IFJump(Register)
+        /// ifjr $condition $pointer
+        /// </summary>
+        ifjr= 0x0068,
+        ret = 0x0041,
+        cvt_sf_i = 0x0030, cvt_i_sf = 0x0031, cvt_df_i = 0x0032, cvt_i_df = 0x0033,
         sqrt = 0x000B, fsqrt_s = 0x001B, fsqrt_d = 0x002B,
 
-        call = 0x0042, mv = 0x0043, syscall = 0x0044,
+        call = 0x0042, 
+        mv = 0x0043,
+        syscall = 0x0044,
         /// <summary>
         /// Copy Resource to new memory area.
         /// rescp resource_type:TEXT|XCVMRES ID $ReciverRegister

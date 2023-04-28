@@ -14,6 +14,7 @@ namespace xCVMc.Data
                 { "NULL", "0" },
                 { "null", "0" },
                 { "stdout", "1" },
+                { "mainstack", "1" },
             };
             assemblerDefinition.PredefinedTypeMapping = new Dictionary<string , int>
             {
@@ -30,6 +31,8 @@ namespace xCVMc.Data
             };
             assemblerDefinition.Definitions = new List<InstructionDefinition>
             {
+                new InstructionDefinition{ Name="jmp",  ID=(int)Inst.jmp, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
+                new InstructionDefinition{ Name="jmpr",  ID=(int)Inst.jmpr, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name="malloc",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
                 new InstructionDefinition{ Name="realloc",  ID=(int)Inst.realloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="free",  ID=(int)Inst.free, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
