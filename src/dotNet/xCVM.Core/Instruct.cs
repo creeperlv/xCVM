@@ -168,6 +168,10 @@ namespace xCVM.Core
         /// </summary>
         free = 0x05D,
         /// <summary>
+        /// mlen $pointer_to_memory $register_to_store_len
+        /// </summary>
+        mlen=0x05E,
+        /// <summary>
         /// AND Word full Register
         /// andw $L $R $Save
         /// </summary>

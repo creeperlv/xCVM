@@ -19,13 +19,26 @@ namespace xCVM.Core
         xCVMemBlock MemoryBlocks;
         ManagedMem ManagedMem;
         xCVMOption xCVMOption;
-        public xCVMCore(xCVMOption xCVMOption)
+        public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories)
         {
             this.xCVMOption = xCVMOption;
             RegisterSize = xCVMOption.RegisterSize;
             Registers = new xCVMem() { data = new byte [ xCVMOption.RegisterCount * xCVMOption.RegisterSize ] };
             MemoryBlocks = new xCVMemBlock();
             ManagedMem = new ManagedMem();
+            if (PredefinedMemories != null)
+            {
+                MemoryBlocks = PredefinedMemories;
+            }
+            else
+            {
+                MemoryBlocks = new xCVMemBlock();
+                InitMemory();
+            }
+        }
+        void InitMemory()
+        {
+            MemoryBlocks.MALLOC(10,0);
         }
         public void Execute(Instruct instruct)
         {
@@ -641,10 +654,11 @@ namespace xCVM.Core
     public class xCVMemBlock
     {
         public Dictionary<int , xCVMem> Datas = new Dictionary<int , xCVMem>();
-        public int MALLOC(int Size)
+        public int MALLOC(int Size , int ForceKey = -1)
         {
-            int K = Datas.Count + 1;
-            Datas.Add(K , new xCVMem(new byte [ Size ]));
+            var mem = new xCVMem(new byte [ Size + 1 ]);
+            var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
+            Datas.Add(K , mem);
             return K;
         }
         public void FREE(int Key)
