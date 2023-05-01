@@ -16,6 +16,7 @@ namespace xCVMc.Data
                 { "stdout", "1" },
                 { "retv", "0" },
                 { "p_ms", "1" },
+                { "p_ag", "2" },
                 { "mainstack", "0" },
             };
             assemblerDefinition.PredefinedTypeMapping = new Dictionary<string , int>

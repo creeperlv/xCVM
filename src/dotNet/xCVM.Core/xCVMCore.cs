@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -598,6 +599,11 @@ namespace xCVM.Core
             }
         }
         int PC = 0;
+        public void Load(xCVMModule module)
+        {
+            program = new xCVMRTProgram();
+            program.program=module;
+        }
         public void Run()
         {
             if (program == null) return;
