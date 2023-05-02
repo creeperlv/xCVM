@@ -2,11 +2,11 @@
 
 namespace xCVM.Core.CompilerServices
 {
-    public class CompileError
+    public class OperationError
     {
         public Segment? Segment;
 
-        public CompileError(Segment? binded, string? msg = "")
+        public OperationError(Segment? binded, string? msg = "")
         {
             Segment = binded;
             _msg = msg;
@@ -19,7 +19,7 @@ namespace xCVM.Core.CompilerServices
             return Message ?? "";
         }
     }
-    public class VersionFormatError : CompileError
+    public class VersionFormatError : OperationError
     {
         public VersionFormatError(Segment? binded) : base(binded, null)
         {
@@ -27,14 +27,14 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to System.Version.";
     }
-    public class UnexpectedEndOfFileError : CompileError
+    public class UnexpectedEndOfFileError : OperationError
     {
         public UnexpectedEndOfFileError(Segment? binded) : base(binded, null)
         {
         }
         public override string Message => $"End at unexpected location.";
     }
-    public class IntParseError : CompileError
+    public class IntParseError : OperationError
     {
         public IntParseError(Segment? binded) : base(binded, null)
         {
@@ -42,7 +42,7 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to Int32.";
     }
-    public class UIntParseError : CompileError
+    public class UIntParseError : OperationError
     {
         public UIntParseError(Segment? binded) : base(binded, null)
         {
@@ -50,7 +50,7 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to unsigned int32.";
     }
-    public class LongParseError : CompileError
+    public class LongParseError : OperationError
     {
         public LongParseError(Segment? binded) : base(binded, null)
         {
@@ -58,7 +58,7 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to Int64.";
     }
-    public class FloatParseError : CompileError
+    public class FloatParseError : OperationError
     {
         public FloatParseError(Segment? binded) : base(binded, null)
         {
@@ -66,7 +66,7 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to Single.";
     }
-    public class DoubleParseError : CompileError
+    public class DoubleParseError : OperationError
     {
         public DoubleParseError(Segment? binded) : base(binded, null)
         {
@@ -74,7 +74,7 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Cannot convert content to Single.";
     }
-    public class RegisterFormatError : CompileError
+    public class RegisterFormatError : OperationError
     {
         public RegisterFormatError(Segment? binded) : base(binded, null)
         {
@@ -82,28 +82,28 @@ namespace xCVM.Core.CompilerServices
 
         public override string Message => $"Should start with $.";
     }
-    public class UnknownInstructionError : CompileError
+    public class UnknownInstructionError : OperationError
     {
         public UnknownInstructionError(Segment? binded) : base(binded, null)
         {
         }
         public override string Message => $"Unknown instruction.";
     }
-    public class UnknownParameterError : CompileError
+    public class UnknownParameterError : OperationError
     {
         public UnknownParameterError(Segment? binded) : base(binded, null)
         {
         }
         public override string Message => $"Parameter cannot be converted.";
     }
-    public class MustEndWithSemicolonError : CompileError
+    public class MustEndWithSemicolonError : OperationError
     {
         public MustEndWithSemicolonError(Segment? binded) : base(binded, null)
         {
         }
         public override string Message => $"Must end with semicolon error.";
     }
-    public class MustEndWithSpecifiedEndMarkError : CompileError
+    public class MustEndWithSpecifiedEndMarkError : OperationError
     {
         string end_mark;
         public MustEndWithSpecifiedEndMarkError(Segment? binded, string end_mark) : base(binded, null)
@@ -112,14 +112,14 @@ namespace xCVM.Core.CompilerServices
         }
         public override string Message => $"Must end with {end_mark}.";
     }
-    public class AssemblerNotDefinedError : CompileError
+    public class AssemblerNotDefinedError : OperationError
     {
         public AssemblerNotDefinedError(Segment? binded) : base(binded, null)
         {
         }
         public override string Message => $"Assembler Not Defined.";
     }
-    public class ExpectAMarkError : CompileError
+    public class ExpectAMarkError : OperationError
     { 
         string __mark;
         public ExpectAMarkError(Segment? binded,string mark) : base(binded, null)

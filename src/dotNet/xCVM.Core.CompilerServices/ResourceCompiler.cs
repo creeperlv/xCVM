@@ -12,10 +12,10 @@ namespace xCVM.Core.CompilerServices
 
     public class ResourceCompiler
     {
-        public CompileResult<ResourceDevDef> CompileDevDefinition(ResourceCompilerOptions options, params FileInfo[] MapFiles)
+        public OperationResult<ResourceDevDef> CompileDevDefinition(ResourceCompilerOptions options, params FileInfo[] MapFiles)
         {
             ResourceDevDef DevDef = new ResourceDevDef();
-            var result = new CompileResult<ResourceDevDef>(DevDef);
+            var result = new OperationResult<ResourceDevDef>(DevDef);
             ResourceDictionary resourceDictionary = new ResourceDictionary();
             foreach (var item in MapFiles)
             {
@@ -35,14 +35,14 @@ namespace xCVM.Core.CompilerServices
             }
             return result;
         }
-        public CompileResult<ResourceCompilationResult> Compile(ResourceCompilerOptions options, params FileInfo[] MapFiles)
+        public OperationResult<ResourceCompilationResult> Compile(ResourceCompilerOptions options, params FileInfo[] MapFiles)
         {
             ResourceDevDef Definition = new ResourceDevDef();
             CompiledxCVMResource compiled_res = new CompiledxCVMResource();
             ResourceDictionary resourceDictionary = new ResourceDictionary();
 
             var cresult = new ResourceCompilationResult(Definition, compiled_res);
-            var result = new CompileResult<ResourceCompilationResult>(cresult);
+            var result = new OperationResult<ResourceCompilationResult>(cresult);
             foreach (var item in MapFiles)
             {
                 var compileResult = ResourceDictionary.FromTextReader(item.OpenText(), item.Directory, item.Name);
@@ -128,10 +128,10 @@ namespace xCVM.Core.CompilerServices
                 }
             }
         }
-        public static CompileResult<ResourceDevDef> FromStream(TextReader stream, string ID)
+        public static OperationResult<ResourceDevDef> FromStream(TextReader stream, string ID)
         {
             ResourceDevDef def = new ResourceDevDef();
-            CompileResult<ResourceDevDef> result = new CompileResult<ResourceDevDef>(def);
+            OperationResult<ResourceDevDef> result = new OperationResult<ResourceDevDef>(def);
             ResourceManifestParser parser = new ResourceManifestParser();
             SegmentContext context = new SegmentContext(parser.Parse(stream.ReadToEnd(), false, ID));
             while (true)

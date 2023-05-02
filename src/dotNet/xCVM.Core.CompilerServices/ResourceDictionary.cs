@@ -31,7 +31,7 @@ namespace xCVM.Core.CompilerServices
                 }
             }
         }
-        public static CompileResult<ResourceDictionary> FromTextReader(TextReader reader, DirectoryInfo Parent, string? ID = null)
+        public static OperationResult<ResourceDictionary> FromTextReader(TextReader reader, DirectoryInfo Parent, string? ID = null)
         {
             ResourceManifestParser parser = new ResourceManifestParser();
             var content = reader.ReadToEnd();
@@ -40,10 +40,10 @@ namespace xCVM.Core.CompilerServices
             var result = Parse(context, Parent);
             return result;
         }
-        static CompileResult<ResourceDictionary> Parse(SegmentContext context, DirectoryInfo Parent)
+        static OperationResult<ResourceDictionary> Parse(SegmentContext context, DirectoryInfo Parent)
         {
             ResourceDictionary dictionary = new ResourceDictionary();
-            CompileResult<ResourceDictionary> result = new CompileResult<ResourceDictionary>(dictionary);
+            OperationResult<ResourceDictionary> result = new OperationResult<ResourceDictionary>(dictionary);
             while (true)
             {
                 if (context.ReachEnd)
