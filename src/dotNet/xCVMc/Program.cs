@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using System.Text.Json;
 using xCVM.Core;
 using xCVM.Core.CompilerServices;
 using xCVM.ShellUtilities;
@@ -13,15 +13,15 @@ namespace xCVM.Compiler
         {
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 0,
+                EndWithNewLine = true ,
+                Intend = 0 ,
                 Words = new List<Term> {
                     new Term { Content = "Extensible Common Virtual Machine Compiler" } }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 0,
+                EndWithNewLine = true ,
+                Intend = 0 ,
                 Words = new List<Term> {
                     new Term { Content = "CLI:" },
                     new Term { Content = typeof(Arguments).Assembly.GetName().Version+"", Color= ConsoleColor.Green },
@@ -29,8 +29,8 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 0,
+                EndWithNewLine = true ,
+                Intend = 0 ,
                 Words = new List<Term> {
                     new Term { Content = "xCVM.Core:" },
                     new Term { Content = typeof(xCVMCore).Assembly.GetName().Version+"", Color= ConsoleColor.Green },
@@ -43,8 +43,8 @@ namespace xCVM.Compiler
 
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 0,
+                EndWithNewLine = true ,
+                Intend = 0 ,
                 Words = new List<Term> {
                     new Term { Content = "Extensible Common Virtual Machine Resource Compiler v" },
                     new Term { Content = typeof(Arguments).Assembly.GetName().Version+"", Color= ConsoleColor.Green },
@@ -52,10 +52,10 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 0,
-                PaddingTop = 1,
-                PaddingBottom = 1,
+                EndWithNewLine = true ,
+                Intend = 0 ,
+                PaddingTop = 1 ,
+                PaddingBottom = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "Usage: " },
                     new Term { Content = "xCVMc [options...] input_file..." },
@@ -63,17 +63,17 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 0,
+                EndWithNewLine = true ,
+                Intend = 0 ,
                 Words = new List<Term> {
                     new Term { Content = "Options:" },
                 }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-o" },
                     new Term { Content = "|" },
@@ -84,17 +84,17 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Specify where to write the produced file. Using null or not specifying will write the result to the standard output." },
                 }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-V" },
                     new Term { Content = "\t" },
@@ -103,17 +103,17 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Print the version info." },
                 }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-J" },
                     new Term { Content = "\t" },
@@ -122,17 +122,17 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Output as json." },
                 }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-B" },
                     new Term { Content = "\t" },
@@ -141,17 +141,17 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Output as binary. (Used by default)" },
                 }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-H" },
                     new Term { Content = "\t" },
@@ -160,17 +160,17 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Output as binary, in hex format." },
                 }
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-d" },
                     new Term { Content = "\t" },
@@ -181,8 +181,8 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Will produce the development definition. It is enabled by default." },
                 }
@@ -231,9 +231,9 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 1,
-                PaddingTop = 1,
+                EndWithNewLine = true ,
+                Intend = 1 ,
+                PaddingTop = 1 ,
                 Words = new List<Term> {
                     new Term { Content = "-E" },
                     new Term { Content = "|" },
@@ -244,14 +244,14 @@ namespace xCVM.Compiler
             });
             Shell.Say(new Sentence
             {
-                EndWithNewLine = true,
-                Intend = 2,
+                EndWithNewLine = true ,
+                Intend = 2 ,
                 Words = new List<Term> {
                     new Term { Content = "Export current xCVM assembler definition." },
                 }
             });
         }
-        public static void Main(string[] args)
+        public static void Main(string [ ] args)
         {
             Arguments arguments = Arguments.FromStringArray(args);
             if (arguments.ShowHelp)
@@ -280,7 +280,10 @@ namespace xCVM.Compiler
                 }
                 else
                 {
-                    xCVMAssembler = new xCVMAssembler(JsonConvert.DeserializeObject<AssemblerDefinition>(File.ReadAllText(arguments.UseAlternativeDefinition)));
+
+                    xCVMAssembler = new xCVMAssembler(JsonSerializer.Deserialize<AssemblerDefinition>(
+                                                      File.ReadAllText(arguments.UseAlternativeDefinition) ,
+                                                      SourceGenerationContext.Default.AssemblerDefinition));
                 }
                 if (arguments.OutDefinition != null)
                 {
@@ -291,7 +294,7 @@ namespace xCVM.Compiler
                         {
                             textWriter = new StreamWriter(File.OpenWrite(arguments.OutDefinition));
                         }
-                        textWriter.Write(JsonConvert.SerializeObject(xCVMAssembler.AssemblerDefinition, Formatting.Indented));
+                        textWriter.Write(JsonSerializer.Serialize(xCVMAssembler.AssemblerDefinition , SourceGenerationContext.Default.AssemblerDefinition));
                         if (arguments.OutDefinition != "STDOUT" && arguments.OutDefinition != "null") textWriter.Close();
                     }
                     return;
@@ -328,9 +331,9 @@ namespace xCVM.Compiler
                 else
                 {
                     xCVMModule = result.Result;
-                    if(arguments.ResourceFile != null)
+                    if (arguments.ResourceFile != null)
                     {
-                        var res=xCVMResource.FromStream(File.Open(arguments.ResourceFile , FileMode.Open));
+                        var res = xCVMResource.FromStream(File.Open(arguments.ResourceFile , FileMode.Open));
                         xCVMModule.xCVMResource = res;
                     }
                 }
@@ -355,7 +358,7 @@ namespace xCVM.Compiler
                             break;
                         case OutputType.Json:
                             {
-                                Console.Out.WriteLine(JsonConvert.SerializeObject(xCVMModule, Formatting.Indented));
+                                Console.Out.WriteLine(JsonSerializer.Serialize(xCVMModule , SourceGenerationContext.Default.xCVMModule));
                             }
                             break;
                         default:
@@ -394,7 +397,7 @@ namespace xCVM.Compiler
                             break;
                         case OutputType.Json:
                             {
-                                File.WriteAllText(arguments.Output, JsonConvert.SerializeObject(xCVMModule, Formatting.Indented));
+                                File.WriteAllText(arguments.Output , JsonSerializer.Serialize(xCVMModule , typeof(xCVMModule) , SourceGenerationContext.Default));
                             }
                             break;
                         default:
@@ -419,13 +422,13 @@ namespace xCVM.Compiler
         public bool ShowHelp;
         public bool VersionInfo;
         public OutputType OutputType = OutputType.Binary;
-        public static Arguments FromStringArray(string[] strings)
+        public static Arguments FromStringArray(string [ ] strings)
         {
             Arguments arguments = new Arguments();
             int mode = 0;
-            for (int i = 0; i < strings.Length; i++)
+            for (int i = 0 ; i < strings.Length ; i++)
             {
-                var item = strings[i];
+                var item = strings [ i ];
                 switch (item)
                 {
                     case "-?":

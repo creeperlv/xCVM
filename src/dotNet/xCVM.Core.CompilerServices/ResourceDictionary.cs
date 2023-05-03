@@ -58,7 +58,7 @@ namespace xCVM.Core.CompilerServices
                 //context.GoNext();
                 if (Key == null) break;
                 if (Key == "") { context.GoNext(); continue; }
-                var match_result = context.MatachNext("=");
+                var match_result = context.MatchNext("=");
                 if (match_result == MatchResult.Match)
                 {
                     context.GoNext();

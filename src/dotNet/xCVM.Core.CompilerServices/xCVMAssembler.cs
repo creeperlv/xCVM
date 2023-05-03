@@ -275,7 +275,7 @@ namespace xCVM.Core.CompilerServices
                                         module.ModuleMetadata.ModuleName = context.Current!.content;
                                         if (WillUseEndMark)
                                         {
-                                            if (context.MatachNext(EndMark) != MatchResult.Match)
+                                            if (context.MatchNext(EndMark) != MatchResult.Match)
                                             {
                                                 assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
@@ -291,7 +291,7 @@ namespace xCVM.Core.CompilerServices
                                         module.ModuleMetadata.Author = context.Current!.content;
                                         if (WillUseEndMark)
                                         {
-                                            if (context.MatachNext(EndMark) != MatchResult.Match)
+                                            if (context.MatchNext(EndMark) != MatchResult.Match)
                                             {
                                                 assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
@@ -307,7 +307,7 @@ namespace xCVM.Core.CompilerServices
                                         module.ModuleMetadata.Copyright = context.Current!.content;
                                         if (WillUseEndMark)
                                         {
-                                            if (context.MatachNext(EndMark) != MatchResult.Match)
+                                            if (context.MatchNext(EndMark) != MatchResult.Match)
                                             {
                                                 assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
@@ -323,7 +323,7 @@ namespace xCVM.Core.CompilerServices
                                         module.ModuleMetadata.Description = context.Current!.content;
                                         if (WillUseEndMark)
                                         {
-                                            if (context.MatachNext(EndMark) != MatchResult.Match)
+                                            if (context.MatchNext(EndMark) != MatchResult.Match)
                                             {
                                                 assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
@@ -342,7 +342,7 @@ namespace xCVM.Core.CompilerServices
                                         else assembleResult.AddError(new VersionFormatError(context.Current));
                                         if (WillUseEndMark)
                                         {
-                                            if (context.MatachNext(EndMark) != MatchResult.Match)
+                                            if (context.MatchNext(EndMark) != MatchResult.Match)
                                             {
                                                 assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
@@ -361,7 +361,7 @@ namespace xCVM.Core.CompilerServices
                                         else assembleResult.AddError(new VersionFormatError(context.Current));
                                         if (WillUseEndMark)
                                         {
-                                            if (context.MatachNext(EndMark) != MatchResult.Match)
+                                            if (context.MatchNext(EndMark) != MatchResult.Match)
                                             {
                                                 assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                             }
@@ -386,7 +386,7 @@ namespace xCVM.Core.CompilerServices
                                 module.Texts.Add(result , context.Current.content);
                                 if (WillUseEndMark)
                                 {
-                                    if (context.MatachNext(EndMark) != MatchResult.Match)
+                                    if (context.MatchNext(EndMark) != MatchResult.Match)
                                     {
                                         assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                     }
@@ -416,7 +416,7 @@ namespace xCVM.Core.CompilerServices
                                     module.Texts.Add(ID , context.Current.content);
                                     if (WillUseEndMark)
                                     {
-                                        if (context.MatachNext(EndMark) != MatchResult.Match)
+                                        if (context.MatchNext(EndMark) != MatchResult.Match)
                                         {
                                             assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                         }
@@ -447,7 +447,7 @@ namespace xCVM.Core.CompilerServices
                                 module.IDs.Add(result , context.Current.content);
                                 if (WillUseEndMark)
                                 {
-                                    if (context.MatachNext(EndMark) != MatchResult.Match)
+                                    if (context.MatchNext(EndMark) != MatchResult.Match)
                                     {
                                         assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                     }
@@ -477,7 +477,7 @@ namespace xCVM.Core.CompilerServices
                                     module.IDs.Add(ID , context.Current.content);
                                     if (WillUseEndMark)
                                     {
-                                        if (context.MatachNext(EndMark) != MatchResult.Match)
+                                        if (context.MatchNext(EndMark) != MatchResult.Match)
                                         {
                                             assembleResult.AddError(new MustEndWithSpecifiedEndMarkError(context.Current , EndMark));
                                         }
@@ -702,7 +702,7 @@ namespace xCVM.Core.CompilerServices
                                        Dictionary<string , int> IDs ,
                                        int _IC)
         {
-            var a = context.MatachCollectionMarchReturnContentable(AssemblerDefinition!.Definitions ,
+            var a = context.MatchCollectionMarchReturnContentable(AssemblerDefinition!.Definitions ,
                                                                    AssemblerDefinition!.CaseSensitiveInstructions);
             if (a.Item1 == MatchResult.Match)
             {
@@ -730,7 +730,7 @@ namespace xCVM.Core.CompilerServices
             }
             else if (a.Item1 == MatchResult.Mismatch)
             {
-                var r = context.MatachNext(":" , true);
+                var r = context.MatchNext(":" , true);
                 if (r == MatchResult.Match)
                 {
                     string name = context.Current.Prev.content;
@@ -833,7 +833,7 @@ namespace xCVM.Core.CompilerServices
 
             if (WillUseEndMark)
             {
-                var __re = context.MatachNext(EndMark);
+                var __re = context.MatchNext(EndMark);
                 if (__re == MatchResult.Match)
                 {
                     module.Instructions.Add(inst);

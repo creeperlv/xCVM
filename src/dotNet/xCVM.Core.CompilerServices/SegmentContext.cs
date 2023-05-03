@@ -20,7 +20,7 @@ namespace xCVM.Core.CompilerServices
 
         public Segment? Current => _Current;
         public Segment? Last => _Last;
-        public (MatchResult, IContentable?) MatachCollectionMarchReturnContentable(IEnumerable<IContentable> matches , bool CaseSensitive = true)
+        public (MatchResult, IContentable?) MatchCollectionMarchReturnContentable(IEnumerable<IContentable> matches , bool CaseSensitive = true)
         {
             if (CaseSensitive)
             {
@@ -223,7 +223,7 @@ namespace xCVM.Core.CompilerServices
             }
 
         }
-        public MatchResult MatachNext(string Name , bool WillGoBack = true)
+        public MatchResult MatchNext(string Name , bool WillGoBack = true)
         {
             if (GoNext())
             {
