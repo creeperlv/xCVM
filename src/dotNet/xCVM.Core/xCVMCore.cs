@@ -91,6 +91,7 @@ namespace xCVM.Core
                         int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
                         int op1 = BitConverter.ToInt32(instruct.Op1);
                         int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
+                        //Console.WriteLine($"From {Registers.data.Length}, Select from {op0} to {op0 + Constants.int_size}");
                         int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
                         BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data , op2);
                     }
@@ -609,7 +610,7 @@ namespace xCVM.Core
             if (program == null) return;
             while (true)
             {
-                byte [ ] PCbytes = Registers.data [ 0..3 ];
+                //byte [ ] PCbytes = Registers.data [ 0..3 ];
 #if UNSAFE
                 unsafe
                 {
@@ -617,8 +618,9 @@ namespace xCVM.Core
                         PC = *(int*)pc_ptr;
                 }
 #else
-                PC = BitConverter.ToInt32(PCbytes);
+                //PC = BitConverter.ToInt32(PCbytes);
 #endif
+                if(PC>= program.program.Instructions.Count) break;
                 {
                     //Execute instruct.
                     Execute(program.program.Instructions [ PC ]);
@@ -634,11 +636,11 @@ namespace xCVM.Core
                 Registers.data[3] = pc_ptr[3];
                 }
 #else
-                PCbytes = BitConverter.GetBytes(PC);
-                Registers.data [ 0 ] = PCbytes [ 0 ];
-                Registers.data [ 1 ] = PCbytes [ 1 ];
-                Registers.data [ 2 ] = PCbytes [ 2 ];
-                Registers.data [ 3 ] = PCbytes [ 3 ];
+                //PCbytes = BitConverter.GetBytes(PC);
+                //Registers.data [ 0 ] = PCbytes [ 0 ];
+                //Registers.data [ 1 ] = PCbytes [ 1 ];
+                //Registers.data [ 2 ] = PCbytes [ 2 ];
+                //Registers.data [ 3 ] = PCbytes [ 3 ];
 #endif
             }
         }

@@ -45,23 +45,26 @@ namespace xCVM.Core
             int Offset = 0;
             instruct.Operation = BitConverter.ToInt32(bytes [ Offset..(Offset + Constants.int_size) ]);
             Offset += Constants.int_size;
-            int OP_LEN = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
+            int OP_LEN0 = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
             Offset += Constants.short_size;
-            if (OP_LEN > 0)
+            var OP_LEN1 = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
+            Offset += Constants.short_size;
+            var OP_LEN2 = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
+            Offset += Constants.short_size;
+            if (OP_LEN0 > 0)
             {
-                instruct.Op0 = bytes [ Offset..(Offset + OP_LEN) ];
+                instruct.Op0 = bytes [ Offset..(Offset + OP_LEN0) ];
+                Offset+= OP_LEN0;
             }
-            OP_LEN = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
-            Offset += Constants.short_size;
-            if (OP_LEN > 0)
+            if (OP_LEN1 > 0)
             {
-                instruct.Op1 = bytes [ Offset..(Offset + OP_LEN) ];
+                instruct.Op1 = bytes [ Offset..(Offset + OP_LEN1) ];
+                Offset+= OP_LEN1;
             }
-            OP_LEN = BitConverter.ToInt16(bytes [ Offset..(Offset + Constants.short_size) ]);
-            Offset += Constants.short_size;
-            if (OP_LEN > 0)
+            if (OP_LEN2 > 0)
             {
-                instruct.Op2 = bytes [ Offset..(Offset + OP_LEN) ];
+                instruct.Op2 = bytes [ Offset..(Offset + OP_LEN2) ];
+                Offset+= OP_LEN2;
             }
             return instruct;
         }
