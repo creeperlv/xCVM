@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,93 +48,110 @@ namespace xCVM.Core
         byte [ ] VM__BUFFER_4_BYTES;
         byte [ ] VM__BUFFER_8_BYTES;
         byte [ ] VM__BUFFER_16_BYTES;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void WriteBytes(int Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void WriteBytes(uint Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void WriteBytes(float Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void WriteBytes(double Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_8_BYTES , Data);
             VM__BUFFER_8_BYTES.CopyTo(Target , Offset);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void WriteBytes(long Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_8_BYTES , Data);
             VM__BUFFER_8_BYTES.CopyTo(Target , Offset);
         }
-
-        int RegisterToInt32(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        int RegisterToInt32(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToInt32(Registers.data , op_i);
         }
-        float RegisterToSingle(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        float RegisterToSingle(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToSingle(Registers.data , op_i);
         }
-        double RegisterToDouble(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        double RegisterToDouble(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToDouble(Registers.data , op_i);
         }
-        long RegisterToInt64(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        long RegisterToInt64(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToInt64(Registers.data , op_i);
         }
-        uint RegisterToUInt32(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        uint RegisterToUInt32(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToUInt32(Registers.data , op_i);
         }
-        ulong RegisterToUInt64(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        ulong RegisterToUInt64(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToUInt64(Registers.data , op_i);
         }
-        int ImmediateToInt32(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        int ImmediateToInt32(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt32(inst_parameter);
         }
-        long ImmediateToInt64(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        long ImmediateToInt64(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt64(inst_parameter);
         }
-        float ImmediateToSingle(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        float ImmediateToSingle(byte [ ]? inst_parameter)
         {
             return BitConverter.ToSingle(inst_parameter);
         }
-        double ImmediateToDouble(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        double ImmediateToDouble(byte [ ]? inst_parameter)
         {
             return BitConverter.ToDouble(inst_parameter);
         }
-        uint ImmediateToUInt32(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        uint ImmediateToUInt32(byte [ ]? inst_parameter)
         {
             return BitConverter.ToUInt32(inst_parameter);
         }
-        ulong ImmediateToUInt64(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        ulong ImmediateToUInt64(byte [ ]? inst_parameter)
         {
             return BitConverter.ToUInt64(inst_parameter);
         }
-        int ToRegisterOffset(byte [ ] inst_parameter)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        int ToRegisterOffset(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt32(inst_parameter) * RegisterSize;
         }
@@ -352,6 +370,7 @@ namespace xCVM.Core
                         WriteBytes(RegisterToSingle(instruct.Op0!) / ImmediateToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
+
                 case (int)Inst.fadd_d:
                     {
                         WriteBytes(RegisterToDouble(instruct.Op0!) + RegisterToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
@@ -372,6 +391,7 @@ namespace xCVM.Core
                         WriteBytes(RegisterToDouble(instruct.Op0!) / RegisterToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
+
                 case (int)Inst.faddi_d:
                     {
                         WriteBytes(RegisterToDouble(instruct.Op0!) + ImmediateToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
@@ -392,6 +412,7 @@ namespace xCVM.Core
                         WriteBytes(RegisterToDouble(instruct.Op0!) / ImmediateToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
+
                 case (int)Inst.malloc:
                     {
                         int OP0 = RegisterToInt32(instruct.Op0!);
@@ -401,72 +422,58 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.realloc:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        int OP0 = RegisterToInt32(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int op2 = ToRegisterOffset(instruct.Op2);
                         WriteBytes(MemoryBlocks.REALLOC(OP0 , OP1) , Registers.data , op2);
                     }
                     break;
                 case (int)Inst.free:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
+                        int OP0 = RegisterToInt32(instruct.Op0);
                         MemoryBlocks.FREE(OP0);
                     }
                     break;
                 case (int)Inst.lwr:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        int OP2 = BitConverter.ToInt32(Registers.data [ op2..(op2 + Constants.int_size) ]);
+                        int OP1=RegisterToInt32 (instruct.Op1);
+                        int OP2=RegisterToInt32 (instruct.Op2);
+                        int op0=ToRegisterOffset(instruct.Op0);
                         MemoryBlocks.Datas [ OP1 ].data [ (OP2 * RegisterSize)..(OP2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
                 case (int)Inst.lwi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        int op0 = ToRegisterOffset(instruct.Op0);
+                        int op2 = ToRegisterOffset(instruct.Op2);
+                        int OP1 = RegisterToInt32(instruct.Op1);
                         MemoryBlocks.Datas [ OP1 ].data [ (op2 * RegisterSize)..(op2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
                 case (int)Inst.swr:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        int OP2 = BitConverter.ToInt32(Registers.data [ op2..(op2 + Constants.int_size) ]);
+                        int OP0 = RegisterToInt32(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int OP2 = RegisterToInt32(instruct.Op2);
                         Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(MemoryBlocks.Datas [ OP1 ].data , OP2);
                     }
                     break;
                 case (int)Inst.swi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
+                        int op2 = ToRegisterOffset(instruct.Op2);
+                        int OP0 = RegisterToInt32(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
                         Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(MemoryBlocks.Datas [ OP1 ].data , op2);
                     }
                     break;
                 case (int)Inst.jmp:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        PC = op0;
+                        PC = ImmediateToInt32(instruct.Op0);
                     }
                     break;
                 case (int)Inst.jmpr:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        PC = OP0;
+                        PC = RegisterToInt32(instruct.Op0);
                     }
                     break;
                 case (int)ManagedExt.mcall:
