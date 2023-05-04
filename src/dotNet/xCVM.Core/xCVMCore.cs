@@ -27,6 +27,9 @@ namespace xCVM.Core
             Registers = new xCVMem() { data = new byte [ xCVMOption.RegisterCount * xCVMOption.RegisterSize ] };
             MemoryBlocks = new xCVMemBlock();
             ManagedMem = new ManagedMem();
+            VM__BUFFER_4_BYTES = new byte [ 4 ];
+            VM__BUFFER_8_BYTES = new byte [ 8 ];
+            VM__BUFFER_16_BYTES = new byte [ 16 ];
             if (PredefinedMemories != null)
             {
                 MemoryBlocks = PredefinedMemories;
@@ -39,7 +42,100 @@ namespace xCVM.Core
         }
         void InitMemory()
         {
-            MemoryBlocks.MALLOC(10,0);
+            MemoryBlocks.MALLOC(10 , 0);
+        }
+        byte [ ] VM__BUFFER_4_BYTES;
+        byte [ ] VM__BUFFER_8_BYTES;
+        byte [ ] VM__BUFFER_16_BYTES;
+        void WriteBytes(int Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
+        }
+        void WriteBytes(uint Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
+        }
+        void WriteBytes(float Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
+        }
+        void WriteBytes(double Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_8_BYTES , Data);
+            VM__BUFFER_8_BYTES.CopyTo(Target , Offset);
+        }
+        void WriteBytes(long Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_8_BYTES , Data);
+            VM__BUFFER_8_BYTES.CopyTo(Target , Offset);
+        }
+
+        int RegisterToInt32(byte [ ] inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToInt32(Registers.data , op_i);
+        }
+        float RegisterToSingle(byte [ ] inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToSingle(Registers.data , op_i);
+        }
+        double RegisterToDouble(byte [ ] inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToDouble(Registers.data , op_i);
+        }
+        long RegisterToInt64(byte [ ] inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToInt64(Registers.data , op_i);
+        }
+        uint RegisterToUInt32(byte [ ] inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToUInt32(Registers.data , op_i);
+        }
+        ulong RegisterToUInt64(byte [ ] inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToUInt64(Registers.data , op_i);
+        }
+        int ImmediateToInt32(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToInt32(inst_parameter);
+        }
+        long ImmediateToInt64(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToInt64(inst_parameter);
+        }
+        float ImmediateToSingle(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToSingle(inst_parameter);
+        }
+        double ImmediateToDouble(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToDouble(inst_parameter);
+        }
+        uint ImmediateToUInt32(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToUInt32(inst_parameter);
+        }
+        ulong ImmediateToUInt64(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToUInt64(inst_parameter);
+        }
+        int ToRegisterOffset(byte [ ] inst_parameter)
+        {
+            return BitConverter.ToInt32(inst_parameter) * RegisterSize;
         }
         public void Execute(Instruct instruct)
         {
@@ -47,477 +143,260 @@ namespace xCVM.Core
             {
                 case (int)Inst.add:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) + RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.sub:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) - RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.mul:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) * RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.div:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) / RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
                 case (int)Inst.addi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        //Console.WriteLine($"From {Registers.data.Length}, Select from {op0} to {op0 + Constants.int_size}");
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) + ImmediateToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.subi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 - op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) - ImmediateToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.muli:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 * op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) * ImmediateToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.divi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 / op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt32(instruct.Op0!) / ImmediateToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
+
                 case (int)Inst.uadd:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        uint OP1 = BitConverter.ToUInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) + RegisterToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.usub:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        uint OP1 = BitConverter.ToUInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) - RegisterToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.umul:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        uint OP1 = BitConverter.ToUInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) * RegisterToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.udiv:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        uint OP1 = BitConverter.ToUInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) / RegisterToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
                 case (int)Inst.uaddi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        uint op1 = BitConverter.ToUInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) + ImmediateToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.usubi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        uint op1 = BitConverter.ToUInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 - op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) - ImmediateToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.umuli:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        uint op1 = BitConverter.ToUInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 * op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) * ImmediateToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.udivi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        uint op1 = BitConverter.ToUInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        uint OP0 = BitConverter.ToUInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(OP0 / op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt32(instruct.Op0!) / ImmediateToUInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
+
                 case (int)Inst.ladd:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        long OP1 = BitConverter.ToInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) + RegisterToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.lsub:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        long OP1 = BitConverter.ToInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) - RegisterToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.lmul:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        long OP1 = BitConverter.ToInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) * RegisterToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ldiv:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        long OP1 = BitConverter.ToInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) / RegisterToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
 
                 case (int)Inst.laddi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        long op1 = BitConverter.ToInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) + ImmediateToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.lsubi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        long op1 = BitConverter.ToInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 - op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) - ImmediateToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.lmuli:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        long op1 = BitConverter.ToInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 * op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) * ImmediateToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ldivi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        long op1 = BitConverter.ToInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        long OP0 = BitConverter.ToInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 / op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToInt64(instruct.Op0!) / ImmediateToInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
                 case (int)Inst.uladd:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        ulong OP1 = BitConverter.ToUInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) + RegisterToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ulsub:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        ulong OP1 = BitConverter.ToUInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) - RegisterToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ulmul:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        ulong OP1 = BitConverter.ToUInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) * RegisterToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.uldiv:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        ulong OP1 = BitConverter.ToUInt64(Registers.data [ op1..(op1 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) / RegisterToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
 
                 case (int)Inst.uladdi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        ulong op1 = BitConverter.ToUInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 + op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) + ImmediateToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ulsubi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        ulong op1 = BitConverter.ToUInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 - op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) - ImmediateToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ulmuli:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        ulong op1 = BitConverter.ToUInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 * op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) * ImmediateToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.uldivi:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        ulong op1 = BitConverter.ToUInt64(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        ulong OP0 = BitConverter.ToUInt64(Registers.data [ op0..(op0 + Constants.long_size) ]);
-                        BitConverter.GetBytes(OP0 / op1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToUInt64(instruct.Op0!) / ImmediateToUInt64(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
                 case (int)Inst.fadd_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        var OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        var OP1 = BitConverter.ToSingle(Registers.data [ op1..(op1 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) + RegisterToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fsub_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        float OP1 = BitConverter.ToSingle(Registers.data [ op1..(op1 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) - RegisterToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fmul_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        float OP1 = BitConverter.ToSingle(Registers.data [ op1..(op1 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) * RegisterToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fdiv_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        float OP1 = BitConverter.ToSingle(Registers.data [ op1..(op1 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) / RegisterToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
                 case (int)Inst.faddi_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        float OP1 = BitConverter.ToSingle(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) + ImmediateToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fsubi_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        float OP1 = BitConverter.ToSingle(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) - ImmediateToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fmuli_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        float OP1 = BitConverter.ToSingle(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) * ImmediateToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fdivi_s:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        float OP1 = BitConverter.ToSingle(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        float OP0 = BitConverter.ToSingle(Registers.data [ op0..(op0 + Constants.float_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToSingle(instruct.Op0!) / ImmediateToSingle(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fadd_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        var OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        var OP1 = BitConverter.ToDouble(Registers.data [ op1..(op1 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) + RegisterToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fsub_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        double OP1 = BitConverter.ToDouble(Registers.data [ op1..(op1 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) - RegisterToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fmul_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        double OP1 = BitConverter.ToDouble(Registers.data [ op1..(op1 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) * RegisterToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fdiv_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        double OP1 = BitConverter.ToDouble(Registers.data [ op1..(op1 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) / RegisterToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.faddi_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        double OP1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 + OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) + ImmediateToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fsubi_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        double OP1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 - OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) - ImmediateToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fmuli_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        double OP1 = BitConverter.ToInt32(instruct.Op1);
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 * OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) * ImmediateToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.fdivi_d:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
-                        double OP0 = BitConverter.ToDouble(Registers.data [ op0..(op0 + Constants.double_size) ]);
-                        double OP1 = BitConverter.ToDouble(Registers.data [ op1..(op1 + Constants.double_size) ]);
-                        BitConverter.GetBytes(OP0 / OP1).CopyTo(Registers.data , op2);
+                        WriteBytes(RegisterToDouble(instruct.Op0!) / ImmediateToDouble(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.malloc:
                     {
-                        int op0 = BitConverter.ToInt32(instruct.Op0) * RegisterSize;
-                        int op1 = BitConverter.ToInt32(instruct.Op1) * RegisterSize;
-                        int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
-                        BitConverter.GetBytes(MemoryBlocks.MALLOC(OP0)).CopyTo(Registers.data , op1);
+                        int OP0 = RegisterToInt32(instruct.Op0!);
+                        int op1 = ToRegisterOffset(instruct.Op1!);
+                        WriteBytes(MemoryBlocks.MALLOC(OP0) , Registers.data , op1);
                     }
                     break;
                 case (int)Inst.realloc:
@@ -527,7 +406,7 @@ namespace xCVM.Core
                         int op2 = BitConverter.ToInt32(instruct.Op2) * RegisterSize;
                         int OP0 = BitConverter.ToInt32(Registers.data [ op0..(op0 + Constants.int_size) ]);
                         int OP1 = BitConverter.ToInt32(Registers.data [ op1..(op1 + Constants.int_size) ]);
-                        BitConverter.GetBytes(MemoryBlocks.REALLOC(OP0 , OP1)).CopyTo(Registers.data , op2);
+                        WriteBytes(MemoryBlocks.REALLOC(OP0 , OP1) , Registers.data , op2);
                     }
                     break;
                 case (int)Inst.free:
@@ -603,7 +482,7 @@ namespace xCVM.Core
         public void Load(xCVMModule module)
         {
             program = new xCVMRTProgram();
-            program.program=module;
+            program.program = module;
         }
         public void Run()
         {
@@ -620,7 +499,7 @@ namespace xCVM.Core
 #else
                 //PC = BitConverter.ToInt32(PCbytes);
 #endif
-                if(PC>= program.program.Instructions.Count) break;
+                if (PC >= program.program.Instructions.Count) break;
                 {
                     //Execute instruct.
                     Execute(program.program.Instructions [ PC ]);
