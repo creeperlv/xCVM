@@ -47,7 +47,8 @@ namespace xCVM.Core
         ManagedMem ManagedMem;
         xCVMOption xCVMOption;
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
-
+        Stack<ProgramPosition> CallStack = new Stack<ProgramPosition>();
+        int CurrentModule;
         public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories)
         {
             this.xCVMOption = xCVMOption;
@@ -501,6 +502,21 @@ namespace xCVM.Core
                 case (int)Inst.jmpr:
                     {
                         PC = RegisterToInt32(instruct.Op0);
+                    }
+                    break;
+                case (int)Inst.pcs:
+                    {
+                        CallStack.Push(new ProgramPosition(CurrentModule , PC + 1));
+                    }
+                    break;
+                case (int)Inst.pcso:
+                    {
+                        CallStack.Push(new ProgramPosition(CurrentModule , PC + ImmediateToInt32(instruct.Op0)));
+                    }
+                    break;
+                case (int)Inst.pcsor:
+                    {
+                        CallStack.Push(new ProgramPosition(CurrentModule , PC + RegisterToInt32(instruct.Op0)));
                     }
                     break;
                 case (int)ManagedExt.mcall:

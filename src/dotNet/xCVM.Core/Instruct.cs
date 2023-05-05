@@ -54,17 +54,17 @@ namespace xCVM.Core
             if (OP_LEN0 > 0)
             {
                 instruct.Op0 = bytes [ Offset..(Offset + OP_LEN0) ];
-                Offset+= OP_LEN0;
+                Offset += OP_LEN0;
             }
             if (OP_LEN1 > 0)
             {
                 instruct.Op1 = bytes [ Offset..(Offset + OP_LEN1) ];
-                Offset+= OP_LEN1;
+                Offset += OP_LEN1;
             }
             if (OP_LEN2 > 0)
             {
                 instruct.Op2 = bytes [ Offset..(Offset + OP_LEN2) ];
-                Offset+= OP_LEN2;
+                Offset += OP_LEN2;
             }
             return instruct;
         }
@@ -126,6 +126,40 @@ namespace xCVM.Core
 
         lcmp = 0x0059,
         lcmpi = 0x005A,
+
+        /// <summary>
+        /// Copy Resource to new memory area.
+        /// cpres resource_type:TEXT|XCVMRES ID $ReciverRegister
+        /// </summary>
+        cpres = 0x0090,
+        cptxt = 0x0091,
+        cpid = 0x0092,
+        /// <summary>
+        /// load module
+        /// lm id?module_id
+        /// </summary>
+        lm = 0x0095,
+        /// <summary>
+        /// Load Module which name given by register.
+        /// lmr $register_to_name
+        /// </summary>
+        lmr = 0x0096,
+        /// <summary>
+        /// Push to call stack
+        /// pcs
+        /// </summary>
+        pcs = 0x0097,
+        /// <summary>
+        /// Push to call stack with offset
+        /// pcso offset
+        /// </summary>
+        pcso = 0x0098,
+        /// <summary>
+        /// Push to call stack with offset which is in register.
+        /// pcsor $register_to_offset
+        /// </summary>
+        pcsor = 0x0099,
+
         /// <summary>
         /// Jump to an absolute instruct.
         /// jmp value
@@ -140,40 +174,37 @@ namespace xCVM.Core
         /// IFJump
         /// ifj $condition value
         /// </summary>
-        ifj= 0x0067,
+        ifj = 0x0067,
         /// <summary>
         /// IFJump(Register)
         /// ifjr $condition $pointer
         /// </summary>
-        ifjr= 0x0068,
+        ifjr = 0x0068,
         ret = 0x0041,
         cvt_sf_i = 0x0030, cvt_i_sf = 0x0031, cvt_df_i = 0x0032, cvt_i_df = 0x0033,
         sqrt = 0x000B, fsqrt_s = 0x001B, fsqrt_d = 0x002B,
-
-        call = 0x0042, 
+        /// <summary>
+        /// call $register_to_module $register_to_pc
+        /// </summary>
+        call = 0x0042,
         mv = 0x0043,
         syscall = 0x0044,
         /// <summary>
-        /// Copy Resource to new memory area.
-        /// rescp resource_type:TEXT|XCVMRES ID $ReciverRegister
-        /// </summary>
-        rescp = 0x051,
-        /// <summary>
         /// malloc $register_contains_size $register_to_store_pointer
         /// </summary>
-        malloc = 0x05B,
+        malloc = 0x005B,
         /// <summary>
         /// realloc $register_contain_original_pointer $register_contains_new_size $register_to_store_pointer
         /// </summary>
-        realloc = 0x05C,
+        realloc = 0x005C,
         /// <summary>
         /// free $register_contains_the_pointer $register_to_store_result
         /// </summary>
-        free = 0x05D,
+        free = 0x005D,
         /// <summary>
         /// mlen $pointer_to_memory $register_to_store_len
         /// </summary>
-        mlen=0x05E,
+        mlen = 0x05E,
         /// <summary>
         /// AND Word full Register
         /// andw $L $R $Save
@@ -183,8 +214,8 @@ namespace xCVM.Core
         /// OR Word full Register
         /// orwr $L $R $Save
         /// </summary>
-        orwr = 0x0045,
-        xorwr = 0x0046,
+        orwr = 0x0046,
+        xorwr = 0x0047,
         notwr = 0x0048,
         /// <summary>
         /// ws - word, second (second 4 bytes)
