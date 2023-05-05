@@ -13,6 +13,31 @@ namespace xCVM.Core
         public int RegisterSize;
         public int RegisterCount;
     }
+    public struct ProgramPosition
+    {
+        public int Module;
+        public int IP;
+
+        public ProgramPosition(int module , int iP)
+        {
+            Module = module;
+            IP = iP;
+        }
+        public void WriteToBytes(byte [ ] bytes , int Offset , byte [ ] buffer_4_bytes)
+        {
+            BitConverter.TryWriteBytes(buffer_4_bytes , Module);
+            buffer_4_bytes.CopyTo(bytes , Offset);
+            BitConverter.TryWriteBytes(buffer_4_bytes , IP);
+            buffer_4_bytes.CopyTo(bytes , Offset + 4);
+
+        }
+        public static ProgramPosition FromBytes(byte [ ] bytes , int Offset)
+        {
+            int M = BitConverter.ToInt32(bytes , Offset);
+            int IP = BitConverter.ToInt32(bytes , Offset + 4);
+            return new ProgramPosition(M , IP);
+        }
+    }
     public class xCVMCore
     {
         int RegisterSize = Constants.int_size;
@@ -21,6 +46,8 @@ namespace xCVM.Core
         xCVMemBlock MemoryBlocks;
         ManagedMem ManagedMem;
         xCVMOption xCVMOption;
+        Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
+
         public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories)
         {
             this.xCVMOption = xCVMOption;
@@ -436,9 +463,9 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.lwr:
                     {
-                        int OP1=RegisterToInt32 (instruct.Op1);
-                        int OP2=RegisterToInt32 (instruct.Op2);
-                        int op0=ToRegisterOffset(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int OP2 = RegisterToInt32(instruct.Op2);
+                        int op0 = ToRegisterOffset(instruct.Op0);
                         MemoryBlocks.Datas [ OP1 ].data [ (OP2 * RegisterSize)..(OP2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
