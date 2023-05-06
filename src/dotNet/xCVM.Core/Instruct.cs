@@ -87,11 +87,11 @@ namespace xCVM.Core
     }
     public enum CmpOp
     {
-        eq=0,neq=1,lt=2,lteq=3,gt=4,gteq=5,
+        eq = 0, neq = 1, lt = 2, lteq = 3, gt = 4, gteq = 5,
     }
     public enum Inst
     {
-        nop= 0xFFFF,
+        nop = 0xFFFF,
 
         add = 0x0001, addi = 0x0002,
         sub = 0x0003, subi = 0x0004,
@@ -119,9 +119,11 @@ namespace xCVM.Core
         /// equal, not_equal, less, LessOrEqual,Greater,GreaterOrEqual.
         /// </summary>
         cmp = 0x0009,
+        ucmp = 0x0079,
         fcmp_s = 0x0019,
         fcmp_d = 0x0029,
         cmpi = 0x000A,
+        ucmpi = 0x007A,
         fcmpi_s = 0x001A,
         fcmpi_d = 0x002A,
 
@@ -137,6 +139,8 @@ namespace xCVM.Core
 
         lcmp = 0x0059,
         lcmpi = 0x005A,
+        ulcmp = 0x0089,
+        ulcmpi = 0x008A,
 
         /// <summary>
         /// Copy Resource to new memory area.
@@ -173,7 +177,7 @@ namespace xCVM.Core
         /// <br/>
         /// lmresr $register_to_id
         /// </summary>
-        lmresr=0x0098,
+        lmresr = 0x0098,
         /// <summary>
         /// Push to call stack
         /// <br/>

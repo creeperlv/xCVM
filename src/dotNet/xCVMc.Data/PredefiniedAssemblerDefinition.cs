@@ -14,20 +14,31 @@ namespace xCVMc.Data
                 { "NULL", "0" },
                 { "null", "0" },
                 { "stdout", "1" },
-                { "retv", "0" },
-                { "p_ms", "1" },
-                { "p_ag", "2" },
+                
+                { "retv", "1" },
+                
+                { "func_parameter_pointer", "2" },
+                { "fpp", "2" },
+                
                 { "cond", "3" },
+                { "condition", "3" },
+                { "cnd", "3" },
+                
+                { "mainstack", "4" },
+                { "p_ms", "4" },
+                { "mem_mainstack", "0" },
+                { "current_stack", "5" },
+
                 { "t0", "7" },
                 { "t1", "8" },
                 { "t2", "9" },
                 { "t3", "10" },
                 { "t4", "11" },
                 { "t5", "12" },
+
                 { "lt0", "7" },
                 { "lt1", "9" },
                 { "lt2", "11" },
-                { "mainstack", "0" },
 
                 { "equal", "0" },
                 { "eq", "0" },
@@ -74,7 +85,18 @@ namespace xCVMc.Data
                 new InstructionDefinition{ Name=$"{Inst.nop}",  ID=(int)Inst.nop, OP0DT=-2, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
 
                 new InstructionDefinition{ Name=$"{Inst.cmp}",  ID=(int)Inst.cmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.ucmp}",  ID=(int)Inst.ucmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.lcmp}",  ID=(int)Inst.lcmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.ulcmp}",  ID=(int)Inst.ulcmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.fcmp_s}",  ID=(int)Inst.fcmp_s, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.fcmp_d}",  ID=(int)Inst.fcmp_d, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+
                 new InstructionDefinition{ Name=$"{Inst.cmpi}",  ID=(int)Inst.cmpi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.ucmpi}",  ID=(int)Inst.ucmpi, OP0DT=1, OP0REG=true, OP1DT=5,OP1REG=false,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.ulcmpi}",  ID=(int)Inst.ulcmpi, OP0DT=1, OP0REG=true, OP1DT=6,OP1REG=false,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.lcmpi}",  ID=(int)Inst.lcmpi, OP0DT=1, OP0REG=true, OP1DT=2,OP1REG=false,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.fcmpi_s}",  ID=(int)Inst.fcmpi_s, OP0DT=1, OP0REG=true, OP1DT=3,OP1REG=false,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.fcmpi_d}",  ID=(int)Inst.fcmpi_d, OP0DT=1, OP0REG=true, OP1DT=4,OP1REG=false,OP2DT=1, OP2REG=false},
 
                 new InstructionDefinition{ Name="add",  ID=(int)Inst.add, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="addi", ID=(int)Inst.addi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
@@ -84,14 +106,24 @@ namespace xCVMc.Data
                 new InstructionDefinition{ Name="muli", ID=(int)Inst.muli, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="div",  ID=(int)Inst.div, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="divi", ID=(int)Inst.divi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
+
                 new InstructionDefinition{ Name="uadd",  ID=(int)Inst.uadd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
-                new InstructionDefinition{ Name="uaddi", ID=(int)Inst.uaddi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="uaddi", ID=(int)Inst.uaddi, OP0DT=1, OP0REG=true, OP1DT=5,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="usub",  ID=(int)Inst.usub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
-                new InstructionDefinition{ Name="usubi", ID=(int)Inst.usubi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="usubi", ID=(int)Inst.usubi, OP0DT=1, OP0REG=true, OP1DT=5,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="umul",  ID=(int)Inst.umul, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
-                new InstructionDefinition{ Name="umuli", ID=(int)Inst.umuli, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="umuli", ID=(int)Inst.umuli, OP0DT=1, OP0REG=true, OP1DT=5,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="udiv",  ID=(int)Inst.udiv, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
-                new InstructionDefinition{ Name="udivi", ID=(int)Inst.udivi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="udivi", ID=(int)Inst.udivi, OP0DT=1, OP0REG=true, OP1DT=5,OP1REG=false,OP2DT=1, OP2REG=true},
+
+                new InstructionDefinition{ Name="uladd",  ID=(int)Inst.uladd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="uladdi", ID=(int)Inst.uladdi, OP0DT=1, OP0REG=true, OP1DT=6,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ulsub",  ID=(int)Inst.ulsub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ulsubi", ID=(int)Inst.ulsubi, OP0DT=1, OP0REG=true, OP1DT=6,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ulmul",  ID=(int)Inst.ulmul, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ulmuli", ID=(int)Inst.ulmuli, OP0DT=1, OP0REG=true, OP1DT=6,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="uldiv",  ID=(int)Inst.uldiv, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="uldivi", ID=(int)Inst.uldivi, OP0DT=1, OP0REG=true, OP1DT=6,OP1REG=false,OP2DT=1, OP2REG=true},
 
                 new InstructionDefinition{ Name="ladd",  ID=(int)Inst.ladd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="laddi", ID=(int)Inst.laddi, OP0DT=1, OP0REG=true, OP1DT=2,OP1REG=false,OP2DT=1, OP2REG=true},

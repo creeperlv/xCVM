@@ -26,31 +26,64 @@ namespace Cx.Core
     }
     public class FunctionParser : ContextualParser
     {
+        TypeParser typeParser;
+        public FunctionParser()
+        {
+            typeParser = new TypeParser();
+        }
         public override OperationResult<bool> Parse(SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
-            var isStruct = context.MatchMarch("struct");
             ASTNode FuncDef = new ASTNode();
             FuncDef.Type = ASTNodeType.DeclareFunc;
-            if (isStruct == MatchResult.Match)
+            var HEAD = context.Current;
+            Segment? FirstLP = null;
+            Segment? FirstLB = null;
+            while (true)
             {
-                var isStructSymbol = context.MatchNext("{");
-                if (isStructSymbol == MatchResult.Match)
+                var res = context.MatchMarch("{");
+                if (res == MatchResult.Match)
                 {
-                    //It is a struct definition at first glances.
-                    return new OperationResult<bool>(false);
+                    FirstLB = context.Last;
                 }
-                else if (isStructSymbol == MatchResult.ReachEnd)
+                else if (res == MatchResult.Mismatch)
                 {
-                    result.AddError(new UnexpectedEndOfFileError(context.Current));
+                    context.GoNext();
                 }
                 else
                 {
-                    var n0 = new ASTNode { Type = ASTNodeType.ReturnType , Segment = null };
-                    var n1 = new ASTNode { Type = ASTNodeType.UseStruct , Segment = context.Current };
-                    n0.Children.Add(n1);
-                    FuncDef.Children.Add(n0);
+                    break;
                 }
+            }
+            while (true)
+            {
+                var res = context.MatchMarch("(");
+                if (res == MatchResult.Match)
+                {
+                    FirstLP = context.Last;
+                }
+                else if (res == MatchResult.Mismatch)
+                {
+                    context.GoNext();
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (FirstLP == null)
+                return new OperationResult<bool>(false);
+            if (FirstLB == null)
+                return new OperationResult<bool>(false);
+            if (FirstLP > FirstLB)
+            {
+                return new OperationResult<bool>(false);
+            }
+            {
+                ASTNode return_type= new ASTNode();
+                FuncDef.AddChild(return_type);
+                return_type.Type = ASTNodeType.ReturnType;
+                typeParser.Parse(new SegmentContext(HEAD), return_type);
             }
             while (true)
             {

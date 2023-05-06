@@ -630,6 +630,446 @@ namespace xCVM.Core
                         WriteBytes(result , Registers.data , 3 * RegisterSize);
                     }
                     break;
+                case (int)Inst.ucmp:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToUInt32(instruct.Op0);
+                        var R = RegisterToUInt32(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.ucmpi:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToUInt32(instruct.Op0);
+                        var R = ImmediateToUInt32(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.lcmp:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToInt64(instruct.Op0);
+                        var R = RegisterToInt64(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.lcmpi:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToInt64(instruct.Op0);
+                        var R = ImmediateToInt64(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.ulcmp:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToUInt64(instruct.Op0);
+                        var R = RegisterToUInt64(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.ulcmpi:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToUInt64(instruct.Op0);
+                        var R = ImmediateToUInt64(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.fcmp_s:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToSingle(instruct.Op0);
+                        var R = RegisterToSingle(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.fcmpi_s:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToSingle(instruct.Op0);
+                        var R = ImmediateToSingle(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.fcmp_d:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToDouble(instruct.Op0);
+                        var R = RegisterToDouble(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.fcmpi_d:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToDouble(instruct.Op0);
+                        var R = ImmediateToDouble(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
                 case (int)ManagedExt.mcall:
                     {
 
