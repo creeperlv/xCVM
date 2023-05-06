@@ -85,8 +85,14 @@ namespace xCVM.Core
         /// </summary>
         mset = 0x0802, thread = 0x0803, mrd = 0x804
     }
+    public enum CmpOp
+    {
+        eq=0,neq=1,lt=2,lteq=3,gt=4,gteq=5,
+    }
     public enum Inst
     {
+        nop= 0xFFFF,
+
         add = 0x0001, addi = 0x0002,
         sub = 0x0003, subi = 0x0004,
         mul = 0x0005, muli = 0x0006,
@@ -106,7 +112,12 @@ namespace xCVM.Core
         fsub_d = 0x0023, fsubi_d = 0x0024,
         fmul_d = 0x0025, fmuli_d = 0x0026,
         fdiv_d = 0x0027, fdivi_d = 0x0028,
-
+        /// <summary>
+        /// compare
+        /// cmp $L $R compare_method
+        /// compare_methods:
+        /// equal, not_equal, less, LessOrEqual,Greater,GreaterOrEqual.
+        /// </summary>
         cmp = 0x0009,
         fcmp_s = 0x0019,
         fcmp_d = 0x0029,
@@ -129,62 +140,95 @@ namespace xCVM.Core
 
         /// <summary>
         /// Copy Resource to new memory area.
-        /// cpres resource_type:TEXT|XCVMRES ID $ReciverRegister
+        /// <br/>
+        /// cpres resID $ReciverRegister
         /// </summary>
         cpres = 0x0090,
+        /// <summary>
+        /// Copy Text to new memory area.
+        /// cptxt id $register_to_receive_memory_location
+        /// </summary>
         cptxt = 0x0091,
         cpid = 0x0092,
         /// <summary>
         /// load module
+        /// <br/>
         /// lm id?module_id
         /// </summary>
         lm = 0x0095,
         /// <summary>
         /// Load Module which name given by register.
+        /// <br/>
         /// lmr $register_to_name
         /// </summary>
         lmr = 0x0096,
         /// <summary>
+        /// Load Module from resource.
+        /// <br/>
+        /// lmres res_id
+        /// </summary>
+        lmres = 0x0097,
+        /// <summary>
+        /// Load Module from resource where id is given in register
+        /// <br/>
+        /// lmresr $register_to_id
+        /// </summary>
+        lmresr=0x0098,
+        /// <summary>
         /// Push to call stack
+        /// <br/>
         /// pcs
         /// </summary>
         pcs = 0x0097,
         /// <summary>
         /// Push to call stack with offset
+        /// <br/>
         /// pcso offset
         /// </summary>
         pcso = 0x0098,
         /// <summary>
         /// Push to call stack with offset which is in register.
+        /// <br/>
         /// pcsor $register_to_offset
         /// </summary>
         pcsor = 0x0099,
 
         /// <summary>
         /// Jump to an absolute instruct.
+        /// <br/>
         /// jmp value
         /// </summary>
         jmp = 0x0040,
         /// <summary>
         /// Jump to an absolute instruct which is in the register.
+        /// <br/>
         /// jmpr $register
         /// </summary>
         jmpr = 0x0066,
         /// <summary>
         /// IFJump
+        /// <br/>
         /// ifj $condition value
         /// </summary>
         ifj = 0x0067,
         /// <summary>
         /// IFJump(Register)
+        /// <br/>
         /// ifjr $condition $pointer
         /// </summary>
         ifjr = 0x0068,
+        /// <summary>
+        /// Return to last call stack
+        /// <br/>
+        /// ret
+        /// </summary>
         ret = 0x0041,
         cvt_sf_i = 0x0030, cvt_i_sf = 0x0031, cvt_df_i = 0x0032, cvt_i_df = 0x0033,
         sqrt = 0x000B, fsqrt_s = 0x001B, fsqrt_d = 0x002B,
         /// <summary>
-        /// call $register_to_module $register_to_pc
+        /// Jump to target function in given module.
+        /// <br/>
+        /// call $register_to_module $register_to_id
         /// </summary>
         call = 0x0042,
         mv = 0x0043,
@@ -207,6 +251,7 @@ namespace xCVM.Core
         mlen = 0x05E,
         /// <summary>
         /// AND Word full Register
+        /// <br/>
         /// andw $L $R $Save
         /// </summary>
         andwr = 0x0045,

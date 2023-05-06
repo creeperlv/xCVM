@@ -47,13 +47,14 @@ namespace xCVM.Core
         ManagedMem ManagedMem;
         xCVMOption xCVMOption;
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
+        Dictionary<string , int> ModuleNameIDMap = new Dictionary<string , int>();
         Stack<ProgramPosition> CallStack = new Stack<ProgramPosition>();
         int CurrentModule;
         public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories)
         {
             this.xCVMOption = xCVMOption;
-            RegisterSize = xCVMOption.RegisterSize;
-            Registers = new xCVMem() { data = new byte [ xCVMOption.RegisterCount * xCVMOption.RegisterSize ] };
+            RegisterSize = this.xCVMOption.RegisterSize;
+            Registers = new xCVMem() { data = new byte [ this.xCVMOption.RegisterCount * this.xCVMOption.RegisterSize ] };
             MemoryBlocks = new xCVMemBlock();
             ManagedMem = new ManagedMem();
             VM__BUFFER_4_BYTES = new byte [ 4 ];
@@ -187,6 +188,10 @@ namespace xCVM.Core
         {
             switch (instruct.Operation)
             {
+                case (int)Inst.nop:
+                    {
+                        return;
+                    }
                 case (int)Inst.add:
                     {
                         WriteBytes(RegisterToInt32(instruct.Op0!) + RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
@@ -496,12 +501,30 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.jmp:
                     {
-                        PC = ImmediateToInt32(instruct.Op0);
+                        PC = ImmediateToInt32(instruct.Op0) - 1;
                     }
                     break;
                 case (int)Inst.jmpr:
                     {
-                        PC = RegisterToInt32(instruct.Op0);
+                        PC = RegisterToInt32(instruct.Op0) - 1;
+                    }
+                    break;
+                case (int)Inst.ifj:
+                    {
+                        var cond = ImmediateToInt32(instruct.Op0);
+                        if (cond != 0)
+                        {
+                            PC = ImmediateToInt32(instruct.Op1) - 1;
+                        }
+                    }
+                    break;
+                case (int)Inst.ifjr:
+                    {
+                        var cond = ImmediateToInt32(instruct.Op0);
+                        if (cond != 0)
+                        {
+                            PC = RegisterToInt32(instruct.Op1) - 1;
+                        }
                     }
                     break;
                 case (int)Inst.pcs:
@@ -517,6 +540,94 @@ namespace xCVM.Core
                 case (int)Inst.pcsor:
                     {
                         CallStack.Push(new ProgramPosition(CurrentModule , PC + RegisterToInt32(instruct.Op0)));
+                    }
+                    break;
+                case (int)Inst.cmp:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToInt32(instruct.Op0);
+                        var R = RegisterToInt32(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.cmpi:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToInt32(instruct.Op0);
+                        var R = ImmediateToInt32(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 3 * RegisterSize);
                     }
                     break;
                 case (int)ManagedExt.mcall:

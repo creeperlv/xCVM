@@ -17,7 +17,30 @@ namespace xCVMc.Data
                 { "retv", "0" },
                 { "p_ms", "1" },
                 { "p_ag", "2" },
+                { "cond", "3" },
+                { "t0", "7" },
+                { "t1", "8" },
+                { "t2", "9" },
+                { "t3", "10" },
+                { "t4", "11" },
+                { "t5", "12" },
+                { "lt0", "7" },
+                { "lt1", "9" },
+                { "lt2", "11" },
                 { "mainstack", "0" },
+                { "equal", "0" },
+                { "eq", "0" },
+                { "notequal", "1" },
+                { "neq", "1" },
+                { "less", "2" },
+                { "lt", "2" },
+                { "lessorequal", "3" },
+                { "lesseq", "3" },
+                { "lteq", "3" },
+                { "greater", "4" },
+                { "gt", "4" },
+                { "greaterorequal", "5" },
+                { "gteq", "5" },
             };
             assemblerDefinition.PredefinedTypeMapping = new Dictionary<string , int>
             {
@@ -36,13 +59,20 @@ namespace xCVMc.Data
             {
                 new InstructionDefinition{ Name="jmp",  ID=(int)Inst.jmp, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name="jmpr",  ID=(int)Inst.jmpr, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
-                new InstructionDefinition{ Name="malloc",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.ifj}",  ID=(int)Inst.ifj, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=-2, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.ifjr}",  ID=(int)Inst.ifjr, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.malloc}",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
                 new InstructionDefinition{ Name="realloc",  ID=(int)Inst.realloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="free",  ID=(int)Inst.free, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
 
                 new InstructionDefinition{ Name=$"{Inst.pcs}", ID=(int)Inst.pcs, OP0DT=-2, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.pcso}", ID=(int)Inst.pcso, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.pcsor}", ID=(int)Inst.pcsor, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
+
+                new InstructionDefinition{ Name=$"{Inst.nop}",  ID=(int)Inst.nop, OP0DT=-2, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
+
+                new InstructionDefinition{ Name=$"{Inst.cmp}",  ID=(int)Inst.nop, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.cmpi}",  ID=(int)Inst.nop, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=false},
 
                 new InstructionDefinition{ Name="add",  ID=(int)Inst.add, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="addi", ID=(int)Inst.addi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
