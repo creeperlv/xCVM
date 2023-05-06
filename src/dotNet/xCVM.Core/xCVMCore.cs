@@ -511,7 +511,7 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.ifj:
                     {
-                        var cond = ImmediateToInt32(instruct.Op0);
+                        var cond = RegisterToInt32(instruct.Op0);
                         if (cond != 0)
                         {
                             PC = ImmediateToInt32(instruct.Op1) - 1;
@@ -520,7 +520,7 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.ifjr:
                     {
-                        var cond = ImmediateToInt32(instruct.Op0);
+                        var cond = RegisterToInt32(instruct.Op0);
                         if (cond != 0)
                         {
                             PC = RegisterToInt32(instruct.Op1) - 1;

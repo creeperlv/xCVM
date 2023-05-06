@@ -28,8 +28,10 @@ namespace xCVMc.Data
                 { "lt1", "9" },
                 { "lt2", "11" },
                 { "mainstack", "0" },
+
                 { "equal", "0" },
                 { "eq", "0" },
+                
                 { "notequal", "1" },
                 { "neq", "1" },
                 { "less", "2" },
@@ -71,8 +73,8 @@ namespace xCVMc.Data
 
                 new InstructionDefinition{ Name=$"{Inst.nop}",  ID=(int)Inst.nop, OP0DT=-2, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
 
-                new InstructionDefinition{ Name=$"{Inst.cmp}",  ID=(int)Inst.nop, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
-                new InstructionDefinition{ Name=$"{Inst.cmpi}",  ID=(int)Inst.nop, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.cmp}",  ID=(int)Inst.cmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.cmpi}",  ID=(int)Inst.cmpi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=false},
 
                 new InstructionDefinition{ Name="add",  ID=(int)Inst.add, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="addi", ID=(int)Inst.addi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
