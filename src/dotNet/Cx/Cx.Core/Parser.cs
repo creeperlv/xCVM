@@ -38,6 +38,7 @@ namespace Cx.Core
             FuncDef.Type = ASTNodeType.DeclareFunc;
             var HEAD = context.Current;
             Segment? FirstLP = null;
+            Segment? FirstRP = null;
             Segment? FirstLB = null;
             while (true)
             {
