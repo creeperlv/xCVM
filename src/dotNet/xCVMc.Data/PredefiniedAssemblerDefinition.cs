@@ -72,11 +72,13 @@ namespace xCVMc.Data
             {
                 new InstructionDefinition{ Name="jmp",  ID=(int)Inst.jmp, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name="jmpr",  ID=(int)Inst.jmpr, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.syscall}",  ID=(int)Inst.syscall, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.syscallr}",  ID=(int)Inst.syscallr, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.ifj}",  ID=(int)Inst.ifj, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.ifjr}",  ID=(int)Inst.ifjr, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.malloc}",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
-                new InstructionDefinition{ Name="realloc",  ID=(int)Inst.realloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
-                new InstructionDefinition{ Name="free",  ID=(int)Inst.free, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.realloc}",  ID=(int)Inst.realloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.free}",  ID=(int)Inst.free, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
 
                 new InstructionDefinition{ Name=$"{Inst.pcs}", ID=(int)Inst.pcs, OP0DT=-2, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.pcso}", ID=(int)Inst.pcso, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},

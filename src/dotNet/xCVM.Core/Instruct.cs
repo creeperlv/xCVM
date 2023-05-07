@@ -183,20 +183,25 @@ namespace xCVM.Core
         /// <br/>
         /// pcs
         /// </summary>
-        pcs = 0x0097,
+        pcs = 0x0099,
         /// <summary>
         /// Push to call stack with offset
         /// <br/>
         /// pcso offset
         /// </summary>
-        pcso = 0x0098,
+        pcso = 0x009A,
         /// <summary>
         /// Push to call stack with offset which is in register.
         /// <br/>
         /// pcsor $register_to_offset
         /// </summary>
-        pcsor = 0x0099,
-
+        pcsor = 0x009B,
+        /// <summary>
+        /// system call with id which is given by register
+        /// <br/>
+        /// syscallr $register_to_the_call
+        /// </summary>
+        syscallr = 0x009C,
         /// <summary>
         /// Jump to an absolute instruct.
         /// <br/>
@@ -236,6 +241,10 @@ namespace xCVM.Core
         /// </summary>
         call = 0x0042,
         mv = 0x0043,
+        /// <summary>
+        /// system call
+        /// syscall id
+        /// </summary>
         syscall = 0x0044,
         /// <summary>
         /// malloc $register_contains_size $register_to_store_pointer
