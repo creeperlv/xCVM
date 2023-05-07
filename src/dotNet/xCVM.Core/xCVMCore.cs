@@ -1144,10 +1144,17 @@ namespace xCVM.Core
         public Dictionary<int , xCVMem> Datas = new Dictionary<int , xCVMem>();
         public int MALLOC(int Size , int ForceKey = -1)
         {
-            var mem = new xCVMem(new byte [ Size + 1 ]);
-            var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
-            Datas.Add(K , mem);
-            return K;
+            try
+            {
+                var mem = new xCVMem(new byte [ Size + 1 ]);
+                var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
+                Datas.Add(K , mem);
+                return K;
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
         }
         public void FREE(int Key)
         {
@@ -1158,15 +1165,22 @@ namespace xCVM.Core
         }
         public int REALLOC(int Key , int NewSize)
         {
-            var newD = new xCVMem(new byte [ NewSize ]);
-            if (!Datas.ContainsKey(Key)) return 0;
-            var old = Datas [ Key ];
-            var L = Math.Min(old.data.Length , NewSize);
-            for (int i = 0 ; i < L ; i++)
+            try
             {
-                newD.data [ i ] = old.data [ i ];
+                if (!Datas.ContainsKey(Key)) return -1;
+                var newD = new xCVMem(new byte [ NewSize ]);
+                var old = Datas [ Key ];
+                var L = Math.Min(old.data.Length , NewSize);
+                for (int i = 0 ; i < L ; i++)
+                {
+                    newD.data [ i ] = old.data [ i ];
+                }
+                return Key;
             }
-            return Key;
+            catch (Exception)
+            {
+                return -1;
+            }
         }
     }
 }

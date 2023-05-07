@@ -11,8 +11,8 @@ namespace xCVMc.Data
             AssemblerDefinition assemblerDefinition = new AssemblerDefinition { StatementEndMark = ";" , UseStatementEndMark = true };
             assemblerDefinition.PredefinedSymbols = new Dictionary<string , string> {
                 { "stdin", "0" },
-                { "NULL", "0" },
-                { "null", "0" },
+                { "NULL", "-1" },
+                { "null", "-1" },
                 { "stdout", "1" },
                 
                 { "retv", "1" },
