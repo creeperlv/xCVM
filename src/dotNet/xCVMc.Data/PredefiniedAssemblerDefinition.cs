@@ -17,17 +17,17 @@ namespace xCVMc.Data
                 
                 { "retv", "1" },
                 
-                { "func_parameter_pointer", "2" },
-                { "fpp", "2" },
+                { "func_parameter_pointer", "3" },
+                { "fpp", "3" },
                 
-                { "cond", "3" },
-                { "condition", "3" },
-                { "cnd", "3" },
+                { "cond", "4" },
+                { "condition", "4" },
+                { "cnd", "4" },
                 
-                { "mainstack", "4" },
-                { "p_ms", "4" },
+                { "mainstack", "5" },
+                { "p_ms", "5" },
                 { "mem_mainstack", "0" },
-                { "current_stack", "5" },
+                { "current_stack", "6" },
 
                 { "t0", "7" },
                 { "t1", "8" },

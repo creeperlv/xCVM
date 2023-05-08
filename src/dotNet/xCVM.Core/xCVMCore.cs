@@ -8,55 +8,34 @@ using System.Threading.Tasks;
 
 namespace xCVM.Core
 {
-    public class xCVMOption
-    {
-        public int RegisterSize;
-        public int RegisterCount;
-    }
-    public struct ProgramPosition
-    {
-        public int Module;
-        public int IP;
-
-        public ProgramPosition(int module , int iP)
-        {
-            Module = module;
-            IP = iP;
-        }
-        public void WriteToBytes(byte [ ] bytes , int Offset , byte [ ] buffer_4_bytes)
-        {
-            BitConverter.TryWriteBytes(buffer_4_bytes , Module);
-            buffer_4_bytes.CopyTo(bytes , Offset);
-            BitConverter.TryWriteBytes(buffer_4_bytes , IP);
-            buffer_4_bytes.CopyTo(bytes , Offset + 4);
-
-        }
-        public static ProgramPosition FromBytes(byte [ ] bytes , int Offset)
-        {
-            int M = BitConverter.ToInt32(bytes , Offset);
-            int IP = BitConverter.ToInt32(bytes , Offset + 4);
-            return new ProgramPosition(M , IP);
-        }
-    }
     public class xCVMCore
     {
         int RegisterSize = Constants.int_size;
         xCVMRTProgram? program = null;
+        xCVMOption xCVMOption;
         xCVMem Registers;
         xCVMemBlock MemoryBlocks;
-        ManagedMem ManagedMem;
-        xCVMOption xCVMOption;
+        RuntimeData runtimeData;
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
         Dictionary<string , int> ModuleNameIDMap = new Dictionary<string , int>();
         Stack<ProgramPosition> CallStack = new Stack<ProgramPosition>();
+        Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
         int CurrentModule;
+        public void RegisterSysCall(int ID , ISysCall call)
+        {
+            if (SysCalls.ContainsKey(ID))
+                SysCalls [ ID ] = call;
+            else
+                SysCalls.Add(ID , call);
+        }
         public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories)
         {
             this.xCVMOption = xCVMOption;
             RegisterSize = this.xCVMOption.RegisterSize;
             Registers = new xCVMem() { data = new byte [ this.xCVMOption.RegisterCount * this.xCVMOption.RegisterSize ] };
             MemoryBlocks = new xCVMemBlock();
-            ManagedMem = new ManagedMem();
+            //ManagedMem = new ManagedMem();
+            runtimeData = new RuntimeData(Registers , MemoryBlocks);
             VM__BUFFER_4_BYTES = new byte [ 4 ];
             VM__BUFFER_8_BYTES = new byte [ 8 ];
             VM__BUFFER_16_BYTES = new byte [ 16 ];
@@ -70,6 +49,7 @@ namespace xCVM.Core
                 InitMemory();
             }
         }
+
         void InitMemory()
         {
             MemoryBlocks.MALLOC(10 , 0);
