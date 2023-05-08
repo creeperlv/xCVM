@@ -203,6 +203,12 @@ namespace xCVM.Core
         /// </summary>
         syscallr = 0x009C,
         /// <summary>
+        /// Copy text where the ID is given by register.
+        /// <br/>
+        /// cptxtr $register_to_text $register_to_receive_ID.
+        /// </summary>
+        cptxtr =0x009D,
+        /// <summary>
         /// Jump to an absolute instruct.
         /// <br/>
         /// jmp value

@@ -11,6 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\VMFunctions\SystemCalls\SystemCalls.csproj" />
 		<ProjectReference Include="..\xCVM.Core\xCVM.Core.csproj" />
 	</ItemGroup>
 

@@ -79,6 +79,12 @@ namespace xCVMc.Data
                 new InstructionDefinition{ Name=$"{Inst.malloc}",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
                 new InstructionDefinition{ Name=$"{Inst.realloc}",  ID=(int)Inst.realloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name=$"{Inst.free}",  ID=(int)Inst.free, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.cptxtr}",  ID=(int)Inst.cptxtr, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.cptxt}",  ID=(int)Inst.cptxt, OP0DT=1, OP0REG=false, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.swi}",  ID=(int)Inst.swi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.swr}",  ID=(int)Inst.swr, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.lwi}",  ID=(int)Inst.lwi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.lwr}",  ID=(int)Inst.lwr, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
 
                 new InstructionDefinition{ Name=$"{Inst.pcs}", ID=(int)Inst.pcs, OP0DT=-2, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.pcso}", ID=(int)Inst.pcso, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},

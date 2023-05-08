@@ -15,12 +15,23 @@ namespace xCVM.Core
         xCVMOption xCVMOption;
         xCVMem Registers;
         xCVMemBlock MemoryBlocks;
-        RuntimeData runtimeData;
+        public RuntimeData runtimeData;
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
         Dictionary<string , int> ModuleNameIDMap = new Dictionary<string , int>();
         Stack<ProgramPosition> CallStack = new Stack<ProgramPosition>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
+        public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
         int CurrentModule;
+        public int AddResource(IDisposable disposable)
+        {
+            var id = disposable.GetHashCode();
+            Resources.Add(id , disposable);
+            return id;
+        }
+        public void SetResource(int ID , IDisposable disposable)
+        {
+            Resources.Add(ID , disposable);
+        }
         public void RegisterSysCall(int ID , ISysCall call)
         {
             if (SysCalls.ContainsKey(ID))
@@ -35,7 +46,6 @@ namespace xCVM.Core
             Registers = new xCVMem() { data = new byte [ this.xCVMOption.RegisterCount * this.xCVMOption.RegisterSize ] };
             MemoryBlocks = new xCVMemBlock();
             //ManagedMem = new ManagedMem();
-            runtimeData = new RuntimeData(Registers , MemoryBlocks);
             VM__BUFFER_4_BYTES = new byte [ 4 ];
             VM__BUFFER_8_BYTES = new byte [ 8 ];
             VM__BUFFER_16_BYTES = new byte [ 16 ];
@@ -48,6 +58,7 @@ namespace xCVM.Core
                 MemoryBlocks = new xCVMemBlock();
                 InitMemory();
             }
+            runtimeData = new RuntimeData(Registers , MemoryBlocks);
         }
 
         void InitMemory()
@@ -58,109 +69,133 @@ namespace xCVM.Core
         byte [ ] VM__BUFFER_8_BYTES;
         byte [ ] VM__BUFFER_16_BYTES;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void WriteBytes(int Data , byte [ ] Target , int Offset)
+        public int ReadInt32(byte [ ] Target , int offset)
+        {
+            return BitConverter.ToInt32(Target , offset);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBytes(int Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void WriteBytes(uint Data , byte [ ] Target , int Offset)
+        public void WriteBytesToRegister(int Data , int RegisterID)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(Registers.data , RegisterID * RegisterSize);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBytesToMem(int Data , int Pointer , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(MemoryBlocks.Datas [ Pointer ].data , Offset);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBytes(uint Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void WriteBytes(float Data , byte [ ] Target , int Offset)
+        public void WriteBytes(float Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void WriteBytes(double Data , byte [ ] Target , int Offset)
+        public void WriteBytes(double Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_8_BYTES , Data);
             VM__BUFFER_8_BYTES.CopyTo(Target , Offset);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void WriteBytes(long Data , byte [ ] Target , int Offset)
+        public void WriteBytes(long Data , byte [ ] Target , int Offset)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_8_BYTES , Data);
             VM__BUFFER_8_BYTES.CopyTo(Target , Offset);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int RegisterToInt32(byte [ ]? inst_parameter)
+        public int RegisterToInt32(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToInt32(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        float RegisterToSingle(byte [ ]? inst_parameter)
+        public int RegisterToInt32(int RegisterID)
+        {
+            int op_i = RegisterID * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToInt32(Registers.data , op_i);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float RegisterToSingle(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToSingle(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        double RegisterToDouble(byte [ ]? inst_parameter)
+        public double RegisterToDouble(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToDouble(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        long RegisterToInt64(byte [ ]? inst_parameter)
+        public long RegisterToInt64(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToInt64(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        uint RegisterToUInt32(byte [ ]? inst_parameter)
+        public uint RegisterToUInt32(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToUInt32(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        ulong RegisterToUInt64(byte [ ]? inst_parameter)
+        public ulong RegisterToUInt64(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToUInt64(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int ImmediateToInt32(byte [ ]? inst_parameter)
+        public int ImmediateToInt32(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt32(inst_parameter);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        long ImmediateToInt64(byte [ ]? inst_parameter)
+        public long ImmediateToInt64(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt64(inst_parameter);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        float ImmediateToSingle(byte [ ]? inst_parameter)
+        public float ImmediateToSingle(byte [ ]? inst_parameter)
         {
             return BitConverter.ToSingle(inst_parameter);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        double ImmediateToDouble(byte [ ]? inst_parameter)
+        public double ImmediateToDouble(byte [ ]? inst_parameter)
         {
             return BitConverter.ToDouble(inst_parameter);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        uint ImmediateToUInt32(byte [ ]? inst_parameter)
+        public uint ImmediateToUInt32(byte [ ]? inst_parameter)
         {
             return BitConverter.ToUInt32(inst_parameter);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        ulong ImmediateToUInt64(byte [ ]? inst_parameter)
+        public ulong ImmediateToUInt64(byte [ ]? inst_parameter)
         {
             return BitConverter.ToUInt64(inst_parameter);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int ToRegisterOffset(byte [ ]? inst_parameter)
+        public int ToRegisterOffset(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt32(inst_parameter) * RegisterSize;
         }
@@ -430,7 +465,8 @@ namespace xCVM.Core
                     {
                         int OP0 = RegisterToInt32(instruct.Op0!);
                         int op1 = ToRegisterOffset(instruct.Op1!);
-                        WriteBytes(MemoryBlocks.MALLOC(OP0) , Registers.data , op1);
+                        var id = MemoryBlocks.MALLOC(OP0);
+                        WriteBytes(id, Registers.data , op1);
                     }
                     break;
                 case (int)Inst.realloc:
@@ -465,7 +501,7 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.swr:
                     {
-                        int OP0 = RegisterToInt32(instruct.Op0);
+                        int OP0 = ToRegisterOffset(instruct.Op0);
                         int OP1 = RegisterToInt32(instruct.Op1);
                         int OP2 = RegisterToInt32(instruct.Op2);
                         Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(MemoryBlocks.Datas [ OP1 ].data , OP2);
@@ -473,10 +509,30 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.swi:
                     {
-                        int op2 = ToRegisterOffset(instruct.Op2);
-                        int OP0 = RegisterToInt32(instruct.Op0);
+                        int OP0 = ToRegisterOffset(instruct.Op0);
                         int OP1 = RegisterToInt32(instruct.Op1);
-                        Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(MemoryBlocks.Datas [ OP1 ].data , op2);
+                        int op2 = ToRegisterOffset(instruct.Op2);
+                        var d=MemoryBlocks.Datas [ OP1 ].data;
+                        Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(d, op2);
+                    }
+                    break;
+                case (int)Inst.cptxt:
+                    {
+                        int op0 = ImmediateToInt32(instruct.Op0);
+                        int OP1 = ToRegisterOffset(instruct.Op1);
+                        var b = Encoding.UTF8.GetBytes(LoadedModules [ this.CurrentModule ].Texts [ op0 ]);
+                        var id = MemoryBlocks.PUT(b);
+                        WriteBytes(id,Registers.data , OP1);
+                    }
+                    break;
+                case (int)Inst.cptxtr:
+                    {
+                        int op0 = RegisterToInt32(instruct.Op0);
+                        int OP1 = ToRegisterOffset(instruct.Op1);
+                        var b = Encoding.UTF8.GetBytes(
+                        LoadedModules [ this.CurrentModule ].Texts [ op0 ]);
+                        var id = MemoryBlocks.PUT(b);
+                        WriteBytes(id , Registers.data , OP1);
                     }
                     break;
                 case (int)Inst.jmp:
@@ -487,6 +543,16 @@ namespace xCVM.Core
                 case (int)Inst.jmpr:
                     {
                         PC = RegisterToInt32(instruct.Op0) - 1;
+                    }
+                    break;
+                case (int)Inst.syscall:
+                    {
+                        SysCalls [ ImmediateToInt32(instruct.Op0) ].Execute(this);
+                    }
+                    break;
+                case (int)Inst.syscallr:
+                    {
+                        SysCalls [ RegisterToInt32(instruct.Op0) ].Execute(this);
                     }
                     break;
                 case (int)Inst.ifj:
@@ -1064,6 +1130,8 @@ namespace xCVM.Core
         {
             program = new xCVMRTProgram();
             program.program = module;
+            LoadedModules.Add(module.GetHashCode() , module);
+            CurrentModule = module.GetHashCode();
         }
         public void Run()
         {
@@ -1122,6 +1190,21 @@ namespace xCVM.Core
     public class xCVMemBlock
     {
         public Dictionary<int , xCVMem> Datas = new Dictionary<int , xCVMem>();
+        public int PUT(byte [ ] data , int ForceKey = -1)
+        {
+            try
+            {
+                var mem = new xCVMem(data);
+                var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
+                Datas.Add(K , mem);
+                return K;
+
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
+        }
         public int MALLOC(int Size , int ForceKey = -1)
         {
             try

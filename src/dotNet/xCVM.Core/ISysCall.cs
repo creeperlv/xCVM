@@ -2,6 +2,6 @@
 {
     public interface ISysCall
     {
-        void Execute(RuntimeData runtimeData);
+        void Execute(xCVMCore core);
     }
 }
