@@ -19,6 +19,15 @@ namespace xCVM.Core.CompilerServices
         }
 
         public Segment? Current => _Current;
+        /// <summary>
+        /// Use with care.
+        /// </summary>
+        /// <param name="current"></param>
+        public void SetCurrent(Segment? current)
+        {
+            _Current = current;
+            _Last = current?.Prev;
+        }
         public Segment? Last => _Last;
         public (MatchResult, IContentable?) MatchCollectionMarchReturnContentable(IEnumerable<IContentable> matches , bool CaseSensitive = true)
         {

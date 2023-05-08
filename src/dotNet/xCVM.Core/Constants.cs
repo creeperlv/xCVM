@@ -7,5 +7,6 @@
         public static readonly int int_size = sizeof(int);
         public static readonly int float_size = sizeof(float);
         public static readonly int double_size = sizeof(double);
+        public static readonly int MainStack = 5;
     }
 }

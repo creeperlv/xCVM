@@ -56,6 +56,7 @@ namespace Cx.Core
                     break;
                 }
             }
+            context.SetCurrent(HEAD);
             while (true)
             {
                 var res = context.MatchMarch("(");
@@ -76,6 +77,23 @@ namespace Cx.Core
                 return new OperationResult<bool>(false);
             if (FirstLB == null)
                 return new OperationResult<bool>(false);
+            context.SetCurrent( FirstLP);
+            while (true)
+            {
+                var res = context.MatchMarch(")");
+                if (res == MatchResult.Match)
+                {
+                    FirstRP = context.Last;
+                }
+                else if (res == MatchResult.Mismatch)
+                {
+                    context.GoNext();
+                }
+                else
+                {
+                    break;
+                }
+            }
             if (FirstLP > FirstLB)
             {
                 return new OperationResult<bool>(false);
@@ -85,6 +103,22 @@ namespace Cx.Core
                 FuncDef.AddChild(return_type);
                 return_type.Type = ASTNodeType.ReturnType;
                 typeParser.Parse(new SegmentContext(HEAD), return_type);
+            }
+            {
+                ASTNode node= new ASTNode();
+                while (true)
+                {
+                    //
+                    if (context.Current > FirstRP)
+                    {
+                        break;
+                    }
+                    var tr=typeParser.Parse(context,node);
+                    if (tr.Result == true)
+                    {
+
+                    }
+                }
             }
             while (true)
             {

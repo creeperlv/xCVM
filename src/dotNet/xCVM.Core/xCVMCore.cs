@@ -18,7 +18,7 @@ namespace xCVM.Core
         public RuntimeData runtimeData;
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
         Dictionary<string , int> ModuleNameIDMap = new Dictionary<string , int>();
-        Stack<ProgramPosition> CallStack = new Stack<ProgramPosition>();
+        Stack<CallFrame> CallStack = new Stack<CallFrame>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
         public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
         int CurrentModule;
@@ -215,6 +215,7 @@ namespace xCVM.Core
                             var pp = CallStack.Pop();
                             CurrentModule = pp.Module;
                             PC = pp.IP;
+                            WriteBytesToRegister(pp.MainStack , Constants.MainStack);
                         }
                         else { Running = false; }
                         return;
@@ -587,17 +588,17 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.pcs:
                     {
-                        CallStack.Push(new ProgramPosition(CurrentModule , PC + 1));
+                        CallStack.Push(new CallFrame(CurrentModule , PC + 1 , RegisterToInt32(Constants.MainStack)));
                     }
                     break;
                 case (int)Inst.pcso:
                     {
-                        CallStack.Push(new ProgramPosition(CurrentModule , PC + ImmediateToInt32(instruct.Op0)));
+                        CallStack.Push(new CallFrame(CurrentModule , PC + ImmediateToInt32(instruct.Op0) , RegisterToInt32(Constants.MainStack)));
                     }
                     break;
                 case (int)Inst.pcsor:
                     {
-                        CallStack.Push(new ProgramPosition(CurrentModule , PC + RegisterToInt32(instruct.Op0)));
+                        CallStack.Push(new CallFrame(CurrentModule , PC + RegisterToInt32(instruct.Op0) , RegisterToInt32(Constants.MainStack)));
                     }
                     break;
                 case (int)Inst.cmp:
