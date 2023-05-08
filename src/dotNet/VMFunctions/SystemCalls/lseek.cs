@@ -1,10 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using xCVM.Core;
 
 namespace SystemCalls
 {
-    public class read : ISysCall
+    public class lseek : ISysCall
     {
         public void Execute(xCVMCore core)
         {
@@ -14,24 +13,21 @@ namespace SystemCalls
             if (parameter_count == 3)
             {
                 int ResourceID = core.ReadInt32(block.data , 0);
-                int data = core.ReadInt32(block.data , 4);
-                int count = core.ReadInt32(block.data , 8);
+                SEEK seek = (SEEK)core.ReadInt32(block.data , 4);
+                int offset = core.ReadInt32(block.data , 8);
                 var fs = core.Resources [ ResourceID ] as Stream;
                 if (fs is null)
                 {
                     core.WriteBytesToRegister(-1 , 3);
                     return;
                 }
-                var c = fs.Read(core.runtimeData.MemoryBlocks.Datas [ data ].data , 0 , count);
-                core.WriteBytesToRegister(c , 3);
+
+                var l = (int)fs.Seek(offset , (SeekOrigin)seek);
+                core.WriteBytesToRegister(l , 3);
                 return;
             }
             core.WriteBytesToRegister(-1 , 3);
             return;
         }
-    }
-    public enum SEEK
-    {
-        SEEK_SET = 0, SEEK_CUR = 1, SEEK_END = 2
     }
 }

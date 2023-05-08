@@ -199,12 +199,24 @@ namespace xCVM.Core
         {
             return BitConverter.ToInt32(inst_parameter) * RegisterSize;
         }
+        bool Running;
         public void Execute(Instruct instruct)
         {
             switch (instruct.Operation)
             {
                 case (int)Inst.nop:
                     {
+                        return;
+                    }
+                case (int)Inst.ret:
+                    {
+                        if (CallStack.Count > 0)
+                        {
+                            var pp = CallStack.Pop();
+                            CurrentModule = pp.Module;
+                            PC = pp.IP;
+                        }
+                        else { Running = false; }
                         return;
                     }
                 case (int)Inst.add:
@@ -466,7 +478,7 @@ namespace xCVM.Core
                         int OP0 = RegisterToInt32(instruct.Op0!);
                         int op1 = ToRegisterOffset(instruct.Op1!);
                         var id = MemoryBlocks.MALLOC(OP0);
-                        WriteBytes(id, Registers.data , op1);
+                        WriteBytes(id , Registers.data , op1);
                     }
                     break;
                 case (int)Inst.realloc:
@@ -512,8 +524,8 @@ namespace xCVM.Core
                         int OP0 = ToRegisterOffset(instruct.Op0);
                         int OP1 = RegisterToInt32(instruct.Op1);
                         int op2 = ToRegisterOffset(instruct.Op2);
-                        var d=MemoryBlocks.Datas [ OP1 ].data;
-                        Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(d, op2);
+                        var d = MemoryBlocks.Datas [ OP1 ].data;
+                        Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(d , op2);
                     }
                     break;
                 case (int)Inst.cptxt:
@@ -522,7 +534,7 @@ namespace xCVM.Core
                         int OP1 = ToRegisterOffset(instruct.Op1);
                         var b = Encoding.UTF8.GetBytes(LoadedModules [ this.CurrentModule ].Texts [ op0 ]);
                         var id = MemoryBlocks.PUT(b);
-                        WriteBytes(id,Registers.data , OP1);
+                        WriteBytes(id , Registers.data , OP1);
                     }
                     break;
                 case (int)Inst.cptxtr:
@@ -629,7 +641,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.cmpi:
@@ -673,7 +685,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.ucmp:
@@ -717,7 +729,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.ucmpi:
@@ -761,7 +773,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.lcmp:
@@ -805,7 +817,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.lcmpi:
@@ -849,7 +861,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.ulcmp:
@@ -893,7 +905,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.ulcmpi:
@@ -937,7 +949,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.fcmp_s:
@@ -981,7 +993,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.fcmpi_s:
@@ -1025,7 +1037,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.fcmp_d:
@@ -1069,7 +1081,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)Inst.fcmpi_d:
@@ -1113,7 +1125,7 @@ namespace xCVM.Core
                             default:
                                 break;
                         }
-                        WriteBytes(result , Registers.data , 3 * RegisterSize);
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
                 case (int)ManagedExt.mcall:
@@ -1136,7 +1148,8 @@ namespace xCVM.Core
         public void Run()
         {
             if (program == null) return;
-            while (true)
+            Running = true;
+            while (Running)
             {
                 //byte [ ] PCbytes = Registers.data [ 0..3 ];
 #if UNSAFE
@@ -1148,10 +1161,15 @@ namespace xCVM.Core
 #else
                 //PC = BitConverter.ToInt32(PCbytes);
 #endif
-                if (PC >= program.program.Instructions.Count) break;
+                var ins = LoadedModules [ CurrentModule ].Instructions;
+                if (PC >= ins.Count)
+                {
+                    Execute(new Instruct { Operation = (int)Inst.ret });
+                }
+                else
                 {
                     //Execute instruct.
-                    Execute(program.program.Instructions [ PC ]);
+                    Execute(ins [ PC ]);
                 }
                 PC++;
 #if UNSAFE

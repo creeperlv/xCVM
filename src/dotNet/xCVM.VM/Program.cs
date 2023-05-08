@@ -25,6 +25,10 @@ namespace xCVM.VM
                     core.RegisterSysCall(3 , new read());
                     core.RegisterSysCall(4 , new write());
                     core.RegisterSysCall(5 , new open());
+                    core.RegisterSysCall(6 , new close());
+                    core.RegisterSysCall(19 , new lseek());
+                    core.RegisterSysCall(118 , new fsync());
+                    core.RegisterSysCall(122 , new uname());
                 }
                 {
                     //Setup Resources.

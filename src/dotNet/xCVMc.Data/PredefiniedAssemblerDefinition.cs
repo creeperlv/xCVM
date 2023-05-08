@@ -54,6 +54,16 @@ namespace xCVMc.Data
                 { "gt", "4" },
                 { "greaterorequal", "5" },
                 { "gteq", "5" },
+
+
+
+                { "read", "3" },
+                { "write", "4" },
+                { "open", "5" },
+                { "close", "6" },
+                { "lseek", "19" },
+                { "fsync", "118" },
+                { "uname", "122" },
             };
             assemblerDefinition.PredefinedTypeMapping = new Dictionary<string , int>
             {
@@ -91,6 +101,7 @@ namespace xCVMc.Data
                 new InstructionDefinition{ Name=$"{Inst.pcsor}", ID=(int)Inst.pcsor, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
 
                 new InstructionDefinition{ Name=$"{Inst.nop}",  ID=(int)Inst.nop, OP0DT=-2, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
+                new InstructionDefinition{ Name=$"{Inst.ret}",  ID=(int)Inst.ret, OP0DT=-2, OP0REG=true, OP1DT=-2,OP1REG=true,OP2DT=-2, OP2REG=true},
 
                 new InstructionDefinition{ Name=$"{Inst.cmp}",  ID=(int)Inst.cmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.ucmp}",  ID=(int)Inst.ucmp, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=false},
