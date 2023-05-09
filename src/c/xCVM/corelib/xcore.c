@@ -30,3 +30,8 @@ void DestoryResult(Result r){
 	r->Data=NULL;
 	free(r);
 }
+void Panic(){
+	puts("Runtime panic!");
+	puts("Usually due to malloc cannot alloc desired memory.");
+	exit(1);
+}

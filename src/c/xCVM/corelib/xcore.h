@@ -43,3 +43,4 @@ string NewString();
 bool AddChar(string str, char c);
 bool CStrEqualsCStr(char* L,char* R);
 void DestoryResult(Result r);
+void Panic();
