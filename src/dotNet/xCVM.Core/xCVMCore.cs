@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +13,6 @@ namespace xCVM.Core
     public class xCVMCore
     {
         int RegisterSize = Constants.int_size;
-        xCVMRTProgram? program = null;
         xCVMOption xCVMOption;
         xCVMem Registers;
         xCVMemBlock MemoryBlocks;
@@ -21,7 +22,7 @@ namespace xCVM.Core
         Stack<CallFrame> CallStack = new Stack<CallFrame>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
         public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
-        int CurrentModule;
+        int CurrentModule=-1;
         public int AddResource(IDisposable disposable)
         {
             var id = disposable.GetHashCode();
@@ -43,7 +44,13 @@ namespace xCVM.Core
         {
             this.xCVMOption = xCVMOption;
             RegisterSize = this.xCVMOption.RegisterSize;
-            Registers = new xCVMem() { data = new byte [ this.xCVMOption.RegisterCount * this.xCVMOption.RegisterSize ] };
+            {
+                var size = this.xCVMOption.RegisterCount * this.xCVMOption.RegisterSize;
+                var barray = new byte [ size ];
+                Array.Fill<byte>(barray , 0);
+                Registers = new xCVMem() { data = barray };
+
+            }
             MemoryBlocks = new xCVMemBlock();
             //ManagedMem = new ManagedMem();
             VM__BUFFER_4_BYTES = new byte [ 4 ];
@@ -60,10 +67,37 @@ namespace xCVM.Core
             }
             runtimeData = new RuntimeData(Registers , MemoryBlocks);
         }
-
+        public void SetEnvironmentVariable(IDictionary EV)
+        {
+            var EID = MemoryBlocks.MALLOC(EV.Count * Constants.int_size * 2);
+            int C = 0;
+            foreach (var item in EV.Keys)
+            {
+                var KID = MemoryBlocks.PUT(Encoding.UTF8.GetBytes(item.ToString()));
+                var VID = MemoryBlocks.PUT(Encoding.UTF8.GetBytes(EV [ item ].ToString()));
+                WriteBytes(KID , MemoryBlocks.Datas [ EID ].data , C);
+                C += Constants.int_size;
+                WriteBytes(VID , MemoryBlocks.Datas [ EID ].data , C);
+                C += Constants.int_size;
+            }
+            WriteBytes(EID , MemoryBlocks.Datas [ 0 ].data , 0);
+        }
+        public void SetArguments(string [ ] args)
+        {
+            var AID = MemoryBlocks.MALLOC(args.Length * Constants.int_size);
+            int C = 0;
+            foreach (var item in args)
+            {
+                var KID = MemoryBlocks.PUT(Encoding.UTF8.GetBytes(item));
+                WriteBytes(KID , MemoryBlocks.Datas [ AID ].data , C);
+                C += Constants.int_size;
+            }
+            WriteBytes(args.Length , MemoryBlocks.Datas [ 0 ].data , Constants.int_size);
+            WriteBytes(AID , MemoryBlocks.Datas [ 0 ].data , Constants.int_size * 2);
+        }
         void InitMemory()
         {
-            MemoryBlocks.MALLOC(10 , 0);
+            MemoryBlocks.MALLOC(3 * RegisterSize , 0);
         }
         byte [ ] VM__BUFFER_4_BYTES;
         byte [ ] VM__BUFFER_8_BYTES;
@@ -584,6 +618,17 @@ namespace xCVM.Core
                         {
                             PC = RegisterToInt32(instruct.Op1) - 1;
                         }
+                    }
+                    break;
+                case (int)Inst.call:
+                    {
+
+                        CallStack.Push(new CallFrame(CurrentModule , PC + 1 , RegisterToInt32(Constants.MainStack)));
+                        var module = RegisterToInt32(instruct.Op0);
+                        var fun_ID = RegisterToInt32(instruct.Op1);
+                        CurrentModule = module;
+                        var func = LoadedModules [ CurrentModule ].ExternFunctions [ fun_ID ];
+                        PC = func.Label - 1;
                     }
                     break;
                 case (int)Inst.pcs:
@@ -1141,14 +1186,30 @@ namespace xCVM.Core
         int PC = 0;
         public void Load(xCVMModule module)
         {
-            program = new xCVMRTProgram();
-            program.program = module;
             LoadedModules.Add(module.GetHashCode() , module);
             CurrentModule = module.GetHashCode();
         }
+        public void Destory()
+        {
+            var L = this.Resources.Count;
+            Running = false;
+            for (int i = 0 ; i < L ; i++)
+            {
+                var R = Resources.ElementAt(i);
+                try
+                {
+                    R.Value.Dispose();
+                }
+                catch (Exception)
+                {
+                }
+            }
+            LoadedModules.Clear();
+
+        }
         public void Run()
         {
-            if (program == null) return;
+            if (CurrentModule== -1) return;
             Running = true;
             while (Running)
             {
@@ -1204,65 +1265,6 @@ namespace xCVM.Core
         public xCVMem(byte [ ] data)
         {
             this.data = data;
-        }
-    }
-    public class xCVMemBlock
-    {
-        public Dictionary<int , xCVMem> Datas = new Dictionary<int , xCVMem>();
-        public int PUT(byte [ ] data , int ForceKey = -1)
-        {
-            try
-            {
-                var mem = new xCVMem(data);
-                var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
-                Datas.Add(K , mem);
-                return K;
-
-            }
-            catch (Exception)
-            {
-                return -1;
-            }
-        }
-        public int MALLOC(int Size , int ForceKey = -1)
-        {
-            try
-            {
-                var mem = new xCVMem(new byte [ Size + 1 ]);
-                var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
-                Datas.Add(K , mem);
-                return K;
-            }
-            catch (Exception)
-            {
-                return -1;
-            }
-        }
-        public void FREE(int Key)
-        {
-            if (Datas.ContainsKey(Key))
-            {
-                Datas.Remove(Key);
-            }
-        }
-        public int REALLOC(int Key , int NewSize)
-        {
-            try
-            {
-                if (!Datas.ContainsKey(Key)) return -1;
-                var newD = new xCVMem(new byte [ NewSize ]);
-                var old = Datas [ Key ];
-                var L = Math.Min(old.data.Length , NewSize);
-                for (int i = 0 ; i < L ; i++)
-                {
-                    newD.data [ i ] = old.data [ i ];
-                }
-                return Key;
-            }
-            catch (Exception)
-            {
-                return -1;
-            }
         }
     }
 }

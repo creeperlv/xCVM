@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cx.Core", "Cx\Cx.Core\Cx.Co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VMFunction", "VMFunction", "{A2F8F0DD-6D60-44D7-B6D1-557583024D1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemCalls", "VMFunctions\SystemCalls\SystemCalls.csproj", "{525809C8-5CA3-4A72-9FC6-F1D09E544182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemCalls", "VMFunctions\SystemCalls\SystemCalls.csproj", "{525809C8-5CA3-4A72-9FC6-F1D09E544182}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cx.Preprocessor", "Cx\Cx.Preprocessor\Cx.Preprocessor.csproj", "{64A55B7C-7F1B-42B9-A979-5E891301653B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,10 @@ Global
 		{525809C8-5CA3-4A72-9FC6-F1D09E544182}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{525809C8-5CA3-4A72-9FC6-F1D09E544182}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{525809C8-5CA3-4A72-9FC6-F1D09E544182}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64A55B7C-7F1B-42B9-A979-5E891301653B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64A55B7C-7F1B-42B9-A979-5E891301653B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64A55B7C-7F1B-42B9-A979-5E891301653B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64A55B7C-7F1B-42B9-A979-5E891301653B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5A554A01-B995-48DB-8D65-C0865A852E79} = {DE082038-489E-4A7F-82C0-45DA5F992B8B}
 		{525809C8-5CA3-4A72-9FC6-F1D09E544182} = {A2F8F0DD-6D60-44D7-B6D1-557583024D1A}
+		{64A55B7C-7F1B-42B9-A979-5E891301653B} = {DE082038-489E-4A7F-82C0-45DA5F992B8B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B462C80F-2718-4E96-ADE0-4CBC764339FF}

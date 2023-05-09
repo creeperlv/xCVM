@@ -290,12 +290,19 @@ namespace xCVM.Compiler
                     if (xCVMAssembler.AssemblerDefinition != null)
                     {
                         TextWriter textWriter = Console.Out;
+                        Stream stream=null;
                         if (arguments.OutDefinition != "STDOUT" && arguments.OutDefinition != "null")
                         {
-                            textWriter = new StreamWriter(File.OpenWrite(arguments.OutDefinition));
+                            stream = File.OpenWrite(arguments.OutDefinition);
+                            stream.SetLength(0);
+                            textWriter = new StreamWriter(stream);
                         }
                         textWriter.Write(JsonSerializer.Serialize(xCVMAssembler.AssemblerDefinition , SourceGenerationContext.Default.AssemblerDefinition));
-                        if (arguments.OutDefinition != "STDOUT" && arguments.OutDefinition != "null") textWriter.Close();
+                        if (arguments.OutDefinition != "STDOUT" && arguments.OutDefinition != "null")
+                        {
+                            textWriter.Close();
+                            stream.Close();
+                        }
                     }
                     return;
                 }
@@ -371,8 +378,9 @@ namespace xCVM.Compiler
                     {
                         case OutputType.Binary:
                             {
-                                using (var s = File.OpenWrite(arguments.Output))
+                                using (var s = File.Open(arguments.Output , FileMode.OpenOrCreate , FileAccess.Write , FileShare.Read))
                                 {
+                                    s.SetLength(0);
                                     xCVMModule.WriteBrinary(s);
                                     s.Flush();
                                 }
@@ -383,6 +391,13 @@ namespace xCVM.Compiler
                             {
                                 using (var fs = File.OpenWrite(arguments.Output))
                                 {
+                                    try
+                                    {
+                                        fs.SetLength(0);
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
                                     using (var fw = new StreamWriter(fs))
                                     {
                                         using (var s = new HEXStream { UnderlyingWriter = fw })
@@ -414,7 +429,7 @@ namespace xCVM.Compiler
     public class Arguments
     {
         public List<string> Inputs = new List<string>();
-        public string Output = "STDOUT";
+        public string Output = "a.out";
         public string UseAlternativeDefinition = "DEFAULT";
         public string OutDefinition = null;
         public string ResourceFile = null;

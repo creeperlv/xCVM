@@ -122,6 +122,13 @@ namespace xCVM.Core.CompilerServices
         {
             using (var fs = File.OpenWrite(path))
             {
+                try
+                {
+                    fs.SetLength(0);
+                }
+                catch (Exception)
+                {
+                }
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
                     WriteWriter(sw);

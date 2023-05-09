@@ -89,6 +89,7 @@ namespace xCVMc.Data
                 new InstructionDefinition{ Name="jmpr",  ID=(int)Inst.jmpr, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.syscall}",  ID=(int)Inst.syscall, OP0DT=1, OP0REG=false, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.syscallr}",  ID=(int)Inst.syscallr, OP0DT=1, OP0REG=true, OP1DT=-2,OP1REG=false,OP2DT=-2, OP2REG=false},
+                new InstructionDefinition{ Name=$"{Inst.call}",  ID=(int)Inst.call, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.ifj}",  ID=(int)Inst.ifj, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.ifjr}",  ID=(int)Inst.ifjr, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=false},
                 new InstructionDefinition{ Name=$"{Inst.malloc}",  ID=(int)Inst.malloc, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=-2, OP2REG=true},
