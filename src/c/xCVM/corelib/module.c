@@ -10,7 +10,7 @@ Result NewModule(){
 Result LoadModule(FILE* f){
 	Result r=NewResult();
 	if(r==NULL){
-		Panic();		
+		Panic();
 	}
 	Result mr=NewModule();
 	if(mr->HasError){
@@ -20,6 +20,20 @@ Result LoadModule(FILE* f){
 	}
 	Module m=mr->Data;
 	DestoryResult(mr);
+	//HEADER CHECK
+	{
+		byte header[4];//=new byte[4];
+		header[0]=fgetc(f);
+		header[1]=fgetc(f);
+		header[2]=fgetc(f);
+		header[3]=fgetc(f);
+		if(!ByteArrayEqualsCStr(&header, "xCVM",4)){
+			r->HasError=true;
+			r->error=NewErrorWID(ERROR_CORE_DATA_MODULE_HEADER_MISMATCH);
+			return r;
+		}
+	}
+	//
 	while(true){
 		char c=fgetc(f);
 		if(c==EOF){

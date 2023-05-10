@@ -38,9 +38,12 @@ typedef struct _str{
 }* string;
 
 Error NewError();
+Error NewErrorWID(int ID);
 Result NewResult();
 string NewString();
 bool AddChar(string str, char c);
+Result ToCStr(string str);
+bool ByteArrayEqualsCStr(byte* L,char* R,size_t LLen);
 bool CStrEqualsCStr(char* L,char* R);
 void DestoryResult(Result r);
 void Panic();

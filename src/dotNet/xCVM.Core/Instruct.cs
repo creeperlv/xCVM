@@ -261,6 +261,11 @@ namespace xCVM.Core
         /// </summary>
         realloc = 0x005C,
         /// <summary>
+        /// Re-Allocate Right aligned.
+        /// reallocl $register_contain_original_pointer $register_contains_new_size $register_to_store_pointer
+        /// </summary>
+        reallocl = 0x005F,
+        /// <summary>
         /// free $register_contains_the_pointer $register_to_store_result
         /// </summary>
         free = 0x005D,

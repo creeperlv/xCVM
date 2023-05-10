@@ -22,7 +22,7 @@ namespace xCVM.Core
         Stack<CallFrame> CallStack = new Stack<CallFrame>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
         public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
-        int CurrentModule=-1;
+        int CurrentModule = -1;
         public int AddResource(IDisposable disposable)
         {
             var id = disposable.GetHashCode();
@@ -516,12 +516,32 @@ namespace xCVM.Core
                         WriteBytes(id , Registers.data , op1);
                     }
                     break;
+                case (int)Inst.mlen:
+                    {
+                        int OP0 = RegisterToInt32(instruct.Op0!);
+                        int op1 = RegisterToInt32(instruct.Op1!);
+                        if (MemoryBlocks.Datas.ContainsKey(OP0))
+                            WriteBytes(-1 , Registers.data , op1);
+                        else
+                        {
+                            WriteBytes(MemoryBlocks.Datas [ OP0 ].data.Length , Registers.data , op1);
+                        }
+                    }
+                    break;
                 case (int)Inst.realloc:
                     {
                         int OP0 = RegisterToInt32(instruct.Op0);
                         int OP1 = RegisterToInt32(instruct.Op1);
                         int op2 = ToRegisterOffset(instruct.Op2);
-                        WriteBytes(MemoryBlocks.REALLOC(OP0 , OP1) , Registers.data , op2);
+                        WriteBytes(MemoryBlocks.REALLOC(OP0 , OP1 , false) , Registers.data , op2);
+                    }
+                    break;
+                case (int)Inst.reallocl:
+                    {
+                        int OP0 = RegisterToInt32(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int op2 = ToRegisterOffset(instruct.Op2);
+                        WriteBytes(MemoryBlocks.REALLOC(OP0 , OP1 , true) , Registers.data , op2);
                     }
                     break;
                 case (int)Inst.free:
@@ -1209,7 +1229,7 @@ namespace xCVM.Core
         }
         public void Run()
         {
-            if (CurrentModule== -1) return;
+            if (CurrentModule == -1) return;
             Running = true;
             while (Running)
             {

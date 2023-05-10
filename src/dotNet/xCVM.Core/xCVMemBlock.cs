@@ -44,7 +44,7 @@ namespace xCVM.Core
                 Datas.Remove(Key);
             }
         }
-        public int REALLOC(int Key , int NewSize)
+        public int REALLOC(int Key , int NewSize , bool RightAligned)
         {
             try
             {
@@ -52,9 +52,20 @@ namespace xCVM.Core
                 var newD = new xCVMem(new byte [ NewSize ]);
                 var old = new Span<byte>(Datas [ Key ].data);
                 var L = Math.Min(old.Length , NewSize);
-                for (int i = 0 ; i < L ; i++)
+                var OL = old.Length - 1;
+                if (RightAligned)
                 {
-                    newD.data [ i ] = old [ i ];
+                    for (int i = 0 ; i < L ; i++)
+                    {
+                        newD.data [ i ] = old [ OL - i ];
+                    }
+                }
+                else
+                {
+                    for (int i = 0 ; i < L ; i++)
+                    {
+                        newD.data [ i ] = old [ i ];
+                    }
                 }
                 return Key;
             }

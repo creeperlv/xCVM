@@ -8,6 +8,9 @@ int main(int argc, char** argv){
 	char* fn=argv[1];
 	FILE* f=fopen(fn,"r");
 	Result r=LoadModule(f);
-	
+	if(r->HasError){
+		Write("Cannot load module: ");
+		WriteLine(GetErrorMessage(r->error.ID));
+	}
 	return 0;
 }
