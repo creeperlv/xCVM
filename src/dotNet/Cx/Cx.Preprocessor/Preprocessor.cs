@@ -11,9 +11,12 @@ namespace Cx.Preprocessor
     public class Preprocessor
     {
         FilesProvider FilesProvider;
+        FilesProvider ProcessedFile;
+        bool ProcessIntoMemory;
         public Preprocessor(FilesProvider filesProvider)
         {
             FilesProvider = filesProvider;
+            ProcessedFile = new FilesProvider();
         }
         CStyleParser CStyleParser = new CStyleParser();
         public Dictionary<string , string> Symbols = new Dictionary<string , string>();
@@ -22,28 +25,41 @@ namespace Cx.Preprocessor
             if (Symbols.ContainsKey(symbol)) { Symbols [ symbol ] = value; }
             else { Symbols.Add(symbol , value); }
         }
+        public void define(SegmentContext context)
+        {
+            var key = context.Current?.content ?? "";
+            var value = context.Current?.Next?.content ?? "";
+            Define(key , value);
+        }
         public void Undefine(string symbol)
         {
             if (Symbols.ContainsKey(symbol)) Symbols.Remove(symbol);
         }
-        public bool _if(string Condition)
+        public bool _if(SegmentContext context)
         {
 
             return false;
         }
-        public bool ifdef(string Condition)
+        public bool ifdef(SegmentContext context)
         {
-            return _if($"defined({Condition})");
+            return defined(context.Current?.content ?? "");
         }
-        public bool elif(string Condition)
+        public bool elif(SegmentContext context)
         {
-            return _if(Condition);
+            return _if(context);
         }
         public bool defined(string name)
         {
             return Symbols.ContainsKey(name);
         }
+        public OperationResult<bool> Process(List<VirtualFile> files)
+        {
+            foreach (var item in files)
+            {
 
+            }
+            return new OperationResult<bool>(false);
+        }
         public VirtualFile Process(Stream Input , string Identifier)
         {
             VirtualFile VirtualFile = new VirtualFile();

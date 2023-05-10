@@ -98,6 +98,21 @@ namespace xCVM.Core
         mul = 0x0005, muli = 0x0006,
         div = 0x0007, divi = 0x0008,
 
+        badd = 0x0101, baddi = 0x0102,
+        bsub = 0x0103, bsubi = 0x0104,
+        bmul = 0x0105, bmuli = 0x0106,
+        bdiv = 0x0107, bdivi = 0x0108,
+
+        sadd = 0x0111, saddi = 0x0112,
+        ssub = 0x0113, ssubi = 0x0114,
+        smul = 0x0115, smuli = 0x0116,
+        sdiv = 0x0117, sdivi = 0x0118,
+
+        usadd = 0x0121, usaddi = 0x0122,
+        ussub = 0x0123, ussubi = 0x0124,
+        usmul = 0x0125, usmuli = 0x0126,
+        usdiv = 0x0127, usdivi = 0x0128,
+
         uadd = 0x0071, uaddi = 0x0072,
         usub = 0x0073, usubi = 0x0074,
         umul = 0x0075, umuli = 0x0076,
@@ -126,6 +141,9 @@ namespace xCVM.Core
         ucmpi = 0x007A,
         fcmpi_s = 0x001A,
         fcmpi_d = 0x002A,
+        bcmpi_d = 0x010A,
+        scmpi_d = 0x011A,
+        uscmpi_d = 0x012A,
 
         ladd = 0x0051, laddi = 0x0052,
         lsub = 0x0053, lsubi = 0x0054,
@@ -136,6 +154,46 @@ namespace xCVM.Core
         ulsub = 0x0083, ulsubi = 0x0084,
         ulmul = 0x0085, ulmuli = 0x0086,
         uldiv = 0x0087, uldivi = 0x0088,
+        /// <summary>
+        /// load byte
+        /// <br/>
+        /// lwr $register_save_value $register_to_memory $register_to_offset
+        /// </summary>
+        lbr = 0x0200,
+        lbi = 0x0201,
+        /// <summary>
+        /// load double byte
+        /// </summary>
+        sbr = 0x0202,
+        sbi = 0x0203,
+        ldr = 0x0204,
+        ldi = 0x0205,
+        sdr = 0x0206,
+        sdi = 0x0207,
+        /// <summary>
+        /// push word
+        /// </summary>
+        pushw = 0x0300,
+        /// <summary>
+        /// push byte
+        /// </summary>
+        pushb = 0x0301,
+        /// <summary>
+        /// push double byte.
+        /// </summary>
+        pushd = 0x0302,
+        /// <summary>
+        /// Right Pop
+        /// </summary>
+        rpopw = 0x0303,
+        rpopb = 0x0304,
+        rpopd = 0x0305,
+        /// <summary>
+        /// Left Pop
+        /// </summary>
+        lpopw = 0x0306,
+        lpopb = 0x0307,
+        lpopd = 0x0308,
 
         lcmp = 0x0059,
         lcmpi = 0x005A,
@@ -207,7 +265,7 @@ namespace xCVM.Core
         /// <br/>
         /// cptxtr $register_to_text $register_to_receive_ID.
         /// </summary>
-        cptxtr =0x009D,
+        cptxtr = 0x009D,
         /// <summary>
         /// Jump to an absolute instruct.
         /// <br/>

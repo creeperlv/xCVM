@@ -555,15 +555,15 @@ namespace xCVM.Core
                         int OP1 = RegisterToInt32(instruct.Op1);
                         int OP2 = RegisterToInt32(instruct.Op2);
                         int op0 = ToRegisterOffset(instruct.Op0);
-                        MemoryBlocks.Datas [ OP1 ].data [ (OP2 * RegisterSize)..(OP2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
+                        MemoryBlocks.Datas [ OP1 ].data [ (OP2)..(OP2 + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
                 case (int)Inst.lwi:
                     {
                         int op0 = ToRegisterOffset(instruct.Op0);
-                        int op2 = ToRegisterOffset(instruct.Op2);
+                        int op2 = ImmediateToInt32(instruct.Op2);
                         int OP1 = RegisterToInt32(instruct.Op1);
-                        MemoryBlocks.Datas [ OP1 ].data [ (op2 * RegisterSize)..(op2 * RegisterSize + RegisterSize) ].CopyTo(Registers.data , op0);
+                        MemoryBlocks.Datas [ OP1 ].data [ (op2)..(op2 + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
                 case (int)Inst.swr:
@@ -578,7 +578,7 @@ namespace xCVM.Core
                     {
                         int OP0 = ToRegisterOffset(instruct.Op0);
                         int OP1 = RegisterToInt32(instruct.Op1);
-                        int op2 = ToRegisterOffset(instruct.Op2);
+                        int op2 = ImmediateToInt32(instruct.Op2);
                         var d = MemoryBlocks.Datas [ OP1 ].data;
                         Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(d , op2);
                     }
