@@ -723,7 +723,7 @@ namespace xCVM.Core
                         int op1 = RegisterToInt32(instruct.Op1!);
                         MemoryBlocks.Pop(op1 , 4 , false , Registers.data , OP0);
                     }
-                    break
+                    break;
                 case (int)Inst.rpopw:
                     {
                         int OP0 = ToRegisterOffset(instruct.Op0!);
@@ -737,7 +737,7 @@ namespace xCVM.Core
                         int op1 = RegisterToInt32(instruct.Op1!);
                         MemoryBlocks.Pop(op1 , 2 , false , Registers.data , OP0);
                     }
-                    break
+                    break;
                 case (int)Inst.rpopd:
                     {
                         int OP0 = ToRegisterOffset(instruct.Op0!);
@@ -751,7 +751,7 @@ namespace xCVM.Core
                         int op1 = RegisterToInt32(instruct.Op1!);
                         MemoryBlocks.Pop(op1 , 1 , false , Registers.data , OP0);
                     }
-                    break
+                    break;
                 case (int)Inst.rpopb:
                     {
                         int OP0 = ToRegisterOffset(instruct.Op0!);
