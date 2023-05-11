@@ -114,6 +114,23 @@ namespace xCVM.Core
             VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBytes(short Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBytes(ushort Data , byte [ ] Target , int Offset)
+        {
+            BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
+            VM__BUFFER_4_BYTES.CopyTo(Target , Offset);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBytes(byte Data , byte [ ] Target , int Offset)
+        {
+            Target [ Offset ] = Data;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBytesToRegister(int Data , int RegisterID)
         {
             BitConverter.TryWriteBytes(VM__BUFFER_4_BYTES , Data);
@@ -155,6 +172,27 @@ namespace xCVM.Core
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;
             return BitConverter.ToInt32(Registers.data , op_i);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public short RegisterToInt16(byte [ ]? inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToInt16(Registers.data , op_i);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ushort RegisterToUInt16(byte [ ]? inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return BitConverter.ToUInt16(Registers.data , op_i);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ushort RegisterToByte(byte [ ]? inst_parameter)
+        {
+            int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
+            if (op_i == 0) return 0;
+            return Registers.data [ op_i ];
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int RegisterToInt32(int RegisterID)
@@ -202,6 +240,21 @@ namespace xCVM.Core
         public int ImmediateToInt32(byte [ ]? inst_parameter)
         {
             return BitConverter.ToInt32(inst_parameter);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public short ImmediateToInt16(byte [ ]? inst_parameter)
+        {
+            return BitConverter.ToInt16(inst_parameter);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ushort ImmediateToUInt16(byte [ ]? inst_parameter)
+        {
+            return BitConverter.ToUInt16(inst_parameter);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public byte ImmediateToByte(byte [ ]? inst_parameter)
+        {
+            return inst_parameter? [ 0 ] ?? 0;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ImmediateToInt64(byte [ ]? inst_parameter)
@@ -293,6 +346,132 @@ namespace xCVM.Core
                 case (int)Inst.divi:
                     {
                         WriteBytes(RegisterToInt32(instruct.Op0!) / ImmediateToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+
+                case (int)Inst.sadd:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) + RegisterToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.ssub:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) - RegisterToInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.smul:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) * RegisterToInt16(instruct.Op1!)), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.sdiv:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) / RegisterToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+
+                case (int)Inst.saddi:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) + ImmediateToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.ssubi:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) - ImmediateToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.smuli:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) * ImmediateToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.sdivi:
+                    {
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) / ImmediateToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+
+                case (int)Inst.usadd:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) + RegisterToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.ussub:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) - RegisterToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.usmul:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) * RegisterToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.usdiv:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) / RegisterToUInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+
+                case (int)Inst.usaddi:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) + ImmediateToUInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.ussubi:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) - ImmediateToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.usmuli:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) * ImmediateToUInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.usdivi:
+                    {
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) / ImmediateToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+
+                case (int)Inst.badd:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) + RegisterToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.bsub:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) - RegisterToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.bmul:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) * RegisterToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.bdiv:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) / RegisterToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+
+                case (int)Inst.baddi:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) + ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.bsubi:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) - ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.bmuli:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) * ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
+                case (int)Inst.bdivi:
+                    {
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) / ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 

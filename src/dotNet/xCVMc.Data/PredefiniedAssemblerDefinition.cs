@@ -14,16 +14,16 @@ namespace xCVMc.Data
                 { "NULL", "-1" },
                 { "null", "-1" },
                 { "stdout", "1" },
-                
+
                 { "retv", "1" },
-                
+
                 { "func_parameter_pointer", "3" },
                 { "fpp", "3" },
-                
+
                 { "cond", "4" },
                 { "condition", "4" },
                 { "cnd", "4" },
-                
+
                 { "mainstack", "5" },
                 { "p_ms", "5" },
                 { "mem_mainstack", "0" },
@@ -47,7 +47,7 @@ namespace xCVMc.Data
 
                 { "equal", "0" },
                 { "eq", "0" },
-                
+
                 { "notequal", "1" },
                 { "neq", "1" },
                 { "less", "2" },
@@ -133,6 +133,33 @@ namespace xCVMc.Data
                 new InstructionDefinition{ Name="muli", ID=(int)Inst.muli, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="div",  ID=(int)Inst.div, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="divi", ID=(int)Inst.divi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
+
+                new InstructionDefinition{ Name="badd",  ID=(int)Inst.badd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="baddi", ID=(int)Inst.baddi, OP0DT=1, OP0REG=true, OP1DT=Constants._byte,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="bsub",  ID=(int)Inst.bsub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="bsubi", ID=(int)Inst.bsubi, OP0DT=1, OP0REG=true, OP1DT=Constants._byte,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="bmul",  ID=(int)Inst.bmul, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="bmuli", ID=(int)Inst.bmuli, OP0DT=1, OP0REG=true, OP1DT=Constants._byte,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="bdiv",  ID=(int)Inst.bdiv, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="bdivi", ID=(int)Inst.bdivi, OP0DT=1, OP0REG=true, OP1DT=Constants._byte,OP1REG=false,OP2DT=1, OP2REG=true},
+
+                new InstructionDefinition{ Name="sadd",  ID=(int)Inst.sadd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="saddi", ID=(int)Inst.saddi, OP0DT=1, OP0REG=true, OP1DT=Constants._short,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ssub",  ID=(int)Inst.ssub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ssubi", ID=(int)Inst.ssubi, OP0DT=1, OP0REG=true, OP1DT=Constants._short,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="smul",  ID=(int)Inst.smul, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="smuli", ID=(int)Inst.smuli, OP0DT=1, OP0REG=true, OP1DT=Constants._short,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="sdiv",  ID=(int)Inst.sdiv, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="sdivi", ID=(int)Inst.sdivi, OP0DT=1, OP0REG=true, OP1DT=Constants._short,OP1REG=false,OP2DT=1, OP2REG=true},,
+
+                new InstructionDefinition{ Name="usadd",  ID=(int)Inst.usadd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="usaddi", ID=(int)Inst.usaddi, OP0DT=1, OP0REG=true, OP1DT=Constants._ushort,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ussub",  ID=(int)Inst.ussub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="ussubi", ID=(int)Inst.ussubi, OP0DT=1, OP0REG=true, OP1DT=Constants._ushort,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="usmul",  ID=(int)Inst.usmul, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="usmuli", ID=(int)Inst.usmuli, OP0DT=1, OP0REG=true, OP1DT=Constants._ushort,OP1REG=false,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="usdiv",  ID=(int)Inst.usdiv, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+                new InstructionDefinition{ Name="usdivi", ID=(int)Inst.usdivi, OP0DT=1, OP0REG=true, OP1DT=Constants._ushort,OP1REG=false,OP2DT=1, OP2REG=true},
 
                 new InstructionDefinition{ Name="uadd",  ID=(int)Inst.uadd, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name="uaddi", ID=(int)Inst.uaddi, OP0DT=1, OP0REG=true, OP1DT=5,OP1REG=false,OP2DT=1, OP2REG=true},

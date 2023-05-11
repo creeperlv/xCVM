@@ -917,6 +917,33 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
+                case Constants._short:
+                    {
+                        if (NextShort(assembleResult , context , AcceptRegister , SupressError , out var reg0))
+                        {
+                            reg = BitConverter.GetBytes(reg0);
+                            return true;
+                        }
+                    }
+                    break;
+                case Constants._ushort:
+                    {
+                        if (NextUShort(assembleResult , context , AcceptRegister , SupressError , out var reg0))
+                        {
+                            reg = BitConverter.GetBytes(reg0);
+                            return true;
+                        }
+                    }
+                    break;
+                case Constants._byte:
+                    {
+                        if (NextByte(assembleResult , context , AcceptRegister , SupressError , out var reg0))
+                        {
+                            reg = new byte []{ reg0 };
+                            return true;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -1232,6 +1259,118 @@ namespace xCVM.Core.CompilerServices
             reg0 = -1;
             return false;
         }
+        private bool NextShort(OperationResult<xCVMModule> assembleResult ,
+                              SegmentContext context ,
+                              bool AcceptRegister ,
+                              bool SupressError ,
+                              out short reg0)
+        {
+            if (context.GoNext())
+            {
+                var _long = context.Current!.content;
+                if (AcceptRegister)
+                {
+                    if (_long.StartsWith("$"))
+                    {
+                        _long = _long.Substring(1);
+                    }
+                    else
+                    {
+                        assembleResult.AddError(new RegisterFormatError(context.Last));
+                    }
+                }
+                if (short.TryParse(_long , out var data))
+                {
+                    reg0 = data;
+                    return true;
+                }
+                else
+                {
+                    if (AssemblerDefinition != null)
+                    {
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _long))
+                        {
+                            if (short.TryParse(_long , out data))
+                            {
+                                reg0 = data;
+                                return true;
+                            }
+                            else
+                            {
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
+                            }
+                        }
+                    }
+                    else
+                        if (!SupressError)
+                        assembleResult.AddError(new LongParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = -1;
+            return false;
+        }
+        private bool NextByte(OperationResult<xCVMModule> assembleResult ,
+                              SegmentContext context ,
+                              bool AcceptRegister ,
+                              bool SupressError ,
+                              out byte reg0)
+        {
+            if (context.GoNext())
+            {
+                var _long = context.Current!.content;
+                if (AcceptRegister)
+                {
+                    if (_long.StartsWith("$"))
+                    {
+                        _long = _long.Substring(1);
+                    }
+                    else
+                    {
+                        assembleResult.AddError(new RegisterFormatError(context.Last));
+                    }
+                }
+                if (byte.TryParse(_long , out var data))
+                {
+                    reg0 = data;
+                    return true;
+                }
+                else
+                {
+                    if (AssemblerDefinition != null)
+                    {
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _long))
+                        {
+                            if (byte.TryParse(_long , out data))
+                            {
+                                reg0 = data;
+                                return true;
+                            }
+                            else
+                            {
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
+                            }
+                        }
+                    }
+                    else
+                        if (!SupressError)
+                        assembleResult.AddError(new LongParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = 0;
+            return false;
+        }
         private bool NextULong(OperationResult<xCVMModule> assembleResult ,
                               SegmentContext context ,
                               bool AcceptRegister ,
@@ -1264,6 +1403,62 @@ namespace xCVM.Core.CompilerServices
                         if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _long))
                         {
                             if (ulong.TryParse(_long , out data))
+                            {
+                                reg0 = data;
+                                return true;
+                            }
+                            else
+                            {
+                                if (!SupressError)
+                                    assembleResult.AddError(new IntParseError(context.Last));
+                            }
+                        }
+                    }
+                    else
+                        if (!SupressError)
+                        assembleResult.AddError(new LongParseError(context.Last));
+                }
+            }
+            else
+            {
+                assembleResult.AddError(new UnexpectedEndOfFileError(context.Last));
+            }
+
+            reg0 = 0;
+            return false;
+        }
+        private bool NextUShort(OperationResult<xCVMModule> assembleResult ,
+                              SegmentContext context ,
+                              bool AcceptRegister ,
+                              bool SupressError ,
+                              out ushort reg0)
+        {
+            if (context.GoNext())
+            {
+                var _long = context.Current!.content;
+                if (AcceptRegister)
+                {
+                    if (_long.StartsWith("$"))
+                    {
+                        _long = _long.Substring(1);
+                    }
+                    else
+                    {
+                        assembleResult.AddError(new RegisterFormatError(context.Last));
+                    }
+                }
+                if (ushort.TryParse(_long , out var data))
+                {
+                    reg0 = data;
+                    return true;
+                }
+                else
+                {
+                    if (AssemblerDefinition != null)
+                    {
+                        if (AssemblerDefinition.PredefinedSymbols.TryGetValue(context.Current!.content , out _long))
+                        {
+                            if (ushort.TryParse(_long , out data))
                             {
                                 reg0 = data;
                                 return true;
