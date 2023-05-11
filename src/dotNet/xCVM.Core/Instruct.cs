@@ -175,6 +175,7 @@ namespace xCVM.Core
         sdi = 0x0207,
         /// <summary>
         /// push word
+        /// pushw $register_of_content $pointer
         /// </summary>
         pushw = 0x0300,
         /// <summary>
@@ -325,7 +326,7 @@ namespace xCVM.Core
         /// Re-Allocate Right aligned.
         /// reallocl $register_contain_original_pointer $register_contains_new_size $register_to_store_pointer
         /// </summary>
-        reallocl = 0x005F,
+        reallocr = 0x005F,
         /// <summary>
         /// free $register_contains_the_pointer $register_to_store_result
         /// </summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace xCVM.Core
 {
@@ -19,6 +20,37 @@ namespace xCVM.Core
             catch (Exception)
             {
                 return -1;
+            }
+        }
+        public void Push(int ID , byte [ ] data,int offset,int len)
+        {
+            Stack<byte> bytes = new Stack<byte>(Datas [ ID ].data);
+            var L = len;
+            for (int i = 0 ; i < L ; i++)
+            {
+                bytes.Push(data [ offset+i ]);
+            }
+            Datas [ ID ].data = bytes.ToArray();
+        }
+        public void Pop(int ID , int Len , bool IsStack , byte [ ] reciver , int Offset)
+        {
+            if (IsStack)
+            {
+                Stack<byte> bytes = new Stack<byte>(Datas [ ID ].data);
+                for (int i = 0 ; i < Len ; i++)
+                {
+                    reciver [ Offset +Len- i ] = bytes.Pop();
+                }
+                Datas [ ID ].data = bytes.ToArray();
+            }
+            else
+            {
+                Queue<byte> bytes = new Queue<byte>(Datas [ ID ].data);
+                for (int i = 0 ; i < Len ; i++)
+                {
+                    reciver [ Offset + i ] = bytes.Dequeue();
+                }
+                Datas [ ID ].data = bytes.ToArray();
             }
         }
         public int MALLOC(int Size , int ForceKey = -1)
