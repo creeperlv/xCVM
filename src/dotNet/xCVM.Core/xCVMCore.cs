@@ -356,12 +356,12 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.ssub:
                     {
-                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) - RegisterToInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) - RegisterToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.smul:
                     {
-                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) * RegisterToInt16(instruct.Op1!)), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((short)(RegisterToInt16(instruct.Op0!) * RegisterToInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.sdiv:
@@ -408,13 +408,13 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.usdiv:
                     {
-                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) / RegisterToUInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) / RegisterToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
                 case (int)Inst.usaddi:
                     {
-                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) + ImmediateToUInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) + ImmediateToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.ussubi:
@@ -424,7 +424,7 @@ namespace xCVM.Core
                     break;
                 case (int)Inst.usmuli:
                     {
-                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) * ImmediateToUInt16(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((ushort)(RegisterToUInt16(instruct.Op0!) * ImmediateToUInt16(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.usdivi:
@@ -456,22 +456,22 @@ namespace xCVM.Core
 
                 case (int)Inst.baddi:
                     {
-                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) + ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) + ImmediateToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.bsubi:
                     {
-                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) - ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) - ImmediateToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.bmuli:
                     {
-                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) * ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) * ImmediateToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
                 case (int)Inst.bdivi:
                     {
-                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) / ImmediateToByte(instruct.Op1!) ), Registers.data , ToRegisterOffset(instruct.Op2!));
+                        WriteBytes((byte)(RegisterToByte(instruct.Op0!) / ImmediateToByte(instruct.Op1!)) , Registers.data , ToRegisterOffset(instruct.Op2!));
                     }
                     break;
 
@@ -737,6 +737,22 @@ namespace xCVM.Core
                         MemoryBlocks.Datas [ OP1 ].data [ (OP2)..(OP2 + RegisterSize) ].CopyTo(Registers.data , op0);
                     }
                     break;
+                case (int)Inst.lbr:
+                    {
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int OP2 = RegisterToInt32(instruct.Op2);
+                        int op0 = ToRegisterOffset(instruct.Op0);
+                        Registers.data [ op0 ] = MemoryBlocks.Datas [ OP1 ].data [ OP2 ];
+                    }
+                    break;
+                case (int)Inst.lbi:
+                    {
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int OP2 = ImmediateToInt32(instruct.Op2);
+                        int op0 = ToRegisterOffset(instruct.Op0);
+                        Registers.data [ op0 ] = MemoryBlocks.Datas [ OP1 ].data [ OP2 ];
+                    }
+                    break;
                 case (int)Inst.lwi:
                     {
                         int op0 = ToRegisterOffset(instruct.Op0);
@@ -760,6 +776,24 @@ namespace xCVM.Core
                         int op2 = ImmediateToInt32(instruct.Op2);
                         var d = MemoryBlocks.Datas [ OP1 ].data;
                         Registers.data [ OP0..(OP0 + RegisterSize) ].CopyTo(d , op2);
+                    }
+                    break;
+                case (int)Inst.sbi:
+                    {
+                        int OP0 = ToRegisterOffset(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int op2 = ImmediateToInt32(instruct.Op2);
+                        var d = MemoryBlocks.Datas [ OP1 ].data;
+                        d [ op2 ] = Registers.data [ OP0 ];
+                    }
+                    break;
+                case (int)Inst.sbr:
+                    {
+                        int OP0 = ToRegisterOffset(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int op2 = RegisterToInt32(instruct.Op2);
+                        var d = MemoryBlocks.Datas [ OP1 ].data;
+                        d [ op2 ] = Registers.data [ OP0 ];
                     }
                     break;
                 case (int)Inst.cptxt:
@@ -894,6 +928,94 @@ namespace xCVM.Core
                         var comp = ImmediateToInt32(instruct.Op2);
                         var L = RegisterToInt32(instruct.Op0);
                         var R = ImmediateToInt32(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.bcmp:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToByte(instruct.Op0);
+                        var R = RegisterToByte(instruct.Op1);
+                        int result = 0;
+                        switch (comp)
+                        {
+                            case (int)CmpOp.eq:
+                                {
+                                    result = L == R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.neq:
+                                {
+                                    result = L != R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lt:
+                                {
+                                    result = L < R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.lteq:
+                                {
+                                    result = L <= R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gt:
+                                {
+                                    result = L > R ? 1 : 0;
+                                }
+                                break;
+                            case (int)CmpOp.gteq:
+                                {
+                                    result = L >= R ? 1 : 0;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteBytes(result , Registers.data , 4 * RegisterSize);
+                    }
+                    break;
+                case (int)Inst.bcmpi:
+                    {
+                        var comp = ImmediateToInt32(instruct.Op2);
+                        var L = RegisterToByte(instruct.Op0);
+                        var R = ImmediateToByte(instruct.Op1);
                         int result = 0;
                         switch (comp)
                         {
