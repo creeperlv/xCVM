@@ -36,12 +36,16 @@ namespace xCVM.Core
         {
             if (IsStack)
             {
-                Stack<byte> bytes = new Stack<byte>(Datas [ ID ].data);
-                for (int i = 0 ; i < Len ; i++)
-                {
-                    reciver [ Offset +Len- i ] = bytes.Pop();
-                }
-                Datas [ ID ].data = bytes.ToArray();
+                var span = Datas [ID].data.AsSpan ();
+                var poped = span.Slice(span.Length - Len , Len).ToArray() ;
+                poped.CopyTo(reciver , Offset);
+                Datas [ ID ].data=span.Slice(0, span.Length - Len).ToArray();
+                //Stack<byte> bytes = new Stack<byte>(Datas [ ID ].data);
+                //for (int i = 0 ; i < Len ; i++)
+                //{
+                //    reciver [ Offset +Len- i ] = bytes.Pop();
+                //}
+                //Datas [ ID ].data = bytes.ToArray();
             }
             else
             {
@@ -82,7 +86,8 @@ namespace xCVM.Core
             {
                 if (!Datas.ContainsKey(Key)) return -1;
                 var newD = new xCVMem(new byte [ NewSize ]);
-                var old = new Span<byte>(Datas [ Key ].data);
+                var old = Datas [ Key ].data.AsSpan();
+                
                 var L = Math.Min(old.Length , NewSize);
                 var OL = old.Length - 1;
                 if (RightAligned)

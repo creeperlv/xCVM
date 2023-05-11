@@ -108,7 +108,7 @@ namespace xCVM.Core
                 xCVMResource?.WriteToStream(stream);
             }
         }
-        public static xCVMModule FromStream(Stream stream)
+        public static xCVMModule? FromStream(Stream stream)
         {
             xCVMModule xCVMModule = new xCVMModule();
             {
@@ -128,7 +128,7 @@ namespace xCVM.Core
                 if (!Pass)
                 {
                     //Should throw error.
-                    return xCVMModule;
+                    return null;
                 }
             }
             {

@@ -18,7 +18,6 @@ namespace xCVM.Core
         xCVMemBlock MemoryBlocks;
         public RuntimeData runtimeData;
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
-        Dictionary<string , int> ModuleNameIDMap = new Dictionary<string , int>();
         Stack<CallFrame> CallStack = new Stack<CallFrame>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
         public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
@@ -40,9 +39,11 @@ namespace xCVM.Core
             else
                 SysCalls.Add(ID , call);
         }
-        public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories)
+        ModuleProvider? mprovider;
+        public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories , ModuleProvider? provider)
         {
             this.xCVMOption = xCVMOption;
+            this.mprovider = provider;
             RegisterSize = this.xCVMOption.RegisterSize;
             {
                 var size = this.xCVMOption.RegisterCount * this.xCVMOption.RegisterSize;
@@ -793,6 +794,50 @@ namespace xCVM.Core
                         MemoryBlocks.FREE(OP0);
                     }
                     break;
+                case (int)Inst.lm:
+                    {
+                        int OP0 = ImmediateToInt32(instruct.Op0);
+                        var ID = LoadedModules [ CurrentModule ].IDs [ OP0 ];
+                        var __id = ID.GetHashCode();
+                        if (LoadedModules.ContainsKey(__id))
+                        {
+
+                        }
+                        else
+                        {
+                            if (mprovider != null)
+                            {
+                                var module = mprovider.LoadModule(ID);
+                                if (module != null)
+                                {
+                                    LoadedModules.Add(__id , module);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case (int)Inst.lmr:
+                    {
+                        int OP0 = RegisterToInt32(instruct.Op0);
+                        var ID = LoadedModules [ CurrentModule ].IDs [ OP0 ];
+                        var __id = ID.GetHashCode();
+                        if (LoadedModules.ContainsKey(__id))
+                        {
+
+                        }
+                        else
+                        {
+                            if (mprovider != null)
+                            {
+                                var module = mprovider.LoadModule(ID);
+                                if (module != null)
+                                {
+                                    LoadedModules.Add(__id , module);
+                                }
+                            }
+                        }
+                    }
+                    break;
                 case (int)Inst.lwr:
                     {
                         int OP1 = RegisterToInt32(instruct.Op1);
@@ -921,9 +966,10 @@ namespace xCVM.Core
                     {
 
                         CallStack.Push(new CallFrame(CurrentModule , PC + 1 , RegisterToInt32(Constants.MainStack)));
-                        var module = RegisterToInt32(instruct.Op0);
+                        var m_id = RegisterToInt32(instruct.Op0);
                         var fun_ID = RegisterToInt32(instruct.Op1);
-                        CurrentModule = module;
+                        var Name = LoadedModules [ CurrentModule ].IDs [ m_id ];
+                        CurrentModule = Name.GetHashCode();
                         var func = LoadedModules [ CurrentModule ].ExternFunctions [ fun_ID ];
                         PC = func.Label - 1;
                     }
