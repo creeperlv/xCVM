@@ -19,14 +19,14 @@ namespace SystemCalls
                 var fs = core.Resources [ ResourceID ] as Stream;
                 if (fs is null)
                 {
-                    core.WriteBytesToRegister(-1 , 3);
+                    core.WriteBytesToRegister(-1 , Constants.retv);
                     return;
                 }
                 var c = fs.Read(core.runtimeData.MemoryBlocks.Datas [ data ].data , 0 , count);
-                core.WriteBytesToRegister(c , 3);
+                core.WriteBytesToRegister(c , Constants.retv);
                 return;
             }
-            core.WriteBytesToRegister(-1 , 3);
+            core.WriteBytesToRegister(-1 , Constants.retv);
             return;
         }
     }

@@ -20,5 +20,7 @@
         public const int _byte= 7;
         public const int _short= 8;
         public const int _ushort= 9;
+        public const int retv= 1;
+        public const int fpp= 3;
     }
 }

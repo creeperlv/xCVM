@@ -18,15 +18,15 @@ namespace SystemCalls
                     var fs = core.Resources [ ResourceID ];
                     fs.Dispose();
                     core.Resources.Remove(ResourceID);
-                    core.WriteBytesToRegister(0 , 3);
+                    core.WriteBytesToRegister(0 , Constants.retv);
                 }
                 catch (System.Exception)
                 {
-                    core.WriteBytesToRegister(-1 , 3);
+                    core.WriteBytesToRegister(-1 , Constants.retv);
                 }
                 return;
             }
-            core.WriteBytesToRegister(0 , 3);
+            core.WriteBytesToRegister(0 , Constants.retv);
             return;
         }
     }

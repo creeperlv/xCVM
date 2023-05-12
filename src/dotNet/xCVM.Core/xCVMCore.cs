@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace xCVM.Core
 {
@@ -308,6 +309,109 @@ namespace xCVM.Core
                         else { Running = false; }
                         return;
                     }
+                case (int)Inst.cvt:
+                    {
+                        int RegisterID = ToRegisterOffset(instruct.Op0!);
+                        int OT = ImmediateToInt32(instruct.Op1);
+                        int TT = ImmediateToInt32(instruct.Op2);
+                        switch (OT)
+                        {
+                            case Constants._int:
+                                {
+                                    var odata = RegisterToInt32(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._uint:
+                                {
+                                    var odata = RegisterToUInt32(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._short:
+                                {
+                                    var odata = RegisterToInt16(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._ushort:
+                                {
+                                    var odata = RegisterToUInt16(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._long:
+                                {
+                                    var odata = RegisterToInt64(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._ulong:
+                                {
+                                    var odata = RegisterToUInt64(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._byte:
+                                {
+                                    var odata = RegisterToByte(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._float:
+                                {
+                                    var odata = RegisterToSingle(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            case Constants._double:
+                                {
+                                    var odata = RegisterToDouble(instruct.Op0);
+                                    cvt(odata);
+                                }
+                                break;
+                            default:
+                                return;
+                        }
+                        void cvt(object odata)
+                        {
+                            switch (TT)
+                            {
+                                case Constants._uint:
+                                    WriteBytes(Convert.ToUInt32(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._int:
+                                    WriteBytes(Convert.ToInt32(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._short:
+                                    WriteBytes(Convert.ToInt16(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._ushort:
+                                    WriteBytes(Convert.ToUInt16(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._float:
+                                    WriteBytes(Convert.ToSingle(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._long:
+                                    WriteBytes(Convert.ToInt64(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._double:
+                                    WriteBytes(Convert.ToDouble(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._byte:
+                                    WriteBytes(Convert.ToByte(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                case Constants._ulong:
+                                    WriteBytes(Convert.ToUInt64(odata) , Registers.data , Constants.retv * RegisterSize);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                        }
+                        WriteBytes(RegisterToInt32(instruct.Op0!) + RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));
+                    }
+                    break;
                 case (int)Inst.add:
                     {
                         WriteBytes(RegisterToInt32(instruct.Op0!) + RegisterToInt32(instruct.Op1!) , Registers.data , ToRegisterOffset(instruct.Op2!));

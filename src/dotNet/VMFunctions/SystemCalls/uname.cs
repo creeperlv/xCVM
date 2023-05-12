@@ -37,7 +37,7 @@ namespace SystemCalls
                 core.WriteBytesToMem(I_MACHINE , UNAME_STRUCT_ID , 16);
                 //core.WriteBytesToMem(-1 , UNAME_STRUCT_ID , 20);
             }
-            core.WriteBytesToRegister(-1 , 3);
+            core.WriteBytesToRegister(-1 , Constants.retv);
             return;
         }
     }

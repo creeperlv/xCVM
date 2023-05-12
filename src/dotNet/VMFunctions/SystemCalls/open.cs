@@ -73,7 +73,7 @@ namespace SystemCalls
                         break;
                 }
                 var id = core.AddResource(fs);
-                core.WriteBytesToRegister(id , 1);
+                core.WriteBytesToRegister(id , Constants.retv);
             }
         }
     }

@@ -199,6 +199,14 @@ namespace xCVM.Core
         lpopb = 0x0307,
         lpopd = 0x0308,
 
+        /// <summary>
+        /// convert data. Converted data will be write to retv.
+        /// <br/>
+        /// cvt $data_to_convert original_type target_type
+        /// </summary>
+        cvt=0x0320,
+
+
         lcmp = 0x0059,
         lcmpi = 0x005A,
         ulcmp = 0x0089,

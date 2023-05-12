@@ -18,15 +18,15 @@ namespace SystemCalls
                 var fs = core.Resources [ ResourceID ] as Stream;
                 if (fs is null)
                 {
-                    core.WriteBytesToRegister(-1 , 3);
+                    core.WriteBytesToRegister(-1 , Constants.retv);
                     return;
                 }
 
                 var l = (int)fs.Seek(offset , (SeekOrigin)seek);
-                core.WriteBytesToRegister(l , 3);
+                core.WriteBytesToRegister(l , Constants.retv);
                 return;
             }
-            core.WriteBytesToRegister(-1 , 3);
+            core.WriteBytesToRegister(-1 , Constants.retv);
             return;
         }
     }

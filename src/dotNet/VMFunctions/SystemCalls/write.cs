@@ -9,7 +9,7 @@ namespace SystemCalls
     {
         public void Execute(xCVMCore core)
         {
-            var ParameterPointer = core.RegisterToInt32(3);
+            var ParameterPointer = core.RegisterToInt32(Constants.fpp);
             var block = core.runtimeData.MemoryBlocks.Datas [ ParameterPointer ];
             var parameter_count = block.data.Length / 4;
             if (parameter_count == 3)
@@ -27,13 +27,13 @@ namespace SystemCalls
                 if (count >= 0)
                 {
                     fs.Write(d , 0 , count);
-                    core.WriteBytesToRegister(count , 1);
+                    core.WriteBytesToRegister(count , Constants.retv);
 
                 }
                 else
                 {
                     fs.Write(d , 0 , d.Length);
-                    core.WriteBytesToRegister(d.Length , 1);
+                    core.WriteBytesToRegister(d.Length , Constants.retv);
                 }
                 return;
             }
@@ -41,7 +41,7 @@ namespace SystemCalls
             {
                 Console.WriteLine("???");
             }
-            core.WriteBytesToRegister(-1 , 1);
+            core.WriteBytesToRegister(-1 , Constants.retv);
             return;
         }
     }
