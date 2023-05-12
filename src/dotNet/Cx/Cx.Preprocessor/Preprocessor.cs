@@ -7,7 +7,6 @@ using xCVM.Core.CompilerServices;
 
 namespace Cx.Preprocessor
 {
-
     public class Preprocessor
     {
         FilesProvider FilesProvider;
@@ -52,15 +51,13 @@ namespace Cx.Preprocessor
         {
             return Symbols.ContainsKey(name);
         }
-        public OperationResult<bool> Process(List<VirtualFile> files)
+        public OperationResult<Preprocessed?> Process(VirtualFile InputCFile)
         {
-            foreach (var item in files)
-            {
-
-            }
-            return new OperationResult<bool>(false);
+            Preprocessed preprocessed = new Preprocessed();
+            Process(InputCFile.GetStream() , InputCFile.ID , preprocessed , false);
+            return new OperationResult<Preprocessed?>(null);
         }
-        public VirtualFile Process(Stream Input , string Identifier)
+        public VirtualFile Process(Stream Input , string Identifier , Preprocessed preprocessed , bool isHeader)
         {
             VirtualFile VirtualFile = new VirtualFile();
             VirtualFile.ID = Identifier;
@@ -77,10 +74,27 @@ namespace Cx.Preprocessor
                     var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
                     SegmentContext segmentContext = new SegmentContext(LineParse);
                     var macro = segmentContext.MatchCollectionMarch(false , "include" , "define" , "if" , "undefine"
-                        , "ifndef" , "ifdef" , "elif" , "endif" , "else");
+                        , "ifndef" , "ifdef" , "elif" , "endif" , "else" , "pragma");
                     if (macro.Item1 == MatchResult.Match)
                     {
-
+                        switch (macro.Item2)
+                        {
+                            case 1:
+                                {
+                                    var m =segmentContext.MatchNext("<" , true);
+                                    if(m== MatchResult.Match)
+                                    {
+                                        var f=FilesProvider.Find(segmentContext.Current?.content??"");
+                                        if (f != null)
+                                        {
+                                            var vf=Process(f.GetStream() , f.ID , preprocessed , true);
+                                        }
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
