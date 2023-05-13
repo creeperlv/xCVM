@@ -4,7 +4,13 @@ namespace Cx.Core
 {
     public class VirtualFile : IDisposable, IEquatable<VirtualFile>, IEqualityComparer<VirtualFile>
     {
-        public string? ID;
+        public string ID;
+
+        public VirtualFile(string iD)
+        {
+            ID = iD;
+        }
+
         public MemoryStream? FileInMemory;
         public FileInfo? FileOnDisk;
         Stream? FStream;

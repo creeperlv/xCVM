@@ -3,7 +3,7 @@
     public class FilesProvider
     {
         public Dictionary<string , VirtualFile>? PredefinedFiles;
-        public DirectoryInfo? Directory;
+        public List<DirectoryInfo> SearchDirectories=new List<DirectoryInfo>();
         public VirtualFile? Find(string path , VirtualFile RelatedFile)
         {
             var f = Find(path);
@@ -16,7 +16,7 @@
                 if (fi.Exists)
                 {
                     var ID = fi.FullName;
-                    return new VirtualFile() { FileOnDisk = fi , ID = ID };
+                    return new VirtualFile(ID) { FileOnDisk = fi  };
                 }
             }
             return null;
@@ -30,14 +30,14 @@
                     return file;
                 }
             }
-            if (Directory != null)
+            foreach (var Directory in SearchDirectories)
             {
                 var target_path = Path.Combine(Directory.FullName , path);
                 if (File.Exists(target_path))
                 {
                     var fi = new FileInfo(target_path);
                     var ID = fi.FullName;
-                    return new VirtualFile() { FileOnDisk = fi , ID = ID };
+                    return new VirtualFile(ID) { FileOnDisk = fi };
                 }
             }
             return null;

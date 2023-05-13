@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Authentication;
 using Cx.Core;
 using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
@@ -10,12 +11,9 @@ namespace Cx.Preprocessor
     public class Preprocessor
     {
         FilesProvider FilesProvider;
-        FilesProvider ProcessedFile;
-        bool ProcessIntoMemory;
         public Preprocessor(FilesProvider filesProvider)
         {
             FilesProvider = filesProvider;
-            ProcessedFile = new FilesProvider();
         }
         CStyleParser CStyleParser = new CStyleParser();
         public Dictionary<string , string> Symbols = new Dictionary<string , string>();
@@ -54,20 +52,41 @@ namespace Cx.Preprocessor
         public OperationResult<Preprocessed?> Process(VirtualFile InputCFile)
         {
             Preprocessed preprocessed = new Preprocessed();
-            Process(InputCFile.GetStream() , InputCFile.ID , preprocessed , false);
+            Process(InputCFile , preprocessed , false);
             return new OperationResult<Preprocessed?>(null);
         }
-        public VirtualFile Process(Stream Input , string Identifier , Preprocessed preprocessed , bool isHeader)
+        public VirtualFile Process(VirtualFile Input , Preprocessed preprocessed , bool isHeader)
         {
-            VirtualFile VirtualFile = new VirtualFile();
-            VirtualFile.ID = Identifier;
+            VirtualFile VirtualFile = new VirtualFile(Input.ID);
             VirtualFile.FileInMemory = new MemoryStream();
-            StreamWriter sw = new StreamWriter(VirtualFile.FileInMemory);
-            StreamReader streamReader = new StreamReader(VirtualFile.FileInMemory);
+            StreamWriter sw = new StreamWriter(VirtualFile.GetStream());
+            StreamReader streamReader = new StreamReader(Input.GetStream());
             string? Line = null;
+            if (isHeader)
+            {
+                preprocessed.ProcessedHeader.Add(Input.ID , Input);
+            }
             while (true)
             {
                 Line = streamReader.ReadLine();
+                if (Line.Trim().EndsWith('\\'))
+                {
+                    while (true)
+                    {
+                        var NLine = streamReader.ReadLine();
+                        if (NLine == null)
+                        {
+                            break;
+                        }
+                        Line = Line.Substring(0 , Line.Length - 1);
+                        Line += "\n";
+                        Line += NLine;
+                        if (!NLine.Trim().EndsWith('\\'))
+                        {
+                            break;
+                        }
+                    }
+                }
                 if (Line == null) break;
                 if (Line.StartsWith("#"))
                 {
@@ -81,13 +100,13 @@ namespace Cx.Preprocessor
                         {
                             case 1:
                                 {
-                                    var m =segmentContext.MatchNext("<" , true);
-                                    if(m== MatchResult.Match)
+                                    var m = segmentContext.MatchNext("<" , true);
+                                    if (m == MatchResult.Match)
                                     {
-                                        var f=FilesProvider.Find(segmentContext.Current?.content??"");
+                                        var f = FilesProvider.Find(segmentContext.Current?.content ?? "");
                                         if (f != null)
                                         {
-                                            var vf=Process(f.GetStream() , f.ID , preprocessed , true);
+                                            var vf = Process(f , preprocessed , true);
                                         }
                                     }
                                 }
