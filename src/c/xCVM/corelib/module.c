@@ -27,12 +27,12 @@ Result LoadModule(FILE* f){
 		header[1]=fgetc(f);
 		header[2]=fgetc(f);
 		header[3]=fgetc(f);
-		if(!ByteArrayEqualsCStr(&header, "xCVM",4)){
-			r->HasError=true;
-			r->error=NewErrorWID(ERROR_CORE_DATA_MODULE_HEADER_MISMATCH);
-			return r;
-		}
-	}
+                if (!ByteArrayEqualsCStr(header, "xCVM", 4)) {
+                    r->HasError = true;
+                    r->error = NewErrorWID(ERROR_CORE_DATA_MODULE_HEADER_MISMATCH);
+                    return r;
+                }
+        }
 	//
 	while(true){
 		char c=fgetc(f);

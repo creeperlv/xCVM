@@ -40,7 +40,7 @@ typedef struct _str{
 Error NewError();
 Error NewErrorWID(int ID);
 Result NewResult();
-string NewString();
+Result NewString();
 bool AddChar(string str, char c);
 Result ToCStr(string str);
 bool ByteArrayEqualsCStr(byte* L,char* R,size_t LLen);

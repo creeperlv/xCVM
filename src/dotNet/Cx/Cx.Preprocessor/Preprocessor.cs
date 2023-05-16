@@ -62,6 +62,8 @@ namespace Cx.Preprocessor
             StreamWriter sw = new StreamWriter(VirtualFile.GetStream());
             StreamReader streamReader = new StreamReader(Input.GetStream());
             string? Line = null;
+            int IFSCOPE;
+            bool willskip = false;
             if (isHeader)
             {
                 preprocessed.ProcessedHeader.Add(Input.ID , Input);
@@ -98,17 +100,32 @@ namespace Cx.Preprocessor
                     {
                         switch (macro.Item2)
                         {
+                            case 0:
+                                {
+                                    if (!willskip)
+                                    {
+                                        var m = segmentContext.MatchNext("<" , true);
+                                        if (m == MatchResult.Match)
+                                        {
+                                            var f = FilesProvider.Find(segmentContext.Current?.content ?? "");
+                                            if (f != null)
+                                            {
+                                                var vf = Process(f , preprocessed , true);
+                                            }
+                                        }
+
+                                    }
+                                }
+                                break;
                             case 1:
                                 {
-                                    var m = segmentContext.MatchNext("<" , true);
-                                    if (m == MatchResult.Match)
-                                    {
-                                        var f = FilesProvider.Find(segmentContext.Current?.content ?? "");
-                                        if (f != null)
-                                        {
-                                            var vf = Process(f , preprocessed , true);
-                                        }
-                                    }
+                                    define(segmentContext);
+                                }
+                                break;
+                            case 2:
+                                {
+                                    willskip = _if(segmentContext);
+                                    IFSCOPE++;
                                 }
                                 break;
                             default:
