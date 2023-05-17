@@ -62,7 +62,7 @@ namespace Cx.Preprocessor
             StreamWriter sw = new StreamWriter(VirtualFile.GetStream());
             StreamReader streamReader = new StreamReader(Input.GetStream());
             string? Line = null;
-            int IFSCOPE;
+            int IFSCOPE=0;
             bool willskip = false;
             if (isHeader)
             {
