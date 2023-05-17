@@ -34,6 +34,17 @@ namespace Cx.Preprocessor
             var key = context.Current?.content ?? "";
             if (Symbols.ContainsKey(key)) Symbols.Remove(key);
         }
+        public ASTNode ParseEval(SegmentContext context)
+        {
+            SegmentContext segmentContext = new SegmentContext(context.Current);
+            while (true)
+            {
+                if (segmentContext.Current.content == "&&")
+                {
+
+                }
+            }
+        }
         public bool _if(SegmentContext context)
         {
 

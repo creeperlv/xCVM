@@ -19,7 +19,7 @@ namespace xCVM.VM
                     module = xCVMModule.FromStream(s);
                 }
 
-                xCVMCore core = new xCVMCore(new xCVMOption() { RegisterSize = Constants.int_size , RegisterCount = 16 } , null);
+                xCVMCore core = new xCVMCore(new xCVMOption() { RegisterSize = Constants.int_size , RegisterCount = 16 } , null,null);
                 {
                     //Setup Syscall
                     core.RegisterSysCall(3 , new read());
