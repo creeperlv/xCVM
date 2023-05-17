@@ -1,5 +1,6 @@
 ﻿using LibCLCC.NET.TextProcessing;
 using System.Collections.Generic;
+using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace xCVM.Core.CompilerServices
@@ -273,6 +274,37 @@ namespace xCVM.Core.CompilerServices
                 if (_Current == null) return true;
                 return _Current.content == "" && _Current.Next == null;
             }
+        }
+        public string FormTillEnd(bool IncludeCurrent , char sep)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            Segment? Current;
+            if (IncludeCurrent)
+            {
+                Current = this.Current;
+            }
+            else
+            {
+                Current = this.Current?.Next ?? null;
+            }
+            while (true)
+            {
+                if (Current == null) break;
+                if (Current.Next == null) break;
+                if (Current.isEncapsulated)
+                {
+                    stringBuilder.Append(Current.EncapsulationIdentifier);
+                    stringBuilder.Append(Current.content);
+                    stringBuilder.Append(Current.EncapsulationIdentifier);
+                }
+                else
+                    stringBuilder.Append(Current.content);
+                if (Current == null) break;
+                if (Current.Next == null) break;
+                stringBuilder.Append(sep);
+                Current = Current.Next;
+            }
+            return stringBuilder.ToString();
         }
     }
     public enum MatchResult

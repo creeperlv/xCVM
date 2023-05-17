@@ -21,9 +21,12 @@ namespace cxp
                 filesProvider.SearchDirectories.Add(new DirectoryInfo(x));
             });
             VirtualFile MainC=new VirtualFile(opt.MainCFile) { FileOnDisk=new FileInfo(opt.MainCFile)};
+            VirtualFile CombinedHeader=new VirtualFile(opt.OutputHeaderFile) { FileOnDisk=new FileInfo(opt.OutputHeaderFile)};
             Preprocessor preprocessor = new Preprocessor(filesProvider);
-            
-            var result=preprocessor.Process(MainC);
+            Preprocessed preprocessed = new Preprocessed();
+            preprocessed.ProcessedCFile = MainC;
+            preprocessed.CombinedHeader = CombinedHeader;
+            var result = preprocessor.Process(MainC ,preprocessed);
         }
     }
     public class Options

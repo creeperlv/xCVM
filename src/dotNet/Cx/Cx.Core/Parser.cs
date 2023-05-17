@@ -184,7 +184,7 @@ namespace Cx.Core
     }
     public class ASTNode : TreeNode
     {
-        public ASTNodeType Type;
+        public int Type;
         public Segment? Segment;
     }
 
