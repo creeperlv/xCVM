@@ -1,4 +1,5 @@
 ﻿using LibCLCC.NET.TextProcessing;
+using System;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.Core

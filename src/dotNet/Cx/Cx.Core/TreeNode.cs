@@ -1,4 +1,7 @@
-﻿namespace Cx.Core
+﻿using System;
+using System.Collections.Generic;
+
+namespace Cx.Core
 {
     [Serializable]
     public class TreeNode

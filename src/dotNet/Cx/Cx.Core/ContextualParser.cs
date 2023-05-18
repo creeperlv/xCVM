@@ -1,4 +1,5 @@
-﻿using xCVM.Core.CompilerServices;
+﻿using System.Collections.Generic;
+using xCVM.Core.CompilerServices;
 
 namespace Cx.Core
 {

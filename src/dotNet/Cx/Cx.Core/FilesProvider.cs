@@ -1,4 +1,7 @@
-﻿namespace Cx.Core
+﻿using System.Collections.Generic;
+using System.IO;
+
+namespace Cx.Core
 {
     public class FilesProvider
     {
