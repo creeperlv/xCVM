@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Text;
+using System.Xml.XPath;
 using Cx.Core;
 using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
@@ -34,21 +37,298 @@ namespace Cx.Preprocessor
             var key = context.Current?.content ?? "";
             if (Symbols.ContainsKey(key)) Symbols.Remove(key);
         }
-        public ASTNode ParseEval(SegmentContext context)
+        public OperationResult<bool> PerformClosure(SegmentContext segmentContext , string ClosureLeft , string ClosureRight)
         {
-            SegmentContext segmentContext = new SegmentContext(context.Current);
+            int ClosureLeftFound = 0;
+            List<Segment> Closed = new List<Segment>();
+            Segment? ClosureLeftPoint = null;
+            bool Hit = false;
             while (true)
             {
-                if (segmentContext.Current.content == "&&")
+                if (segmentContext.ReachEnd)
+                {
+                    break;
+                }
+                {
+                    var ML = segmentContext.Match(ClosureLeft);
+                    if (ML == MatchResult.Match)
+                    {
+                        ClosureLeftFound++;
+                        ClosureLeftPoint = segmentContext.Current;
+                        segmentContext.GoNext();
+                        continue;
+                    }
+                }
+                {
+                    var MR = segmentContext.Match(ClosureRight);
+                    if (MR == MatchResult.Match)
+                    {
+                        ClosureLeftFound--;
+                        if (ClosureLeftFound == 0)
+                        {
+                            ClosableSegment closableSegment = new ClosableSegment();
+                            closableSegment.ClosedSegments = Closed;
+                            closableSegment.LeftClosureIdentifer = ClosureLeftPoint;
+                            var LL = ClosureLeftPoint!.Prev;
+                            if (LL != null)
+                            {
+                                LL.Next = closableSegment;
+                            }
+                            closableSegment.Prev = LL;
+                            var RR = segmentContext.Current!.Next;
+                            if (RR != null)
+                                RR.Prev = segmentContext.Current;
+                            closableSegment.Next = RR;
+                            Closed = new List<Segment>();
+                            closableSegment.RightClosureIdentifer = segmentContext.Current;
+                            if (ClosureLeftPoint == segmentContext.HEAD)
+                            {
+                                segmentContext.SetHead(closableSegment);
+                            }
+                            Hit = true;
+                            segmentContext.GoNext();
+                            continue;
+                        }
+                        else if (ClosureLeftFound < 0)
+                        {
+                            var r = new OperationResult<bool>(false);
+                            r.AddError(new MisClosureError(segmentContext.Current));
+                            return r;
+                        }
+                    }
+                }
+                if (ClosureLeftFound > 0)
+                {
+                    Closed.Add(segmentContext.Current!);
+                }
+                segmentContext.GoNext();
+            }
+            return Hit;
+        }
+        public OperationResult<ASTNode?> SearchUnaryExpression(SegmentContext context , params string [ ] operators)
+        {
+
+            while (true)
+            {
+                if (context.ReachEnd) break;
+                if (context.Current is ClosableSegment)
+                {
+                    context.GoNext();
+                }
+                else
+                {
+
+                    var mr = context.MatchCollection(true , operators);
+                    if (mr.Item1 == MatchResult.Match)
+                    {
+                        ASTNode node = new ASTNode();
+                        node.Segment = context.Current;
+                        node.Type = ASTNodeType.BinaryExpression;
+                        if (context.Current == null)
+                        {
+                            var or = new OperationResult<ASTNode?>(null);
+                            or.AddError(new UnexpectedEndOfFileError(context.Current));
+                            return or;
+                        }
+                        {
+                            var RC = new SegmentContext(context.Current.Next);
+                            var RR = ParseEval(RC);
+                            if (RR.Errors.Count == 0)
+                            {
+                                if (RR.Result == null)
+                                {
+
+                                }
+                                else
+                                {
+                                    node.AddChild(RR.Result);
+                                }
+                            }
+                            else
+                            {
+                                return new OperationResult<ASTNode?>(null) { Errors = RR.Errors };
+                            }
+                        }
+                        return node;
+                    }
+                    else
+                    {
+                        context.GoNext();
+                    }
+                }
+            }
+            return new OperationResult<ASTNode?>(null);
+        }
+        public OperationResult<ASTNode?> SearchBinaryExpression(SegmentContext context , params string [ ] operators)
+        {
+            while (true)
+            {
+                if (context.ReachEnd) break;
+                var mr = context.MatchCollection(true , operators);
+                if (mr.Item1 == MatchResult.Match)
+                {
+                    ASTNode node = new ASTNode();
+                    node.Segment = context.Current;
+                    node.Type = ASTNodeType.BinaryExpression;
+                    {
+                        var LC = new SegmentContext(context.Current);
+                        LC.SetEndPoint(context.Current);
+                        var LR = ParseEval(LC);
+                        if (LR.Errors.Count == 0)
+                        {
+                            node.AddChild(LR.Result);
+                        }
+                    }
+                    if (context.Current == null)
+                    {
+                        var or = new OperationResult<ASTNode?>(null);
+                        or.AddError(new UnexpectedEndOfFileError(context.Current));
+                        return or;
+                    }
+                    {
+                        var RC = new SegmentContext(context.Current.Next);
+                        var RR = ParseEval(RC);
+                        if (RR.Errors.Count == 0)
+                        {
+                            if (RR.Result == null)
+                            {
+
+                            }
+                            else
+                            {
+                                node.AddChild(RR.Result);
+
+                            }
+                        }
+                        else
+                        {
+                            return new OperationResult<ASTNode?>(null) { Errors = RR.Errors };
+                        }
+                    }
+                    return node;
+                }
+                else
+                {
+                    context.GoNext();
+                }
+            }
+            return new OperationResult<ASTNode?>(null);
+        }
+        public OperationResult<ASTNode?> ParseEval(SegmentContext context)
+        {
+            SegmentContext segmentContext = new SegmentContext(context.Current);
+            if (context.Current!.Prev == null)
+            {
+                bool Hit = false;
+                if (context.Current.Next != null)
+                {
+                    if (context.Current.Next.content == "")
+                    {
+                        if (context.Current.Next.Next == null)
+                        {
+                            Hit = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Hit = true;
+                }
+                if (segmentContext.Current is ClosableSegment cs)
+                {
+                    var head = cs.ClosedSegments.First();
+                    var tail = cs.ClosedSegments.Last();
+                    var sc = new SegmentContext(head);
+                    sc.SetEndPoint(tail);
+                    var opres = ParseEval(sc);
+                    if (opres.Errors.Count == 0)
+                    {
+                        return opres;
+                    }
+                    else
+                    {
+                        return new OperationResult<ASTNode?>(null) { Errors = opres.Errors };
+                    }
+                }
+                else
                 {
 
                 }
             }
-        }
-        public bool _if(SegmentContext context)
-        {
+            var or = PerformClosure(segmentContext , "(" , ")");
+            if (or.Errors.Count > 0)
+            {
+                return new OperationResult<ASTNode?>(null) { Errors = or.Errors };
+            }
 
-            return false;
+            {
+                var result = SearchBinaryExpression(context , "&&" , "||");
+                if (result.Result != null)
+                {
+                    return result.Result;
+                }
+            }
+            {
+                var result = SearchBinaryExpression(context , "==" , ">=" , "<=" , "!=");
+                if (result.Result != null)
+                {
+                    return result.Result;
+                }
+            }
+            {
+                var result = SearchBinaryExpression(context , "*" , "/");
+                if (result.Result != null)
+                {
+                    return result.Result;
+                }
+            }
+            {
+                var result = SearchBinaryExpression(context , "+" , "-");
+                if (result.Result != null)
+                {
+                    return result.Result;
+                }
+            }
+            return new OperationResult<ASTNode?>(null);
+        }
+        public OperationResult<object?> Eval(ASTNode node)
+        {
+            if (node.Type == ASTNodeType.BinaryExpression)
+            {
+
+            }
+            else
+            if (node.Type == ASTNodeType.UnaryExpression)
+            {
+
+            }
+            return new OperationResult<object?>(true);
+        }
+        public OperationResult<bool> _if(SegmentContext context)
+        {
+            var AST = ParseEval(context);
+            if (AST.Errors.Count == 0)
+            {
+                var r = Eval(AST.Result);
+                if (r.Errors.Count == 0)
+                {
+                    var er = r.Result;
+                    if (er is bool b)
+                    {
+                        return b;
+                    }
+                    else if (er is int i)
+                    {
+                        return i > 0;
+                    }
+                }
+                else
+                {
+                    return new OperationResult<bool>(false) { Errors = r.Errors };
+                }
+                return false;
+            }
+            return new OperationResult<bool>(false) { Errors = AST.Errors };
         }
         public bool ifdef(SegmentContext context)
         {

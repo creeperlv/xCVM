@@ -13,12 +13,29 @@ namespace xCVM.Core.CompilerServices
     {
         private Segment? _Last = null;
         private Segment? _Current;
-
+        private Segment? EndPoint = null;
+        public void SetEndPoint(Segment? End)
+        {
+            EndPoint = End;
+        }
         public SegmentContext(Segment? current)
         {
+            _head = current;
             _Current = current;
         }
-
+        private Segment? _head=null;
+        public Segment? HEAD => _head;
+        public void SetHead(Segment ? segment)
+        {
+            _head=segment;
+        }
+        /// <summary>
+        /// Reset the current to the head.
+        /// </summary>
+        public void ResetCurrent()
+        {
+            _Current = HEAD;
+        }
         public Segment? Current => _Current;
         /// <summary>
         /// Use with care.
@@ -74,6 +91,35 @@ namespace xCVM.Core.CompilerServices
                 }
             }
             return (MatchResult.Mismatch, null);
+        }
+        public (MatchResult, int) MatchCollection(bool CaseSensitive = true , params string [ ] matches)
+        {
+
+            if (Current == null) return (MatchResult.ReachEnd, -1);
+            if (CaseSensitive)
+            {
+
+                for (int i = 0 ; i < matches.Length ; i++)
+                {
+                    if (Current.content == matches [ i ])
+                    {
+                        return (MatchResult.Match, i);
+                    }
+                }
+            }
+            else
+            {
+                var curr = Current.content.ToUpper();
+                for (int i = 0 ; i < matches.Length ; i++)
+                {
+                    if (curr == matches [ i ].ToUpper())
+                    {
+                        return (MatchResult.Match, i);
+                    }
+                }
+                return (MatchResult.Mismatch, -1);
+            }
+            return (MatchResult.Mismatch, -1);
         }
         public (MatchResult, int) MatchCollectionMarch(bool CaseSensitive = true , params string [ ] matches)
         {
@@ -253,6 +299,24 @@ namespace xCVM.Core.CompilerServices
                 return MatchResult.ReachEnd;
             }
         }
+        public MatchResult Match(IContentable content)
+        {
+            if (ReachEnd) return MatchResult.ReachEnd;
+            if (Current!.content == content.Content)
+            {
+                return MatchResult.Match;
+            }
+            return MatchResult.Mismatch;
+        }
+        public MatchResult Match(string content)
+        {
+            if (ReachEnd) return MatchResult.ReachEnd;
+            if (Current!.content == content)
+            {
+                return MatchResult.Match;
+            }
+            return MatchResult.Mismatch;
+        }
         public bool GoBack()
         {
             if (_Last == null) return false;
@@ -267,10 +331,14 @@ namespace xCVM.Core.CompilerServices
             _Current = _Current.Next;
             return _Current != null;
         }
+        /// <summary>
+        /// If it is **currently** end.
+        /// </summary>
         public bool ReachEnd
         {
             get
             {
+                if (EndPoint == _Current) return true;
                 if (_Current == null) return true;
                 return _Current.content == "" && _Current.Next == null;
             }
