@@ -234,25 +234,28 @@ namespace Cx.Preprocessor
                 {
                     Hit = true;
                 }
-                if (segmentContext.Current is ClosableSegment cs)
+                if (Hit)
                 {
-                    var head = cs.ClosedSegments.First();
-                    var tail = cs.ClosedSegments.Last();
-                    var sc = new SegmentContext(head);
-                    sc.SetEndPoint(tail);
-                    var opres = ParseEval(sc);
-                    if (opres.Errors.Count == 0)
+                    if (segmentContext.Current is ClosableSegment cs)
                     {
-                        return opres;
+                        var head = cs.ClosedSegments.First();
+                        var tail = cs.ClosedSegments.Last();
+                        var sc = new SegmentContext(head);
+                        sc.SetEndPoint(tail);
+                        var opres = ParseEval(sc);
+                        if (opres.Errors.Count == 0)
+                        {
+                            return opres;
+                        }
+                        else
+                        {
+                            return new OperationResult<ASTNode?>(null) { Errors = opres.Errors };
+                        }
                     }
                     else
                     {
-                        return new OperationResult<ASTNode?>(null) { Errors = opres.Errors };
+                        return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
                     }
-                }
-                else
-                {
-
                 }
             }
             var or = PerformClosure(segmentContext , "(" , ")");
@@ -289,10 +292,37 @@ namespace Cx.Preprocessor
                     return result.Result;
                 }
             }
+            {
+                var result = SearchUnaryExpression(context , "!" , "defined");
+                if (result.Result != null)
+                {
+                    return result.Result;
+                }
+            }
             return new OperationResult<ASTNode?>(null);
         }
         public OperationResult<object?> Eval(ASTNode node)
         {
+            if (node.Type == ASTNodeType.EndNode)
+            {
+                if (node.Segment != null)
+                {
+                    if (bool.TryParse(node.Segment.content , out var bres)) { 
+                        return bres;
+                    }
+                    else
+                    if (int.TryParse(node.Segment.content , out var ires))
+                    {
+                        return ires;
+                    }
+                    else
+                    if (int.TryParse(node.Segment.content , out var lres))
+                    {
+                        return lres;
+                    }
+
+                }
+            }
             if (node.Type == ASTNodeType.BinaryExpression)
             {
 
@@ -309,6 +339,10 @@ namespace Cx.Preprocessor
             var AST = ParseEval(context);
             if (AST.Errors.Count == 0)
             {
+                if (AST.Result != null)
+                {
+                    return new OperationResult<bool>(false);
+                }
                 var r = Eval(AST.Result);
                 if (r.Errors.Count == 0)
                 {
@@ -357,6 +391,7 @@ namespace Cx.Preprocessor
         {
             StringBuilder stringBuilder = new StringBuilder();
             var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
+            FloatPointScanner.ScanFloatPoint(ref LineParse);
             SegmentContext segmentContext = new SegmentContext(LineParse);
             while (true)
             {
@@ -399,6 +434,7 @@ namespace Cx.Preprocessor
         public OperationResult<string?> process_macro_line(string Line , ref bool willskip , ref Preprocessed preprocessed , ref int IFSCOPE)
         {
             var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
+            FloatPointScanner.ScanFloatPoint(ref LineParse);
             SegmentContext segmentContext = new SegmentContext(LineParse);
             var macro = segmentContext.MatchCollectionMarch(false , "include" , "define" , "if" , "undefine"
                 , "ifndef" , "ifdef" , "elif" , "endif" , "else" , "pragma");

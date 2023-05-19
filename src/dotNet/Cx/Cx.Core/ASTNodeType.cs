@@ -18,6 +18,7 @@
         public const int UseStruct = 13;
         public const int Name = 14;
         public const int Pointer = 15;
+        public const int EndNode = 16;
     }
 
 }
