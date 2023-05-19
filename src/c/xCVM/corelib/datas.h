@@ -53,11 +53,16 @@ typedef struct callframe {
     int ModuleID;
     int PC;
 } CallFrame;
+typedef struct _CS {
+    int Count;
+    int Size;
+    CallFrame* HEAD;
+}* CallStack;
 typedef struct xminst {
     xCVMRegister xmreg;
     xCVMMemory vmmem;
     DictElem LoadedModules;
     Module CurrentModule;
     int PC;
-    GenericList Callstack;
+    CallStack Callstack;
 } xCVMInstance;

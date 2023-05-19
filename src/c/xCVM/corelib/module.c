@@ -1,83 +1,107 @@
 #include "module.h"
-Result NewMetadata(){
-	Result r=NewResult();
-	if(r==NULL)Panic();
-	ModuleMetadata m=(ModuleMetadata)malloc(sizeof(struct _mi));
-	if(m==NULL){
+Result NewMetadata() {
+	Result r = NewResult();
+	if (r == NULL) { Panic(); return NULL; }
+	ModuleMetadata m = (ModuleMetadata)malloc(sizeof(struct _mi));
+	if (m == NULL) {
 		DestoryResult(r);
 		return NULL;
 	}
-	r->Data=m;
+	r->Data = m;
 	return r;
 }
-bool LoadModuleMeta(ModuleMetadata meta,FILE* f){
-	
-	return true;
-}
-Result NewInst(){
-	Result r=NewResult();
-	if(r==NULL)Panic();
-	Inst inst=(Inst)malloc (sizeof(struct __inst));
-	if(inst==NULL)return NULL;
-	r->Data=inst;
-	return r;
-}
-bool LoadInst(Inst inst,FILE* f){
+bool LoadModuleMeta(ModuleMetadata meta, FILE* f) {
 
 	return true;
 }
-Result NewModule(){
-	Result r=NewResult();
-	if(r==NULL)Panic();
-	Module m=(Module)malloc(sizeof(struct _m));
-	if(m==NULL){
+Result NewInst() {
+	Result r = NewResult();
+	if (r == NULL) { Panic(); return NULL; }
+	Inst inst = (Inst)malloc(sizeof(struct __inst));
+	if (inst == NULL)return NULL;
+	r->Data = inst;
+	return r;
+}
+bool LoadInst(Inst inst, FILE* f) {
+
+	return true;
+}
+Result NewModule() {
+	Result r = NewResult();
+	if (r == NULL) { Panic(); return NULL; }
+	Module m = (Module)malloc(sizeof(struct _m));
+	if (m == NULL) {
 		DestoryResult(r);
 		return NULL;
 	}
-	r->Data=m;
+	r->Data = m;
 	return r;
 }
-Result LoadModule(FILE* f){
-	Result r=NewResult();
-	if(r==NULL){
+Result LoadModule(FILE* f) {
+	Result r = NewResult();
+	if (r == NULL) {
 		Panic();
+		return;
 	}
-	Result mr=NewModule();
-	if(mr->HasError){
-		r->Data=NULL;
-		r->error=mr->error;
+	Result mr = NewModule();
+	if (mr->HasError) {
+		r->Data = NULL;
+		r->error = mr->error;
 		return r;
 	}
-	Module m=mr->Data;
+	Module m = mr->Data;
 	DestoryResult(mr);
 	//HEADER CHECK
 	{
 		byte header[4];//=new byte[4];
-		header[0]=fgetc(f);
-		header[1]=fgetc(f);
-		header[2]=fgetc(f);
-		header[3]=fgetc(f);
-                if (!ByteArrayEqualsCStr(header, "xCVM", 4)) {
+		header[0] = fgetc(f);
+		header[1] = fgetc(f);
+		header[2] = fgetc(f);
+		header[3] = fgetc(f);
+		if (!ByteArrayEqualsCStr(header, "xCVM", 4)) {
 			r->HasError = true;
-                    r->error = NewErrorWID(ERROR_CORE_DATA_MODULE_HEADER_MISMATCH);
-                    return r;
-                }
-        }
+			r->error = NewErrorWID(ERROR_CORE_DATA_MODULE_HEADER_MISMATCH);
+			return r;
+		}
+	}
 	//
 	{
-		Result metar=NewMetadata();
-		if(metar==NULL)Panic();
-		ModuleMetadata meta=metar->Data;
+		Result metar = NewMetadata();
+		if (metar == NULL) {
+			Panic();
+			return;
+		}
+		ModuleMetadata meta = metar->Data;
 		DestoryResult(metar);
-		LoadModuleMeta(meta,f);
+		LoadModuleMeta(meta, f);
 	}
-	while(true){
-		
-		char c=fgetc(f);
-		if(c==EOF){
+	while (true) {
+
+		char c = fgetc(f);
+		if (c == EOF) {
 			break;
 		}
-		
+
 	}
+	return r;
+}
+
+Result NewCallStack()
+{
+	Result r = NewResultWP();
+	CallFrame* HEAD = (CallFrame*)malloc(sizeof(CallFrame) * LIST_BLOCK);
+	if (HEAD = NULL) {
+
+		DestoryResult(r);
+		return NULL;
+	}
+	CallStack _cs = (CallStack)malloc(sizeof(struct  _CS));
+	if (_cs == NULL) {
+		DestoryResult(r);
+		return NULL;
+	}
+	_cs->HEAD = HEAD;
+	_cs->Count = 0;
+	_cs->Size = LIST_BLOCK;
 	return r;
 }
