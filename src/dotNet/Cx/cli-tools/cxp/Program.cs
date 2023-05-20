@@ -8,33 +8,56 @@ namespace cxp
         static void Main(string [ ] args)
         {
             var opt = Options.ParseFromArgs(args);
-            if(opt.ShowVersion == true)
+            if (opt.ShowVersion == true)
             {
                 return;
             }
-            if(opt.ShowHelp == true)
+            if (opt.ShowHelp == true)
             {
                 return;
             }
             FilesProvider filesProvider = new FilesProvider();
-            opt.IncludeSearch.ForEach((x) => {
+            opt.IncludeSearch.ForEach((x) =>
+            {
                 filesProvider.SearchDirectories.Add(new DirectoryInfo(x));
             });
-            VirtualFile MainC=new VirtualFile(opt.MainCFile) { FileOnDisk=new FileInfo(opt.MainCFile)};
-            VirtualFile CombinedHeader=new VirtualFile(opt.OutputHeaderFile) { FileOnDisk=new FileInfo(opt.OutputHeaderFile)};
+            List<VirtualFile> Input = new List<VirtualFile>();
+            opt.Inputs.ForEach((x) => { Input.Add(new VirtualFile(x) { FileOnDisk = new FileInfo(x) }); });
+            var header_path = Path.Combine(opt.OutputFolder , "0_HEAD.h");
+            VirtualFile CombinedHeader = new VirtualFile(header_path)
+            {
+                FileOnDisk = new FileInfo(header_path) ,
+                CreateWhenNotExist = true
+            };
             Preprocessor preprocessor = new Preprocessor(filesProvider);
             Preprocessed preprocessed = new Preprocessed();
-            preprocessed.ProcessedCFile = MainC;
             preprocessed.CombinedHeader = CombinedHeader;
-            var result = preprocessor.Process(MainC ,preprocessed);
+            int ID = 0;
+            if (!Directory.Exists(opt.OutputFolder))
+            {
+                Directory.CreateDirectory(opt.OutputFolder);
+            }
+            preprocessor.OnSingleFileProcessComplete.Add((f) =>
+            {
+                if(f.ID.EndsWith(".c"))
+                using (var fs = File.Open(Path.Combine(opt.OutputFolder , "p_" + ID + ".c") , FileMode.OpenOrCreate))
+                {
+                    fs.SetLength(0);
+                    f.Dump(fs);
+                    ID++;
+                }
+            });
+            foreach (var input in Input)
+            {
+                var result = preprocessor.Process(input , preprocessed);
+            }
         }
     }
     public class Options
     {
         public List<string> IncludeSearch = new List<string>();
-        public string MainCFile;
-        public string OutputCFile;
-        public string OutputHeaderFile;
+        public List<string> Inputs = new List<string>();
+        public string OutputFolder = "./build/preproc/";
         public bool ShowVersion;
         public bool ShowHelp;
         public static Options ParseFromArgs(string [ ] args)
@@ -59,7 +82,7 @@ namespace cxp
                         InputMode = 2;
                         break;
                     case "-o":
-                    case "--output-c":
+                    case "--output":
                         InputMode = 3;
                         break;
                     case "-c":
@@ -78,16 +101,15 @@ namespace cxp
                                 switch (InputMode)
                                 {
                                     case 0:
-                                        options.MainCFile = item;
+                                        options.Inputs.Add(item);
                                         break;
                                     case 1:
                                         options.IncludeSearch.Add(item);
                                         break;
                                     case 2:
-                                        options.OutputHeaderFile = item;
                                         break;
                                     case 3:
-                                        options.OutputCFile = item;
+                                        options.OutputFolder = item;
                                         break;
                                     default:
                                         break;

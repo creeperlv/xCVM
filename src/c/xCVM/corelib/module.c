@@ -41,7 +41,7 @@ Result LoadModule(FILE* f) {
 	Result r = NewResult();
 	if (r == NULL) {
 		Panic();
-		return;
+		return NULL;
 	}
 	Result mr = NewModule();
 	if (mr->HasError) {
@@ -69,7 +69,7 @@ Result LoadModule(FILE* f) {
 		Result metar = NewMetadata();
 		if (metar == NULL) {
 			Panic();
-			return;
+			return NULL;
 		}
 		ModuleMetadata meta = metar->Data;
 		DestoryResult(metar);
@@ -83,25 +83,5 @@ Result LoadModule(FILE* f) {
 		}
 
 	}
-	return r;
-}
-
-Result NewCallStack()
-{
-	Result r = NewResultWP();
-	CallFrame* HEAD = (CallFrame*)malloc(sizeof(CallFrame) * LIST_BLOCK);
-	if (HEAD = NULL) {
-
-		DestoryResult(r);
-		return NULL;
-	}
-	CallStack _cs = (CallStack)malloc(sizeof(struct  _CS));
-	if (_cs == NULL) {
-		DestoryResult(r);
-		return NULL;
-	}
-	_cs->HEAD = HEAD;
-	_cs->Count = 0;
-	_cs->Size = LIST_BLOCK;
 	return r;
 }

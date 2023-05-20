@@ -8,6 +8,3 @@ Result NewInst();
 bool LoadInst(Inst inst,FILE* f);
 Result NewModule();
 Result LoadModule(FILE* f);
-
-Result NewCallStack();
-bool PushCallStack(CallFrame frame);

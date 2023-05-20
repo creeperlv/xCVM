@@ -17,6 +17,7 @@ namespace Cx.Core
         public MemoryStream? FileInMemory;
         public FileInfo? FileOnDisk;
         Stream? FStream;
+        public bool CreateWhenNotExist;
 
         public void Dispose()
         {
@@ -57,7 +58,11 @@ namespace Cx.Core
             {
                 if (FileOnDisk.Exists)
                 {
-                    FStream = FileOnDisk.OpenRead();
+                    FStream = FileOnDisk.Open(FileMode.Open);
+                    return FStream;
+                }else if (CreateWhenNotExist)
+                {
+                    FStream = FileOnDisk.Open(FileMode.Create);
                     return FStream;
                 }
             }

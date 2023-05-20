@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Authentication;
 using System.Text;
-using System.Xml.XPath;
 using Cx.Core;
+using LibCLCC.NET.Delegates;
 using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
 
@@ -14,7 +13,10 @@ namespace Cx.Preprocessor
 {
     public class Preprocessor
     {
+        public bool CloseSWOnProcessEnd = true;
+        public bool CloseSROnProcessEnd = true;
         FilesProvider FilesProvider;
+        public ChainAction<VirtualFile> OnSingleFileProcessComplete = new ChainAction<VirtualFile>();
         public Preprocessor(FilesProvider filesProvider)
         {
             FilesProvider = filesProvider;
@@ -307,7 +309,8 @@ namespace Cx.Preprocessor
             {
                 if (node.Segment != null)
                 {
-                    if (bool.TryParse(node.Segment.content , out var bres)) { 
+                    if (bool.TryParse(node.Segment.content , out var bres))
+                    {
                         return bres;
                     }
                     else
@@ -333,6 +336,16 @@ namespace Cx.Preprocessor
 
             }
             return new OperationResult<object?>(true);
+        }
+        public OperationResult<bool> _ifdef(SegmentContext context)
+        {
+            var c = context.Current?.content ?? "";
+            return defined(c);
+        }
+        public OperationResult<bool> _ifndef(SegmentContext context)
+        {
+            var c = context.Current?.content ?? "";
+            return !defined(c);
         }
         public OperationResult<bool> _if(SegmentContext context)
         {
@@ -431,7 +444,7 @@ namespace Cx.Preprocessor
             }
             return stringBuilder.ToString();
         }
-        public OperationResult<string?> process_macro_line(string Line , ref bool willskip , ref Preprocessed preprocessed , ref int IFSCOPE)
+        public OperationResult<string?> process_macro_line(VirtualFile CurrentFile , string Line , ref bool willskip , ref Preprocessed preprocessed , ref int IFSCOPE , ref int SKIP_POINT_IF_LAYER)
         {
             var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
             FloatPointScanner.ScanFloatPoint(ref LineParse);
@@ -455,24 +468,79 @@ namespace Cx.Preprocessor
                                         Process(f , preprocessed , true);
                                     }
                                 }
+                                else if (segmentContext.Current.isEncapsulated)
+                                {
+                                    var f = FilesProvider.Find(segmentContext.Current?.content ?? "" , CurrentFile);
+                                    if (f != null)
+                                    {
+                                        Process(f , preprocessed , true);
+                                    }
+                                }
 
                             }
                         }
                         break;
                     case 1:
                         {
+                            if (willskip)
+                            {
+                                return null;
+                            }
                             define(segmentContext);
+                            return Line;
                         }
                         break;
                     case 2:
                         {
-                            willskip = _if(segmentContext);
+                            if (!willskip)
+                            {
+                                willskip = !_if(segmentContext);
+                                if (willskip) SKIP_POINT_IF_LAYER = IFSCOPE;
+                            }
                             IFSCOPE++;
                         }
                         break;
                     case 3:
                         {
+                            if (willskip)
+                            {
+                                return new OperationResult<string?>(null);
+                            }
                             Undefine(segmentContext);
+                            return Line;
+                        }
+                    case 4:
+                        {
+                            if (!willskip)
+                            {
+                                willskip = !_ifndef(segmentContext);
+                                if (willskip) SKIP_POINT_IF_LAYER = IFSCOPE;
+                            }
+                            IFSCOPE++;
+                        }
+                        break;
+                    case 5:
+                        {
+                            if (!willskip)
+                            {
+                                willskip = !_ifdef(segmentContext);
+                                if (willskip) SKIP_POINT_IF_LAYER = IFSCOPE;
+                            }
+                            IFSCOPE++;
+                        }
+                        break;
+                    case 6:
+                        break;
+                    case 7:
+                        {
+                            IFSCOPE--;
+                            if (willskip)
+                            {
+                                if (IFSCOPE == SKIP_POINT_IF_LAYER)
+                                {
+                                    willskip = false;
+                                }
+                            }
                         }
                         break;
                     default:
@@ -483,38 +551,35 @@ namespace Cx.Preprocessor
         }
         public void Process(VirtualFile Input , Preprocessed preprocessed , bool isHeader)
         {
+#if DEBUG
+            Console.WriteLine($"Prcess:{Input.ID}");
+#endif
             StreamWriter sw;
-            VirtualFile VirtualFile;
+            VirtualFile OutputFile;
             if (!isHeader)
             {
-                if (preprocessed.ProcessedCFile == null)
-                {
-                    VirtualFile = new VirtualFile(Input.ID);
-                    VirtualFile.FileInMemory = new MemoryStream();
-                    preprocessed.ProcessedCFile = VirtualFile;
-                }
-                else
-                {
-                    VirtualFile = preprocessed.ProcessedCFile;
-                }
+                OutputFile = new VirtualFile(Input.ID);
+                OutputFile.FileInMemory = new MemoryStream();
+                preprocessed.ProcessedCFile.Add(OutputFile);
             }
             else
             {
                 if (preprocessed.CombinedHeader != null)
                 {
-                    VirtualFile = preprocessed.CombinedHeader;
+                    OutputFile = preprocessed.CombinedHeader;
                 }
                 else
                 {
-                    VirtualFile = new VirtualFile(Input.ID);
-                    VirtualFile.FileInMemory = new MemoryStream();
-                    preprocessed.CombinedHeader = VirtualFile;
+                    OutputFile = new VirtualFile(Input.ID);
+                    OutputFile.FileInMemory = new MemoryStream();
+                    preprocessed.CombinedHeader = OutputFile;
                 }
             }
-            sw = new StreamWriter(VirtualFile.GetStream());
+            sw = new StreamWriter(OutputFile.GetStream());
             StreamReader streamReader = new StreamReader(Input.GetStream());
             string? Line = null;
             int IFSCOPE = 0;
+            int SKIP_POINT_IF_LAYER = 0;
             bool willskip = false;
             if (isHeader)
             {
@@ -522,7 +587,9 @@ namespace Cx.Preprocessor
             }
             while (true)
             {
-                Line = streamReader.ReadLine().Trim();
+                Line = streamReader.ReadLine();
+                if (Line == null) break;
+                Line = Line.Trim();
                 if (Line.EndsWith('\\'))
                 {
                     while (true)
@@ -544,7 +611,7 @@ namespace Cx.Preprocessor
                 if (Line == null) break;
                 if (Line.StartsWith("#"))
                 {
-                    var preprocessed_line = process_macro_line(Line , ref willskip , ref preprocessed , ref IFSCOPE);
+                    var preprocessed_line = process_macro_line(Input , Line , ref willskip , ref preprocessed , ref IFSCOPE , ref SKIP_POINT_IF_LAYER);
                     if (preprocessed_line != null)
                     {
                         sw.WriteLine(preprocessed_line.Result);
@@ -559,6 +626,11 @@ namespace Cx.Preprocessor
                     }
                 }
             }
+            OnSingleFileProcessComplete.Invoke(OutputFile);
+            if (CloseSWOnProcessEnd)
+                sw.Close();
+            if (CloseSROnProcessEnd) 
+                streamReader.Close();
             return;
         }
     }

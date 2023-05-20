@@ -7,6 +7,6 @@ namespace Cx.Preprocessor
     {
         public Dictionary<string , VirtualFile> ProcessedHeader = new Dictionary<string , VirtualFile>();
         public VirtualFile? CombinedHeader;
-        public VirtualFile? ProcessedCFile;
+        public List<VirtualFile> ProcessedCFile=new List<VirtualFile>();
     }
 }
