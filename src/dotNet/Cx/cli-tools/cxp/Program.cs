@@ -30,6 +30,7 @@ namespace cxp
                 CreateWhenNotExist = true
             };
             Preprocessor preprocessor = new Preprocessor(filesProvider);
+
             Preprocessed preprocessed = new Preprocessed();
             preprocessed.CombinedHeader = CombinedHeader;
             int ID = 0;
@@ -39,13 +40,24 @@ namespace cxp
             }
             preprocessor.OnSingleFileProcessComplete.Add((f) =>
             {
-                if(f.ID.EndsWith(".c"))
-                using (var fs = File.Open(Path.Combine(opt.OutputFolder , "p_" + ID + ".c") , FileMode.OpenOrCreate))
+                if (f.ID.EndsWith(".c"))
+                    using (var fs = File.Open(Path.Combine(opt.OutputFolder , string.Format(opt.CFileNameScheme, ID)) , FileMode.OpenOrCreate))
+                    {
+                        fs.SetLength(0);
+                        f.Dump(fs);
+#if DEBUG
+                        Console.WriteLine($"Dumped:{f.ID}");
+#endif
+                        ID++;
+                    }
+                else
                 {
-                    fs.SetLength(0);
-                    f.Dump(fs);
-                    ID++;
+
+#if DEBUG
+                    Console.WriteLine($"Ignored:{f.ID}");
+#endif
                 }
+                return;
             });
             foreach (var input in Input)
             {
@@ -58,6 +70,7 @@ namespace cxp
         public List<string> IncludeSearch = new List<string>();
         public List<string> Inputs = new List<string>();
         public string OutputFolder = "./build/preproc/";
+        public string CFileNameScheme = "p_{0}.c";
         public bool ShowVersion;
         public bool ShowHelp;
         public static Options ParseFromArgs(string [ ] args)
@@ -77,8 +90,8 @@ namespace cxp
                     case "--include":
                         InputMode = 1;
                         break;
-                    case "-h":
-                    case "--header":
+                    case "-n":
+                    case "--name":
                         InputMode = 2;
                         break;
                     case "-o":
@@ -107,6 +120,7 @@ namespace cxp
                                         options.IncludeSearch.Add(item);
                                         break;
                                     case 2:
+                                        options.CFileNameScheme = item;
                                         break;
                                     case 3:
                                         options.OutputFolder = item;

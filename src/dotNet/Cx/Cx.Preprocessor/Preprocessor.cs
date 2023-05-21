@@ -403,7 +403,7 @@ namespace Cx.Preprocessor
         public string process_line(string Line)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
+            var LineParse = CStyleParser.Parse(Line , false);
             FloatPointScanner.ScanFloatPoint(ref LineParse);
             SegmentContext segmentContext = new SegmentContext(LineParse);
             while (true)
@@ -424,9 +424,9 @@ namespace Cx.Preprocessor
                 stringBuilder.Append(" ");
                 if (segmentContext.Current.isEncapsulated)
                 {
-                    stringBuilder.Append(segmentContext.Current.EncapsulationIdentifier);
+                    stringBuilder.Append(segmentContext.Current.EncapsulationIdentifier.L);
                     stringBuilder.Append(item);
-                    stringBuilder.Append(segmentContext.Current.EncapsulationIdentifier);
+                    stringBuilder.Append(segmentContext.Current.EncapsulationIdentifier.R);
                 }
                 else
                 {
@@ -441,6 +441,7 @@ namespace Cx.Preprocessor
                         stringBuilder.Append(item);
                     }
                 }
+                segmentContext.GoNext();
             }
             return stringBuilder.ToString();
         }
@@ -474,6 +475,9 @@ namespace Cx.Preprocessor
                                     if (f != null)
                                     {
                                         Process(f , preprocessed , true);
+#if DEBUG
+                                        Console.WriteLine($"Preprocess include:{segmentContext.Current?.content}");
+#endif
                                     }
                                 }
 
@@ -590,6 +594,9 @@ namespace Cx.Preprocessor
                 Line = streamReader.ReadLine();
                 if (Line == null) break;
                 Line = Line.Trim();
+#if DEBUG
+                Console.WriteLine($"Preprocess:\t{Line}");
+#endif
                 if (Line.EndsWith('\\'))
                 {
                     while (true)
@@ -614,7 +621,8 @@ namespace Cx.Preprocessor
                     var preprocessed_line = process_macro_line(Input , Line , ref willskip , ref preprocessed , ref IFSCOPE , ref SKIP_POINT_IF_LAYER);
                     if (preprocessed_line != null)
                     {
-                        sw.WriteLine(preprocessed_line.Result);
+                        if (preprocessed_line.Result != null)
+                            sw.WriteLine(preprocessed_line.Result);
                     }
                 }
                 else
@@ -626,10 +634,11 @@ namespace Cx.Preprocessor
                     }
                 }
             }
+            sw.Flush();
             OnSingleFileProcessComplete.Invoke(OutputFile);
             if (CloseSWOnProcessEnd)
                 sw.Close();
-            if (CloseSROnProcessEnd) 
+            if (CloseSROnProcessEnd)
                 streamReader.Close();
             return;
         }

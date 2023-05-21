@@ -3,7 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef __cplusplus
+#define true 1
+#define True 1
+#define TRUE 1
+#define false 0
+#define False 0
+#define FALSE 0
 typedef int bool;
+#endif
 typedef char byte;
 #if defined(__MSDOS__)
 typedef long long Int64;
@@ -14,15 +22,10 @@ typedef __int64 Int64;
 #else
 typedef int64_t Int64;
 #endif
+typedef int Int32;
 #define panic Panic
 #define PANIC Panic
 #define LIST_BLOCK 16
-#define true 1
-#define True 1
-#define TRUE 1
-#define false 0
-#define False 0
-#define FALSE 0
 typedef struct __e {
     int ID;
     // Att - Attachment
