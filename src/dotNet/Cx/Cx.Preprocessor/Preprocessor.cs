@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using Cx.Core;
 using LibCLCC.NET.Delegates;
@@ -25,6 +27,9 @@ namespace Cx.Preprocessor
         public Dictionary<string , string> Symbols = new Dictionary<string , string>();
         public void Define(string symbol , string value)
         {
+#if DEBUG
+            Console.WriteLine($"Add:{symbol},{value}");
+#endif
             if (Symbols.ContainsKey(symbol)) { Symbols [ symbol ] = value; }
             else { Symbols.Add(symbol , value); }
         }
@@ -173,8 +178,8 @@ namespace Cx.Preprocessor
                     node.Segment = context.Current;
                     node.Type = ASTNodeType.BinaryExpression;
                     {
-                        var LC = new SegmentContext(context.Current);
-                        LC.SetEndPoint(context.Current);
+                        var LC = new SegmentContext(context.HEAD);
+                        LC.SetEndPoint(context.Current!.Prev);
                         var LR = ParseEval(LC);
                         if (LR.Errors.Count == 0)
                         {
@@ -219,6 +224,23 @@ namespace Cx.Preprocessor
         public OperationResult<ASTNode?> ParseEval(SegmentContext context)
         {
             SegmentContext segmentContext = new SegmentContext(context.Current);
+            segmentContext.SetEndPoint(context.EndPoint);
+            if (segmentContext.Current == null)
+            {
+                return new OperationResult<ASTNode?>(null);
+            }
+            if (segmentContext.Current.Next == null)
+            {
+                return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+            }
+            if (segmentContext.Current.Next.content==""&&segmentContext.Current.Next.Next==null)
+            {
+                return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+            }
+            if (segmentContext.Current == segmentContext.EndPoint)
+            {
+                return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+            }
             if (context.Current!.Prev == null)
             {
                 bool Hit = false;
@@ -265,37 +287,41 @@ namespace Cx.Preprocessor
             {
                 return new OperationResult<ASTNode?>(null) { Errors = or.Errors };
             }
-
+            segmentContext.ResetCurrent();
             {
-                var result = SearchBinaryExpression(context , "&&" , "||");
+                var result = SearchBinaryExpression(segmentContext , "&&" , "||");
                 if (result.Result != null)
                 {
                     return result.Result;
                 }
             }
+            segmentContext.ResetCurrent();
             {
-                var result = SearchBinaryExpression(context , "==" , ">=" , "<=" , "!=");
+                var result = SearchBinaryExpression(segmentContext , "==" , ">=" , "<=" , "!=" , ">" , "<");
                 if (result.Result != null)
                 {
                     return result.Result;
                 }
             }
+            segmentContext.ResetCurrent();
             {
-                var result = SearchBinaryExpression(context , "*" , "/");
+                var result = SearchBinaryExpression(segmentContext , "*" , "/");
                 if (result.Result != null)
                 {
                     return result.Result;
                 }
             }
+            segmentContext.ResetCurrent();
             {
-                var result = SearchBinaryExpression(context , "+" , "-");
+                var result = SearchBinaryExpression(segmentContext , "+" , "-");
                 if (result.Result != null)
                 {
                     return result.Result;
                 }
             }
+            segmentContext.ResetCurrent();
             {
-                var result = SearchUnaryExpression(context , "!" , "defined");
+                var result = SearchUnaryExpression(segmentContext , "!" , "defined");
                 if (result.Result != null)
                 {
                     return result.Result;
@@ -305,35 +331,415 @@ namespace Cx.Preprocessor
         }
         public OperationResult<object?> Eval(ASTNode node)
         {
+#if DEBUG
+            if (node == null)
+                Console.WriteLine($"Node not exist!");
+
+            Console.WriteLine($"Node Type:{node.Type}");
+            Console.WriteLine($"Node Segment:{node.Segment?.content}");
+#endif
             if (node.Type == ASTNodeType.EndNode)
             {
                 if (node.Segment != null)
                 {
-                    if (bool.TryParse(node.Segment.content , out var bres))
+                    var toConvert = node.Segment.content;
+                    if (Symbols.ContainsKey(toConvert))
+                    {
+                        toConvert = Symbols [ toConvert ];
+#if DEBUG
+                        Console.WriteLine($"\tMacro Replacement: {toConvert}");
+#endif
+                    }
+                    if (bool.TryParse(toConvert, out var bres))
                     {
                         return bres;
                     }
                     else
-                    if (int.TryParse(node.Segment.content , out var ires))
+                    if (int.TryParse(toConvert , out var ires))
                     {
                         return ires;
                     }
                     else
-                    if (int.TryParse(node.Segment.content , out var lres))
+                    if (long.TryParse(toConvert , out var lres))
                     {
                         return lres;
                     }
-
+                    return node.Segment.content;
                 }
             }
             if (node.Type == ASTNodeType.BinaryExpression)
             {
+                if (node.Segment != null)
+                {
+                    var Operator = node.Segment.content;
+                    switch (Operator)
+                    {
+                        case "==":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
 
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                return cmp==0;
+                            }
+                        case "&&":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                if (LR.Result is bool LB)
+                                {
+                                    if (RR.Result is bool RB)
+                                    {
+                                        return LB && RB;
+                                    }
+                                    else
+                                    {
+                                        var result = new OperationResult<object?>(null);
+                                        result.AddError(new NotABoolError(RN?.Segment));
+                                        return result;
+                                    }
+                                }
+                                else
+                                {
+                                    var result = new OperationResult<object?>(null);
+                                    result.AddError(new NotABoolError(LN?.Segment));
+                                    return result;
+                                }
+                            }
+                        case "||":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                if (LR.Result is bool LB)
+                                {
+                                    if (RR.Result is bool RB)
+                                    {
+                                        return LB || RB;
+                                    }
+                                    else
+                                    {
+                                        var result = new OperationResult<object?>(null);
+                                        result.AddError(new NotABoolError(RN?.Segment));
+                                        return result;
+                                    }
+                                }
+                                else
+                                {
+                                    var result = new OperationResult<object?>(null);
+                                    result.AddError(new NotABoolError(LN?.Segment));
+                                    return result;
+                                }
+                            }
+                        case "!=":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                return cmp != 0;
+                            }
+                        case "*":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                if (LR.Result is int LI)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LI * RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LI * RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                if (LR.Result is long LL)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LL * RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LL * RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                else
+                                {
+                                    var r = new OperationResult<object?>(null);
+                                    r.AddError(new NotANumberError(LN?.Segment));
+                                    return r;
+                                }
+                            }
+                        case "/":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                if (LR.Result is int LI)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LI / RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LI / RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                if (LR.Result is long LL)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LL / RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LL / RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                else
+                                {
+                                    var r = new OperationResult<object?>(null);
+                                    r.AddError(new NotANumberError(LN?.Segment));
+                                    return r;
+                                }
+                            }
+                        case "+":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                if (LR.Result is int LI)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LI / RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LI / RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                if (LR.Result is long LL)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LL + RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LL + RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                else
+                                {
+                                    var r = new OperationResult<object?>(null);
+                                    r.AddError(new NotANumberError(LN?.Segment));
+                                    return r;
+                                }
+                            }
+                        case "-":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                if (LR.Result is int LI)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LI - RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LI - RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                if (LR.Result is long LL)
+                                {
+                                    if (RR.Result is int RI)
+                                    {
+                                        return LL / RI;
+                                    }
+                                    else if (RR.Result is long RL)
+                                    {
+                                        return LL / RL;
+                                    }
+                                    else
+                                    {
+                                        var r = new OperationResult<object?>(null);
+                                        r.AddError(new NotANumberError(RN?.Segment));
+                                        return r;
+                                    }
+                                }
+                                else
+                                {
+                                    var r = new OperationResult<object?>(null);
+                                    r.AddError(new NotANumberError(LN?.Segment));
+                                    return r;
+                                }
+                            }
+                        case ">=":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                return cmp >= 0;
+                            }
+                        case ">":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                return cmp > 0;
+                            }
+                        case "<=":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                return cmp <= 0;
+                            }
+                        case "<":
+                            {
+                                var LN = node.Children [ 0 ] as ASTNode;
+                                var RN = node.Children [ 1 ] as ASTNode;
+
+                                var LR = Eval(LN!);
+                                if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
+                                var RR = Eval(RN!);
+                                if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
+                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                return cmp < 0;
+                            }
+                    }
+                }
             }
             else
             if (node.Type == ASTNodeType.UnaryExpression)
             {
-
+                if (node.Segment != null)
+                    if (node.Segment.content == "defined")
+                    {
+                        var n = node.Children.First() as ASTNode;
+                        var r = Eval(n!);
+                        if (r.Errors.Count > 0) return new OperationResult<object?>(false) { Errors = r.Errors };
+                        return defined(r.Result as string ?? "");
+                    }
+                    else if (node.Segment.content == "!")
+                    {
+                        var n = node.Children.First() as ASTNode;
+                        var r = Eval(n!);
+                        if (r.Errors.Count > 0) return new OperationResult<object?>(false) { Errors = r.Errors };
+                        switch (r.Result)
+                        {
+                            case bool b:
+                                {
+                                    return new OperationResult<object?>(!b);
+                                }
+                            case int i:
+                                {
+                                    return new OperationResult<object?>(i == 0);
+                                }
+                            case long l:
+                                {
+                                    return new OperationResult<object?>(l == 0);
+                                }
+                            default:
+                                break;
+                        }
+                    }
             }
             return new OperationResult<object?>(true);
         }
@@ -352,7 +758,7 @@ namespace Cx.Preprocessor
             var AST = ParseEval(context);
             if (AST.Errors.Count == 0)
             {
-                if (AST.Result != null)
+                if (AST.Result == null)
                 {
                     return new OperationResult<bool>(false);
                 }
@@ -488,7 +894,7 @@ namespace Cx.Preprocessor
                         {
                             if (willskip)
                             {
-                                return null;
+                                return new OperationResult<string?>(null);
                             }
                             define(segmentContext);
                             return Line;
@@ -542,6 +948,9 @@ namespace Cx.Preprocessor
                             {
                                 if (IFSCOPE == SKIP_POINT_IF_LAYER)
                                 {
+#if DEBUG
+                                    Console.WriteLine("Skip closed.");
+#endif
                                     willskip = false;
                                 }
                             }

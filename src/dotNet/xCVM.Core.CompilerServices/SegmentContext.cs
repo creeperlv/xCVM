@@ -13,10 +13,11 @@ namespace xCVM.Core.CompilerServices
     {
         private Segment? _Last = null;
         private Segment? _Current;
-        private Segment? EndPoint = null;
+        private Segment? _EndPoint = null;
+        public Segment? EndPoint { get => _EndPoint; }
         public void SetEndPoint(Segment? End)
         {
-            EndPoint = End;
+            _EndPoint = End;
         }
         public SegmentContext(Segment? current)
         {
@@ -338,7 +339,7 @@ namespace xCVM.Core.CompilerServices
         {
             get
             {
-                if (EndPoint == _Current) return true;
+                if (_EndPoint == _Current) return true;
                 if (_Current == null) return true;
                 return _Current.content == "" && _Current.Next == null;
             }
@@ -358,7 +359,7 @@ namespace xCVM.Core.CompilerServices
             while (true)
             {
                 if (Current == null) break;
-                if (Current.Next == null) break;
+                //if (Current.Next == null) break;
                 if (Current.isEncapsulated)
                 {
                     stringBuilder.Append(Current.EncapsulationIdentifier);
@@ -367,8 +368,6 @@ namespace xCVM.Core.CompilerServices
                 }
                 else
                     stringBuilder.Append(Current.content);
-                if (Current == null) break;
-                if (Current.Next == null) break;
                 stringBuilder.Append(sep);
                 Current = Current.Next;
             }
