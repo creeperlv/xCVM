@@ -29,7 +29,14 @@ namespace xCVM.Core.CompilerServices
     }
     public class UnexpectedEndOfFileError : OperationError
     {
-        public UnexpectedEndOfFileError(Segment? binded) : base(binded, null)
+        public UnexpectedEndOfFileError(Segment? binded) : base(binded , null)
+        {
+        }
+        public override string Message => $"End at unexpected location.";
+    }
+    public class UnexpectedEndError : OperationError
+    {
+        public UnexpectedEndError(Segment? binded) : base(binded , null)
         {
         }
         public override string Message => $"End at unexpected location.";

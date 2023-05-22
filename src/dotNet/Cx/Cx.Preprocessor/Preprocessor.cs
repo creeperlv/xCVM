@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -233,7 +234,7 @@ namespace Cx.Preprocessor
             {
                 return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
             }
-            if (segmentContext.Current.Next.content==""&&segmentContext.Current.Next.Next==null)
+            if (segmentContext.Current.Next.content == "" && segmentContext.Current.Next.Next == null)
             {
                 return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
             }
@@ -350,7 +351,7 @@ namespace Cx.Preprocessor
                         Console.WriteLine($"\tMacro Replacement: {toConvert}");
 #endif
                     }
-                    if (bool.TryParse(toConvert, out var bres))
+                    if (bool.TryParse(toConvert , out var bres))
                     {
                         return bres;
                     }
@@ -384,7 +385,7 @@ namespace Cx.Preprocessor
                                 var RR = Eval(RN!);
                                 if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
-                                return cmp==0;
+                                return cmp == 0;
                             }
                         case "&&":
                             {
@@ -676,7 +677,7 @@ namespace Cx.Preprocessor
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
                                 var RR = Eval(RN!);
                                 if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
-                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
                                 return cmp > 0;
                             }
                         case "<=":
@@ -688,7 +689,7 @@ namespace Cx.Preprocessor
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
                                 var RR = Eval(RN!);
                                 if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
-                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
                                 return cmp <= 0;
                             }
                         case "<":
@@ -700,7 +701,7 @@ namespace Cx.Preprocessor
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
                                 var RR = Eval(RN!);
                                 if (RR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = RR.Errors };
-                                 var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
+                                var cmp = Comparer.Default.Compare(LR.Result , RR.Result);
                                 return cmp < 0;
                             }
                     }
@@ -851,7 +852,13 @@ namespace Cx.Preprocessor
             }
             return stringBuilder.ToString();
         }
-        public OperationResult<string?> process_macro_line(VirtualFile CurrentFile , string Line , ref bool willskip , ref Preprocessed preprocessed , ref int IFSCOPE , ref int SKIP_POINT_IF_LAYER)
+        public OperationResult<string?> ProcessMacroLine(VirtualFile CurrentFile ,
+                                                           string Line ,
+                                                           ref bool willskip ,
+                                                           ref bool SkipFile,
+                                                           ref Preprocessed preprocessed ,
+                                                           ref int IFSCOPE ,
+                                                           ref int SKIP_POINT_IF_LAYER)
         {
             var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
             FloatPointScanner.ScanFloatPoint(ref LineParse);
@@ -867,12 +874,30 @@ namespace Cx.Preprocessor
                             if (!willskip)
                             {
                                 var m = segmentContext.MatchNext("<" , true);
+                                if (segmentContext.Current == null)
+                                {
+
+                                    var result = new OperationResult<string?>(null);
+                                    result.AddError(new UnexpectedEndError(segmentContext.Current));
+                                    return result;
+                                }
                                 if (m == MatchResult.Match)
                                 {
-                                    var f = FilesProvider.Find(segmentContext.Current?.content ?? "");
-                                    if (f != null)
+                                    var remain = segmentContext.FormTillEnd(true , (char)0).Trim();
+                                    if (remain.EndsWith(">"))
                                     {
-                                        Process(f , preprocessed , true);
+
+                                        var f = FilesProvider.Find(remain [ ..^1 ]);
+                                        if (f != null)
+                                        {
+                                            Process(f , preprocessed , true);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var result = new OperationResult<string?>(null);
+                                        result.AddError(new MisClosureError(segmentContext.Current));
+                                        return result;
                                     }
                                 }
                                 else if (segmentContext.Current.isEncapsulated)
@@ -897,7 +922,7 @@ namespace Cx.Preprocessor
                                 return new OperationResult<string?>(null);
                             }
                             define(segmentContext);
-                            return Line;
+                            return new OperationResult<string?>(null);
                         }
                         break;
                     case 2:
@@ -940,10 +965,31 @@ namespace Cx.Preprocessor
                         }
                         break;
                     case 6:
+                        {
+                            if (IFSCOPE <= 0)
+                            {
+
+                                var result = new OperationResult<string?>(null);
+                                result.AddError(new ElifWithoutIfError(segmentContext.Current));
+                                return result;
+                            }
+                            if (willskip)
+                            {
+                                willskip = !_if(segmentContext);
+                                if (willskip) SKIP_POINT_IF_LAYER = IFSCOPE;
+                            }
+                        }
                         break;
                     case 7:
                         {
                             IFSCOPE--;
+                            if (IFSCOPE < 0)
+                            {
+
+                                var result = new OperationResult<string?>(null);
+                                result.AddError(new EndIfWithoutIfError(segmentContext.Current));
+                                return result;
+                            }
                             if (willskip)
                             {
                                 if (IFSCOPE == SKIP_POINT_IF_LAYER)
@@ -952,6 +998,37 @@ namespace Cx.Preprocessor
                                     Console.WriteLine("Skip closed.");
 #endif
                                     willskip = false;
+                                }
+                            }
+                        }
+                        break;
+                    case 8:
+                        {
+                            if (IFSCOPE > 0)
+                                willskip = !willskip;
+                            else
+                            {
+                                var result = new OperationResult<string?>(null);
+                                result.AddError(new ElseWithoutIfError(segmentContext.Current));
+                                return result;
+                            }
+                        }
+                        break;
+                    case 9:
+                        {
+
+                            var pragma = segmentContext.MatchCollectionMarch(false , "once");
+                            if(pragma.Item1 == MatchResult.Match)
+                            {
+                                switch (pragma.Item2)
+                                {
+                                    case 0:
+                                        {
+
+                                        }
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
                         }
@@ -987,6 +1064,8 @@ namespace Cx.Preprocessor
                     OutputFile.FileInMemory = new MemoryStream();
                     preprocessed.CombinedHeader = OutputFile;
                 }
+                if (!preprocessed.ProcessedHeader.ContainsKey(Input.ID))
+                    preprocessed.ProcessedHeader.Add(Input.ID , Input);
             }
             sw = new StreamWriter(OutputFile.GetStream());
             StreamReader streamReader = new StreamReader(Input.GetStream());
@@ -994,6 +1073,7 @@ namespace Cx.Preprocessor
             int IFSCOPE = 0;
             int SKIP_POINT_IF_LAYER = 0;
             bool willskip = false;
+            bool SkipFile = false;
             if (isHeader)
             {
                 preprocessed.ProcessedHeader.Add(Input.ID , Input);
@@ -1027,7 +1107,11 @@ namespace Cx.Preprocessor
                 if (Line == null) break;
                 if (Line.StartsWith("#"))
                 {
-                    var preprocessed_line = process_macro_line(Input , Line , ref willskip , ref preprocessed , ref IFSCOPE , ref SKIP_POINT_IF_LAYER);
+                    var preprocessed_line = ProcessMacroLine(Input , Line , ref willskip ,ref SkipFile, ref preprocessed , ref IFSCOPE , ref SKIP_POINT_IF_LAYER);
+                    if (SkipFile)
+                    {
+                        break;
+                    }
                     if (preprocessed_line != null)
                     {
                         if (preprocessed_line.Result != null)

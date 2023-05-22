@@ -24,11 +24,11 @@ namespace xCVM.Core.CompilerServices
             _head = current;
             _Current = current;
         }
-        private Segment? _head=null;
+        private Segment? _head = null;
         public Segment? HEAD => _head;
-        public void SetHead(Segment ? segment)
+        public void SetHead(Segment? segment)
         {
-            _head=segment;
+            _head = segment;
         }
         /// <summary>
         /// Reset the current to the head.
@@ -368,7 +368,8 @@ namespace xCVM.Core.CompilerServices
                 }
                 else
                     stringBuilder.Append(Current.content);
-                stringBuilder.Append(sep);
+                if (sep == 0)
+                    stringBuilder.Append(sep);
                 Current = Current.Next;
             }
             return stringBuilder.ToString();
