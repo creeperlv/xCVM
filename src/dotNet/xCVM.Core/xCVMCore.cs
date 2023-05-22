@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -909,6 +910,45 @@ namespace xCVM.Core
                         }
                         else
                         {
+                            if (mprovider != null)
+                            {
+                                var module = mprovider.LoadModule(ID);
+                                if (module != null)
+                                {
+                                    LoadedModules.Add(__id , module);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case (int)Inst.lmx:
+                    {
+                        short OP0 = RegisterToInt16(instruct.Op0);
+                        int OP1 = RegisterToInt32(instruct.Op1);
+                        int OP2 = RegisterToInt32(instruct.Op2);
+                        var ID = LoadedModules [ CurrentModule ].IDs [ OP2 ];
+                        var __id = ID.GetHashCode();
+                        if (LoadedModules.ContainsKey(__id))
+                        {
+
+                        }
+                        else
+                        {
+                            switch (OP0)
+                            {
+                                case Constants.lm_mem:
+                                    {
+                                        using MemoryStream ms = new MemoryStream(MemoryBlocks.Datas [ OP1 ].data);
+                                        var module = xCVMModule.FromStream(ms);
+                                        if (module != null)
+                                        {
+                                            LoadedModules.Add(__id , module);
+                                        }
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
                             if (mprovider != null)
                             {
                                 var module = mprovider.LoadModule(ID);

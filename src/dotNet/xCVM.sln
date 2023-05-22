@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cx.Preprocessor", "Cx\Cx.Pr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cli-tools", "cli-tools", "{A7B2F2D0-57B4-422B-A010-913ED7420538}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cxp", "Cx\cli-tools\cxp\cxp.csproj", "{0E329DEE-44BB-4EA6-BA72-B73CE3FE8F4C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cxp", "Cx\cli-tools\cxp\cxp.csproj", "{0E329DEE-44BB-4EA6-BA72-B73CE3FE8F4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cx.HL2VC", "Cx\Cx.HL2VC\Cx.HL2VC.csproj", "{7C53DB5D-8457-4AF9-80EA-3B108D2BDA85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{0E329DEE-44BB-4EA6-BA72-B73CE3FE8F4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E329DEE-44BB-4EA6-BA72-B73CE3FE8F4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E329DEE-44BB-4EA6-BA72-B73CE3FE8F4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C53DB5D-8457-4AF9-80EA-3B108D2BDA85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C53DB5D-8457-4AF9-80EA-3B108D2BDA85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C53DB5D-8457-4AF9-80EA-3B108D2BDA85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C53DB5D-8457-4AF9-80EA-3B108D2BDA85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

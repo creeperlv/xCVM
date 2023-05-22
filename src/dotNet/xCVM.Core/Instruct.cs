@@ -279,6 +279,12 @@ namespace xCVM.Core
         /// </summary>
         cptxtr = 0x009D,
         /// <summary>
+        /// Load Module eXtensible
+        /// <br/>
+        /// lmx $register_to_load_method(short) $pointer $register_to_id
+        /// </summary>
+        lmx=0x009E,
+        /// <summary>
         /// Jump to an absolute instruct.
         /// <br/>
         /// jmp value
