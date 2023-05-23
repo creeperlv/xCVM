@@ -946,6 +946,17 @@ namespace xCVM.Core
                                         }
                                     }
                                     break;
+                                case Constants.lm_df:
+                                    {
+                                        var path = Encoding.UTF8.GetString(MemoryBlocks.Datas [ OP1 ].data);
+                                        using Stream stream=File.OpenRead(path);
+                                        var module = xCVMModule.FromStream(stream);
+                                        if (module != null)
+                                        {
+                                            LoadedModules.Add(__id , module);
+                                        }
+                                    }
+                                    break;
                                 default:
                                     break;
                             }

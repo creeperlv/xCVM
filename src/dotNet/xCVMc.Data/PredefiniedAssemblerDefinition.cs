@@ -147,6 +147,8 @@ namespace xCVMc.Data
 
                 new InstructionDefinition{ Name=$"{Inst.cvt}",  ID=(int)Inst.cvt, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
 
+                new InstructionDefinition{ Name=$"{Inst.lmx}",  ID=(int)Inst.lmx, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
+
                 new InstructionDefinition{ Name=$"{Inst.add}",  ID=(int)Inst.add, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name=$"{Inst.addi}", ID=(int)Inst.addi, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=false,OP2DT=1, OP2REG=true},
                 new InstructionDefinition{ Name=$"{Inst.sub}",  ID=(int)Inst.sub, OP0DT=1, OP0REG=true, OP1DT=1,OP1REG=true,OP2DT=1, OP2REG=true},
