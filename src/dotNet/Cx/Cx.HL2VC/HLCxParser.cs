@@ -9,7 +9,9 @@ namespace Cx.HL2VC
     {
         public HLCxParser()
         {
-            SubParsers.Add(new RootParser());
+            var rp = new RootParser();
+            rp.SubParsers.Add(new NamespaceParser());
+            SubParsers.Add(rp);
         }
         public OperationResult<ASTNode> ParseAST(Segment HEAD)
         {
@@ -35,11 +37,26 @@ namespace Cx.HL2VC
     {
         public NamespaceParser()
         {
-            SubParsers.Add(new FunctionParser());
+            var rp = new RootParser();
+            SubParsers.Add(rp);
         }
         public override OperationResult<bool> Parse(SegmentContext context , ASTNode Parent)
         {
-            throw new NotImplementedException();
+            OperationResult<bool> result=new OperationResult<bool>(false);
+            var nr=context.Match("namespace");
+            var BRKPNT=context.Current;
+            if(nr== MatchResult.Match)
+            {
+                while (true)
+                {
+                    var seg_match = context.MatchCollection(true , "." , "{");
+                }
+            }
+            else
+            {
+                context.SetCurrent(BRKPNT);
+            }
+            return result;
         }
     }
 }

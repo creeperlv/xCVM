@@ -1074,10 +1074,10 @@ namespace Cx.Preprocessor
             int SKIP_POINT_IF_LAYER = 0;
             bool willskip = false;
             bool SkipFile = false;
-            if (isHeader)
-            {
-                preprocessed.ProcessedHeader.Add(Input.ID , Input);
-            }
+            //if (isHeader)
+            //{
+            //    preprocessed.ProcessedHeader.Add(Input.ID , Input);
+            //}
             while (true)
             {
                 Line = streamReader.ReadLine();
