@@ -5,8 +5,7 @@ namespace Cx.Core
 {
     public abstract class ContextualParser
     {
-        public List<ContextualParser> SubParsers = new List<ContextualParser>();
-        public abstract OperationResult<bool> Parse(SegmentContext context , ASTNode Parent);
+        public List<int> ConcernedParsers = new List<int>();
+        public abstract OperationResult<bool> Parse(ParserProvider provider,SegmentContext context , ASTNode Parent);
     }
-
 }

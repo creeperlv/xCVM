@@ -21,7 +21,7 @@ namespace Cx.Core
                 return new OperationResult<ASTNode>(PointTo);
             }
         }
-        public override OperationResult<bool> Parse(SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context , ASTNode Parent)
         {
             var r = context.MatchMarch("struct");
             if (r == MatchResult.Match)

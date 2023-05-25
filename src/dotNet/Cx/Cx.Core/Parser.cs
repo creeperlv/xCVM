@@ -8,18 +8,18 @@ namespace Cx.Core
     {
         public Parser()
         {
-            SubParsers.Add(new RootParser());
+            ConcernedParsers.Add(ASTNodeType.Root);
         }
         public OperationResult<ASTNode> ParseAST(Segment HEAD)
         {
             SegmentContext segmentContext = new SegmentContext(HEAD);
             ASTNode root = new ASTNode();
             OperationResult<ASTNode> result = new OperationResult<ASTNode>(root);
-            Parse(segmentContext , root);
+            Parse(VanillaCParsers.GetProvider() , segmentContext , root);
             return result;
         }
 
-        public override OperationResult<bool> Parse(SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             return result;
@@ -32,7 +32,7 @@ namespace Cx.Core
         {
             typeParser = new TypeParser();
         }
-        public override OperationResult<bool> Parse(SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             ASTNode FuncDef = new ASTNode();
@@ -78,7 +78,7 @@ namespace Cx.Core
                 return new OperationResult<bool>(false);
             if (FirstLB == null)
                 return new OperationResult<bool>(false);
-            context.SetCurrent( FirstLP);
+            context.SetCurrent(FirstLP);
             while (true)
             {
                 var res = context.MatchMarch(")");
@@ -100,13 +100,13 @@ namespace Cx.Core
                 return new OperationResult<bool>(false);
             }
             {
-                ASTNode return_type= new ASTNode();
+                ASTNode return_type = new ASTNode();
                 FuncDef.AddChild(return_type);
                 return_type.Type = ASTNodeType.ReturnType;
-                typeParser.Parse(new SegmentContext(HEAD), return_type);
+                typeParser.Parse(provider , new SegmentContext(HEAD) , return_type);
             }
             {
-                ASTNode node= new ASTNode();
+                ASTNode node = new ASTNode();
                 while (true)
                 {
                     //
@@ -114,7 +114,7 @@ namespace Cx.Core
                     {
                         break;
                     }
-                    var tr=typeParser.Parse(context,node);
+                    var tr = typeParser.Parse(provider , context , node);
                     if (tr.Result == true)
                     {
 
@@ -127,9 +127,11 @@ namespace Cx.Core
                 if (context.Current == null) break;
                 if (context.Current.Next == null) break;
                 var Hit = false;
-                foreach (var item in SubParsers)
+                foreach (var id in ConcernedParsers)
                 {
-                    var _result = item.Parse(context , Parent);
+                    var item = provider.GetParser(id);
+
+                    var _result = item.Parse(provider , context , Parent);
                     if (_result.Result == true)
                     {
                         Hit = true;
@@ -149,9 +151,9 @@ namespace Cx.Core
     {
         public RootParser()
         {
-            SubParsers.Add(new FunctionParser());
+            ConcernedParsers.Add(ASTNodeType.DeclareFunc);
         }
-        public override OperationResult<bool> Parse(SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             while (true)
@@ -160,9 +162,10 @@ namespace Cx.Core
                 if (context.Current == null) break;
                 if (context.Current.Next == null) break;
                 var Hit = false;
-                foreach (var item in SubParsers)
+                foreach (var id in ConcernedParsers)
                 {
-                    var _result = item.Parse(context , Parent);
+                    var item = provider.GetParser(id);
+                    var _result = item.Parse(provider , context , Parent);
                     if (_result.Result == true)
                     {
                         Hit = true;

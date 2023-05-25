@@ -2,6 +2,7 @@
 {
     public static class ASTNodeType
     {
+        public const int Root = -1;
         public const int DeclareFunc = 0;
         public const int DeclareStruct = 1;
         public const int DeclareVar = 2;
