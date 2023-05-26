@@ -78,7 +78,7 @@ Result NewLinkedListItem();
 Result GetItem_LI(LinkedList HEAD, int Count);
 Result NewDictionaryElement();
 Result GetValueInDictionary(LinkedList HEAD, int Count);
-Result NewGenericLsit(size_t ItemSize);
+Result NewGenericList(size_t ItemSize);
 bool AddChar(string str, char c);
 Result ToCStr(string str);
 bool ByteArrayEqualsCStr(byte* L, char* R, size_t LLen);

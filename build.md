@@ -22,8 +22,18 @@ To build C version of xCVM.
 In the project root, run:
 
 ```
-sh ./scripts/DOS_BLD.SH
+sh ./scripts/cbuild.sh
 ```
 
 The C version should be compatible with gcc from DJGPP.
 
+The build script uses $CC in Environment Variable as c compiler.
+
+Thus, you may use:
+
+```
+export CC=x86_64-w64-mingw32-gcc
+sh ./scripts/cbuild.sh
+```
+
+to use gcc from mingw32 to build the C version.

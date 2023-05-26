@@ -3,12 +3,12 @@ Result NewCallStack()
 {
 	Result r = NewResultWP();
 	CallFrame* HEAD = (CallFrame*)malloc(sizeof(CallFrame) * LIST_BLOCK);
-	if (HEAD = NULL) {
+        if (HEAD == NULL) {
 
-		DestoryResult(r);
-		return NULL;
-	}
-	CallStack _cs = (CallStack)malloc(sizeof(struct  _CS));
+            DestoryResult(r);
+            return NULL;
+        }
+        CallStack _cs = (CallStack)malloc(sizeof(struct  _CS));
 	if (_cs == NULL) {
 		DestoryResult(r);
 		return NULL;
