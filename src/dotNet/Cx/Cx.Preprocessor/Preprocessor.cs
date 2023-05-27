@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using Cx.Core;
+using Cx.Core.VCParser;
 using LibCLCC.NET.Delegates;
 using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
