@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Text;
 using Cx.Core;
 using Cx.Core.VCParser;
@@ -183,6 +180,13 @@ namespace Cx.Preprocessor
                         var LC = new SegmentContext(context.HEAD);
                         LC.SetEndPoint(context.Current!.Prev);
                         var LR = ParseEval(LC);
+                        if (LR.Result == null)
+                        {
+                            OperationResult<ASTNode?> result = new OperationResult<ASTNode?>(null);
+                            result.Errors = LR.Errors;
+                            result.AddError(new UnableToParseExpressionError(context.Current));
+                            return result;
+                        }
                         if (LR.Errors.Count == 0)
                         {
                             node.AddChild(LR.Result);
@@ -336,10 +340,17 @@ namespace Cx.Preprocessor
 #if DEBUG
             if (node == null)
                 Console.WriteLine($"Node not exist!");
+            else
+            {
+                Console.WriteLine($"Node Type:{node.Type}");
+                Console.WriteLine($"Node Segment:{node.Segment?.content}");
 
-            Console.WriteLine($"Node Type:{node.Type}");
-            Console.WriteLine($"Node Segment:{node.Segment?.content}");
+            }
 #endif
+            if (node == null)
+            {
+                return new OperationResult<object?>(null);
+            }
             if (node.Type == ASTNodeType.EndNode)
             {
                 if (node.Segment != null)
@@ -808,12 +819,13 @@ namespace Cx.Preprocessor
             Process(InputCFile , preprocessed , false);
             return new OperationResult<Preprocessed?>(null);
         }
-        public string process_line(string Line)
+        public (string, bool) process_line(string Line)
         {
             StringBuilder stringBuilder = new StringBuilder();
             var LineParse = CStyleParser.Parse(Line , false);
             FloatPointScanner.ScanFloatPoint(ref LineParse);
             SegmentContext segmentContext = new SegmentContext(LineParse);
+            bool MacroReplaced = false;
             while (true)
             {
                 if (segmentContext.ReachEnd)
@@ -841,8 +853,8 @@ namespace Cx.Preprocessor
 
                     if (Symbols.ContainsKey(item))
                     {
+                        MacroReplaced = true;
                         stringBuilder.Append(Symbols [ item ]);
-
                     }
                     else
                     {
@@ -851,12 +863,12 @@ namespace Cx.Preprocessor
                 }
                 segmentContext.GoNext();
             }
-            return stringBuilder.ToString();
+            return (stringBuilder.ToString(), MacroReplaced);
         }
         public OperationResult<string?> ProcessMacroLine(VirtualFile CurrentFile ,
                                                            string Line ,
                                                            ref bool willskip ,
-                                                           ref bool SkipFile,
+                                                           ref bool SkipFile ,
                                                            ref Preprocessed preprocessed ,
                                                            ref int IFSCOPE ,
                                                            ref int SKIP_POINT_IF_LAYER)
@@ -925,7 +937,6 @@ namespace Cx.Preprocessor
                             define(segmentContext);
                             return new OperationResult<string?>(null);
                         }
-                        break;
                     case 2:
                         {
                             if (!willskip)
@@ -1019,7 +1030,7 @@ namespace Cx.Preprocessor
                         {
 
                             var pragma = segmentContext.MatchCollectionMarch(false , "once");
-                            if(pragma.Item1 == MatchResult.Match)
+                            if (pragma.Item1 == MatchResult.Match)
                             {
                                 switch (pragma.Item2)
                                 {
@@ -1108,7 +1119,7 @@ namespace Cx.Preprocessor
                 if (Line == null) break;
                 if (Line.StartsWith("#"))
                 {
-                    var preprocessed_line = ProcessMacroLine(Input , Line , ref willskip ,ref SkipFile, ref preprocessed , ref IFSCOPE , ref SKIP_POINT_IF_LAYER);
+                    var preprocessed_line = ProcessMacroLine(Input , Line , ref willskip , ref SkipFile , ref preprocessed , ref IFSCOPE , ref SKIP_POINT_IF_LAYER);
                     if (SkipFile)
                     {
                         break;
@@ -1123,8 +1134,18 @@ namespace Cx.Preprocessor
                 {
                     if (!willskip)
                     {
-                        var preprocessed_line = process_line(Line);
-                        sw.WriteLine(preprocessed_line);
+                        var _Line = Line;
+                        var _continue = false;
+                        while (true)
+                        {
+
+                            (_Line,_continue) = process_line(_Line);
+                            if (_continue == false)
+                            {
+                                break;
+                            }
+                        }
+                        sw.WriteLine(_Line);
                     }
                 }
             }

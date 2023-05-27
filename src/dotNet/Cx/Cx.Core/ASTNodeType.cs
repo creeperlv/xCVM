@@ -20,6 +20,7 @@
         public const int Name = 14;
         public const int Pointer = 15;
         public const int EndNode = 16;
+        public const int SingleParameter= 17;
     }
 
 }

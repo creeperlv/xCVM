@@ -121,6 +121,9 @@ namespace Cx.Core.VCParser
                     }
                 }
             }
+            ASTNode parameters = new ASTNode();
+            FuncDef.AddChild(parameters);
+            parameters.Type= ASTNodeType.Parameters;
             while (true)
             {
                 if (context.ReachEnd) break;

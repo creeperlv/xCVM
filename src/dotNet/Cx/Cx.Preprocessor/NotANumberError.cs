@@ -12,4 +12,13 @@ namespace Cx.Preprocessor
 
         public override string Message => $"Not a number.";
     }
+    public class UnableToParseExpressionError : OperationError
+    {
+
+        public UnableToParseExpressionError(Segment? binded) : base(binded , null)
+        {
+        }
+
+        public override string Message => $"Unable to parse the expression.";
+    }
 }
