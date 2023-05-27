@@ -1,4 +1,5 @@
 ﻿using Cx.Core;
+using Cx.Core.VCParser;
 
 namespace Cx.HL2VC
 {

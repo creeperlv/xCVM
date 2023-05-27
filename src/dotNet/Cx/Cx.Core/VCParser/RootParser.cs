@@ -1,6 +1,6 @@
 ﻿using xCVM.Core.CompilerServices;
 
-namespace Cx.Core
+namespace Cx.Core.VCParser
 {
     public class RootParser : ContextualParser
     {
@@ -8,7 +8,7 @@ namespace Cx.Core
         {
             ConcernedParsers.Add(ASTNodeType.DeclareFunc);
         }
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             while (true)
@@ -20,7 +20,7 @@ namespace Cx.Core
                 foreach (var id in ConcernedParsers)
                 {
                     var item = provider.GetParser(id);
-                    var _result = item.Parse(provider , context , Parent);
+                    var _result = item.Parse(provider, context, Parent);
                     if (_result.Result == true)
                     {
                         Hit = true;

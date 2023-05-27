@@ -1,11 +1,10 @@
-﻿using Cx.Core.VCParser;
-using xCVM.Core.CompilerServices;
+﻿using xCVM.Core.CompilerServices;
 
-namespace Cx.Core
+namespace Cx.Core.VCParser
 {
     public class TypeParser : ContextualParser
     {
-        OperationResult<ASTNode> WrapPointer(SegmentContext context , ASTNode PointTo)
+        OperationResult<ASTNode> WrapPointer(SegmentContext context, ASTNode PointTo)
         {
             var mr = context.MatchMarch("*");
 
@@ -14,7 +13,7 @@ namespace Cx.Core
                 ASTNode node = new ASTNode();
                 node.Type = ASTNodeType.Pointer;
                 node.AddChild(PointTo);
-                var r=WrapPointer(context,node);
+                var r = WrapPointer(context, node);
                 return new OperationResult<ASTNode>(r.Result);
             }
             else
@@ -22,15 +21,15 @@ namespace Cx.Core
                 return new OperationResult<ASTNode>(PointTo);
             }
         }
-        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
         {
             var r = context.MatchMarch("struct");
             if (r == MatchResult.Match)
             {
-                ASTNode __node= new ASTNode();
+                ASTNode __node = new ASTNode();
                 __node.Type = ASTNodeType.UseStruct;
                 __node.Segment = context.Current;
-                var res=WrapPointer(context , __node);
+                var res = WrapPointer(context, __node);
                 Parent.AddChild(res.Result);
                 return new OperationResult<bool>(true);
             }
@@ -39,7 +38,7 @@ namespace Cx.Core
                 ASTNode __node = new ASTNode();
                 __node.Type = ASTNodeType.DataType;
                 __node.Segment = context.Current;
-                var res = WrapPointer(context , __node);
+                var res = WrapPointer(context, __node);
                 Parent.AddChild(res.Result);
                 return new OperationResult<bool>(true);
             }

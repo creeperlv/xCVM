@@ -2,7 +2,7 @@
 using System;
 using xCVM.Core.CompilerServices;
 
-namespace Cx.Core
+namespace Cx.Core.VCParser
 {
     public class Parser : ContextualParser
     {
@@ -15,11 +15,11 @@ namespace Cx.Core
             SegmentContext segmentContext = new SegmentContext(HEAD);
             ASTNode root = new ASTNode();
             OperationResult<ASTNode> result = new OperationResult<ASTNode>(root);
-            Parse(VanillaCParsers.GetProvider() , segmentContext , root);
+            Parse(VanillaCParsers.GetProvider(), segmentContext, root);
             return result;
         }
 
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             return result;
@@ -32,7 +32,7 @@ namespace Cx.Core
         {
             typeParser = new TypeParser();
         }
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             ASTNode FuncDef = new ASTNode();
@@ -103,7 +103,7 @@ namespace Cx.Core
                 ASTNode return_type = new ASTNode();
                 FuncDef.AddChild(return_type);
                 return_type.Type = ASTNodeType.ReturnType;
-                typeParser.Parse(provider , new SegmentContext(HEAD) , return_type);
+                typeParser.Parse(provider, new SegmentContext(HEAD), return_type);
             }
             {
                 ASTNode node = new ASTNode();
@@ -114,7 +114,7 @@ namespace Cx.Core
                     {
                         break;
                     }
-                    var tr = typeParser.Parse(provider , context , node);
+                    var tr = typeParser.Parse(provider, context, node);
                     if (tr.Result == true)
                     {
 
@@ -131,7 +131,7 @@ namespace Cx.Core
                 {
                     var item = provider.GetParser(id);
 
-                    var _result = item.Parse(provider , context , Parent);
+                    var _result = item.Parse(provider, context, Parent);
                     if (_result.Result == true)
                     {
                         Hit = true;
