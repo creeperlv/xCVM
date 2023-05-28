@@ -273,6 +273,18 @@ namespace xCVM.Core
         /// </summary>
         syscallr = 0x009C,
         /// <summary>
+        /// Function Call with immediate ids.
+        /// <br/>
+        /// funccall func_collection_id func_id
+        /// </summary>
+        funccall = 0x0190,
+        /// <summary>
+        /// Function Call with IDs given by registers.
+        /// <br/>
+        /// funccall $func_collection_id $func_id
+        /// </summary>
+        funccallr = 0x0191,
+        /// <summary>
         /// Copy text where the ID is given by register.
         /// <br/>
         /// cptxtr $register_to_text $register_to_receive_ID.

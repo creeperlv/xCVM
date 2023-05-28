@@ -22,6 +22,7 @@ namespace xCVM.Core
         Dictionary<int , xCVMModule> LoadedModules = new Dictionary<int , xCVMModule>();
         Stack<CallFrame> CallStack = new Stack<CallFrame>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
+        Dictionary<int , Dictionary<int , ISysCall>> FunctionTable = new Dictionary<int , Dictionary<int , ISysCall>>();
         public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
         int CurrentModule = -1;
         public int AddResource(IDisposable disposable)
@@ -40,6 +41,26 @@ namespace xCVM.Core
                 SysCalls [ ID ] = call;
             else
                 SysCalls.Add(ID , call);
+        }
+        public void RegisterFunctionCall(int FunctionCollectionID , int FuncID , ISysCall sysCall)
+        {
+            if (FunctionTable.ContainsKey(FunctionCollectionID))
+            {
+                if (FunctionTable [ FunctionCollectionID ].ContainsKey(FuncID))
+                {
+                    FunctionTable [ FunctionCollectionID ] [ FuncID ] = sysCall;
+                }
+                else
+                    FunctionTable [ FunctionCollectionID ].Add(FuncID , sysCall);
+            }
+            else
+            {
+                Dictionary<int , ISysCall> functionCollection = new Dictionary<int , ISysCall>
+                {
+                    { FuncID , sysCall }
+                };
+                FunctionTable.Add(FunctionCollectionID , functionCollection);
+            }
         }
         ModuleProvider? mprovider;
         public xCVMCore(xCVMOption xCVMOption , xCVMemBlock? PredefinedMemories , ModuleProvider? provider)
@@ -949,7 +970,7 @@ namespace xCVM.Core
                                 case Constants.lm_df:
                                     {
                                         var path = Encoding.UTF8.GetString(MemoryBlocks.Datas [ OP1 ].data);
-                                        using Stream stream=File.OpenRead(path);
+                                        using Stream stream = File.OpenRead(path);
                                         var module = xCVMModule.FromStream(stream);
                                         if (module != null)
                                         {
@@ -1087,6 +1108,34 @@ namespace xCVM.Core
                 case (int)Inst.jmpr:
                     {
                         PC = RegisterToInt32(instruct.Op0) - 1;
+                    }
+                    break;
+                case (int)Inst.funccall:
+                    {
+                        int FCID = ImmediateToInt32(instruct.Op0);
+                        int FID = ImmediateToInt32(instruct.Op1);
+                        if (FCID == 0)
+                        {
+                            SysCalls [ FID ].Execute(this);
+                        }
+                        else
+                        {
+                            FunctionTable [ FCID ] [ FID ].Execute(this);
+                        }
+                    }
+                    break;
+                case (int)Inst.funccallr:
+                    {
+                        int FCID = RegisterToInt32(instruct.Op0);
+                        int FID = RegisterToInt32(instruct.Op1);
+                        if (FCID == 0)
+                        {
+                            SysCalls [ FID ].Execute(this);
+                        }
+                        else
+                        {
+                            FunctionTable [ FCID ] [ FID ].Execute(this);
+                        }
                     }
                     break;
                 case (int)Inst.syscall:
