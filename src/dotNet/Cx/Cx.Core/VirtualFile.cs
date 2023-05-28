@@ -35,38 +35,60 @@ namespace Cx.Core
 
         public bool Equals(VirtualFile other)
         {
-            return this.ID==other.ID;
+            return this.ID == other.ID;
         }
 
         public bool Equals(VirtualFile x , VirtualFile y)
         {
-            return x.ID==y.ID;
+            return x.ID == y.ID;
         }
 
         public int GetHashCode(VirtualFile obj)
         {
-            return ID?.GetHashCode()??base.GetHashCode();
+            return ID?.GetHashCode() ?? base.GetHashCode();
         }
-
+        StreamWriter? StreamWriter = null;
+        public StreamWriter GetWriter()
+        {
+            if (StreamWriter == null)
+            {
+                StreamWriter = new StreamWriter(GetStream());
+            }
+            return StreamWriter;
+        }
+        public void Flush()
+        {
+            StreamWriter?.Flush();
+            GetStream()?.Flush();
+        }
+        public void Close()
+        {
+            GetStream()?.Close();
+        }
         public Stream? GetStream()
         {
-            if (FileInMemory != null)
+            if (FStream == null)
             {
-                return FileInMemory;
-            }
-            if (FileOnDisk != null)
-            {
-                if (FileOnDisk.Exists)
+                if (FileInMemory != null)
                 {
-                    FStream = FileOnDisk.Open(FileMode.Open);
-                    return FStream;
-                }else if (CreateWhenNotExist)
+                    return FileInMemory;
+                }
+                if (FileOnDisk != null)
                 {
-                    FStream = FileOnDisk.Open(FileMode.Create);
-                    return FStream;
+                    if (FileOnDisk.Exists)
+                    {
+                        FStream = FileOnDisk.Open(FileMode.Open);
+                        return FStream;
+                    }
+                    else if (CreateWhenNotExist)
+                    {
+                        FStream = FileOnDisk.Open(FileMode.Create);
+                        return FStream;
+                    }
                 }
             }
-            return null;
+
+            return FStream;
         }
     }
 

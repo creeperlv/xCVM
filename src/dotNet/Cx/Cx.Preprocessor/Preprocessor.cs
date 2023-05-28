@@ -14,15 +14,15 @@ namespace Cx.Preprocessor
 {
     public class Preprocessor
     {
-        public bool CloseSWOnProcessEnd = true;
-        public bool CloseSROnProcessEnd = true;
+        public bool CloseSWOnProcessEnd = false;
+        public bool CloseSROnProcessEnd = false;
         FilesProvider FilesProvider;
         public ChainAction<VirtualFile> OnSingleFileProcessComplete = new ChainAction<VirtualFile>();
         public Preprocessor(FilesProvider filesProvider)
         {
             FilesProvider = filesProvider;
         }
-        CStyleParser CStyleParser = new CStyleParser();
+        CStyleScanner CStyleParser = new CStyleScanner();
         public Dictionary<string , string> Symbols = new Dictionary<string , string>();
         public void Define(string symbol , string value)
         {
@@ -1079,7 +1079,7 @@ namespace Cx.Preprocessor
                 if (!preprocessed.ProcessedHeader.ContainsKey(Input.ID))
                     preprocessed.ProcessedHeader.Add(Input.ID , Input);
             }
-            sw = new StreamWriter(OutputFile.GetStream());
+            sw = OutputFile.GetWriter();
             StreamReader streamReader = new StreamReader(Input.GetStream());
             string? Line = null;
             int IFSCOPE = 0;

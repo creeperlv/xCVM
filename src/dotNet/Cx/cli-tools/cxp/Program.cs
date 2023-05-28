@@ -69,6 +69,13 @@ namespace cxp
             {
                 var result = preprocessor.Process(input , preprocessed);
             }
+            foreach (var item in preprocessed.ProcessedCFile)
+            {
+                item.Flush();
+                item.Close();
+            }
+            preprocessed.CombinedHeader?.Flush();
+            preprocessed.CombinedHeader?.Close();
         }
     }
     public class Options
