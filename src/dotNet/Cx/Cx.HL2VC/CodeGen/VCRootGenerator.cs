@@ -27,7 +27,7 @@ namespace Cx.HL2VC.CodeGen
                 if (g0 == null)
                 {
                     OperationResult<bool> operationResult = new OperationResult<bool>(false);
-                    operationResult.AddError(new GeneratorNotFound(c0.Segment));
+                    operationResult.AddError(new GeneratorNotFoundError(c0.Segment));
                     return operationResult;
                 }
                 g0.Write(provider , c0 , writer);
@@ -44,7 +44,7 @@ namespace Cx.HL2VC.CodeGen
                         if (g == null)
                         {
                             OperationResult<bool> operationResult = new OperationResult<bool>(false);
-                            operationResult.AddError(new GeneratorNotFound(item.Segment));
+                            operationResult.AddError(new GeneratorNotFoundError(item.Segment));
                             return operationResult;
                         }
                         var result = g.Write(provider , item , writer);
@@ -63,7 +63,7 @@ namespace Cx.HL2VC.CodeGen
                         if (g == null)
                         {
                             OperationResult<bool> operationResult = new OperationResult<bool>(false);
-                            operationResult.AddError(new GeneratorNotFound(item.Segment));
+                            operationResult.AddError(new GeneratorNotFoundError(item.Segment));
                             return operationResult;
                         }
                         var result = g.Write(provider , item , writer);

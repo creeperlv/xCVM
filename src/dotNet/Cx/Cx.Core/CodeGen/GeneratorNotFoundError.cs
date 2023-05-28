@@ -3,9 +3,9 @@ using xCVM.Core.CompilerServices;
 
 namespace Cx.Core.CodeGen
 {
-    public class GeneratorNotFound : OperationError
+    public class GeneratorNotFoundError : OperationError
     {
-        public GeneratorNotFound(Segment? binded) : base(binded , null)
+        public GeneratorNotFoundError(Segment? binded) : base(binded , null)
         {
         }
 

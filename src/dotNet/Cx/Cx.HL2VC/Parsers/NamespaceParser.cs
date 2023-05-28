@@ -1,5 +1,6 @@
 ﻿using Cx.Core;
 using Cx.Core.VCParser;
+using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.HL2VC
@@ -18,10 +19,27 @@ namespace Cx.HL2VC
             var BRKPNT=context.Current;
             if(nr== MatchResult.Match)
             {
+                var HEAD = context.Current;
+                Segment? FirstLB = null;
                 while (true)
                 {
-                    var seg_match = context.MatchCollection(true , "." , "{");
+                    var res = context.MatchMarch("{");
+                    if (res == MatchResult.Match)
+                    {
+                        FirstLB = context.Last;
+                    }
+                    else if (res == MatchResult.Mismatch)
+                    {
+                        context.GoNext();
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
+                SegmentContext namespace_name = new SegmentContext(HEAD);
+                namespace_name.SetEndPoint(FirstLB);
+
             }
             else
             {

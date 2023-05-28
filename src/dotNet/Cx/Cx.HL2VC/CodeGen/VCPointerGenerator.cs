@@ -17,7 +17,7 @@ namespace Cx.HL2VC.CodeGen
                     if (g == null)
                     {
                         OperationResult<bool> operationResult = new OperationResult<bool>(false);
-                        operationResult.AddError(new GeneratorNotFound(n.Segment));
+                        operationResult.AddError(new GeneratorNotFoundError(n.Segment));
                         return operationResult;
                     }
                     var result = g.Write(provider , n , writer);

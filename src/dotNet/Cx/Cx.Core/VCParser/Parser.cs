@@ -133,7 +133,11 @@ namespace Cx.Core.VCParser
                 foreach (var id in ConcernedParsers)
                 {
                     var item = provider.GetParser(id);
-
+                    if(item == null)
+                    {
+                        result.AddError(new ParserNotFoundError(null));
+                        return result;
+                    }
                     var _result = item.Parse(provider, context, Parent);
                     if (_result.Result == true)
                     {
