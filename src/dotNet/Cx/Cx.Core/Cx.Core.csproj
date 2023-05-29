@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="LibCLCC.NET" Version="1.12.13" />
+		<PackageReference Include="LibCLCC.NET" Version="1.13.14" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\xCVM.Core.CompilerServices\xCVM.Core.CompilerServices.csproj" />

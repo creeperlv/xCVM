@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     FILE* f = fopen(fn, "r");
     if (f == NULL) {
         SetFG(ANSI_Red + ANSI_Bright);
-        Write("Error: ");
+        Write("error:");
         ResetColors();
         WriteLine("File Not Found.");
         return 0;

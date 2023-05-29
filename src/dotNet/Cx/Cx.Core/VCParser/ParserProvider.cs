@@ -1,6 +1,4 @@
-﻿using LibCLCC.NET.TextProcessing;
-using System.Collections.Generic;
-using xCVM.Core.CompilerServices;
+﻿using System.Collections.Generic;
 
 namespace Cx.Core.VCParser
 {
@@ -23,14 +21,6 @@ namespace Cx.Core.VCParser
             }
             return null;
         }
-    }
-    public class ParserNotFoundError : OperationError
-    {
-        public ParserNotFoundError(Segment? binded) : base(binded , null)
-        {
-        }
-
-        public override string Message => $"Parser Not Found.";
     }
     public static class VanillaCParsers
     {
