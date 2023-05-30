@@ -1,4 +1,4 @@
 #!/bin/sh
 cd ../bin/.net
-rm *.pdb
+rm *.dbg
 cd ../../scripts

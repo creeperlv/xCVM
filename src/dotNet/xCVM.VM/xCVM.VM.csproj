@@ -6,6 +6,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<PublishAot>true</PublishAot>
 		<Nullable>enable</Nullable>
+		<OptimizationPreference>Size</OptimizationPreference>
+		<PublishTrimmed>true</PublishTrimmed>
+		<StripSymbols>true</StripSymbols>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 	</PropertyGroup>

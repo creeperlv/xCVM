@@ -5,6 +5,9 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<PublishAot>true</PublishAot>
+		<OptimizationPreference>Size</OptimizationPreference>
+		<PublishTrimmed>true</PublishTrimmed>
+		<StripSymbols>true</StripSymbols>
 		<RootNamespace>xCVM.Compiler</RootNamespace>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
