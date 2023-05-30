@@ -17,9 +17,16 @@ namespace Cx.Core.VCParser
                 if (context.Current == null) break;
                 if (context.Current.Next == null) break;
                 var Hit = false;
+                var __current= context.Current;
                 foreach (var id in ConcernedParsers)
                 {
                     var item = provider.GetParser(id);
+                    if (item == null)
+                    {
+                        result.AddError(new ParserNotFoundError(context.Current));
+                        return result;
+                    }
+                    context.SetCurrent(__current);
                     var _result = item.Parse(provider, context, Parent);
                     if (_result.Result == true)
                     {

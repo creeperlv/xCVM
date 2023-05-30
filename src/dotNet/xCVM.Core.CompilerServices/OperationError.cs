@@ -41,6 +41,13 @@ namespace xCVM.Core.CompilerServices
         }
         public override string Message => $"End at unexpected location.";
     }
+    public class UnexpectedEndMarkError : OperationError
+    {
+        public UnexpectedEndMarkError(Segment? binded) : base(binded , null)
+        {
+        }
+        public override string Message => $"End mark at unexpected location.";
+    }
     public class IntParseError : OperationError
     {
         public IntParseError(Segment? binded) : base(binded, null)

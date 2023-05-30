@@ -1,5 +1,6 @@
 ﻿using Cx.Core;
 using Cx.Core.DataValidation;
+using Cx.Core.SegmentContextUtilities;
 using Cx.Core.VCParser;
 using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
@@ -38,7 +39,7 @@ namespace Cx.HL2VC
                         break;
                     }
                 }
-                if(FirstLB == null)
+                if (FirstLB == null)
                 {
                     result.AddError(new ExpectAMarkError(HEAD , "{"));
                     return result;
@@ -76,7 +77,8 @@ namespace Cx.HL2VC
                                 if (seg == ".")
                                 {
                                     FormedPrefix += "_";
-                                }else if (seg == "{")
+                                }
+                                else if (seg == "{")
                                 {
                                     FormedPrefix += "_";
                                     Continue = false;
@@ -94,7 +96,7 @@ namespace Cx.HL2VC
                         default:
                             {
                                 var r = new OperationResult<bool>(false);
-                                r.AddError(new IllegalIdentifierError(namespace_name.Current)) ;
+                                r.AddError(new IllegalIdentifierError(namespace_name.Current));
                                 return r;
                             }
                             break;
@@ -104,6 +106,45 @@ namespace Cx.HL2VC
                 var __seg = __head.Duplicate();
                 __seg.content = __seg.content = FormedPrefix;
                 root.Segment = __seg;
+                SegmentContext newContext = new SegmentContext(FirstLB);
+                var __r = ContextClosure.Close(newContext , "{" , "}");
+                if (__r.Errors.Count > 0)
+                {
+                    OperationResult<bool> operationResult = false;
+                    operationResult.Errors = __r.Errors;
+                    return operationResult;
+                }
+                {
+                    while (true)
+                    {
+                        if (newContext.ReachEnd) break;
+                        if (newContext.Current == null) break;
+                        if (newContext.Current.Next == null) break;
+                        var Hit = false;
+                        var _Current = newContext.Current;
+                        foreach (var id in ConcernedParsers)
+                        {
+                            newContext.SetCurrent(_Current);
+                            var item = provider.GetParser(id);
+                            if (item == null)
+                            {
+                                result.AddError(new ParserNotFoundError(newContext.Current));
+                                return result;
+                            }
+                            var _result = item.Parse(provider , context , Parent);
+                            if (_result.Result == true)
+                            {
+                                Hit = true;
+                                break;
+                            }
+                        }
+                        if (Hit == false)
+                        {
+                            result.Result = false;
+                        }
+
+                    }
+                }
             }
             else
             {
