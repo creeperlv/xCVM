@@ -8,10 +8,10 @@ namespace Cx.HL2VC.Parsers
         public static ParserProvider GetProvider()
         {
             ParserProvider ParserProvider = new ParserProvider();
-            ParserProvider.RegisterParser(ASTNodeType.Root, new RootParser());
-            ParserProvider.RegisterParser(ASTNodeType.DeclareFunc, new FunctionParser());
-            ParserProvider.RegisterParser(ASTNodeType.DataType, new TypeParser());
-            ParserProvider.RegisterParser(HLASTNodeType.Namespace, new NamespaceParser());
+            ParserProvider.RegisterParser(ASTNodeType.Root , new RootParser());
+            ParserProvider.RegisterParser(ASTNodeType.DeclareFunc , new FunctionParser());
+            ParserProvider.RegisterParser(ASTNodeType.DataType , new TypeParser());
+            ParserProvider.RegisterParser(HLASTNodeType.Namespace , new NamespaceParser());
             return ParserProvider;
         }
     }
@@ -20,6 +20,7 @@ namespace Cx.HL2VC.Parsers
         public HLRootParser()
         {
             ConcernedParsers.Add(HLASTNodeType.Namespace);
+            ConcernedParsers.Add(HLASTNodeType.Using);
         }
     }
 }

@@ -107,7 +107,7 @@ namespace Cx.HL2VC
                 __seg.content = __seg.content = FormedPrefix;
                 root.Segment = __seg;
                 SegmentContext newContext = new SegmentContext(FirstLB);
-                var __r = ContextClosure.Close(newContext , "{" , "}");
+                var __r = ContextClosure.LRClose(newContext , "{" , "}");
                 if (__r.Errors.Count > 0)
                 {
                     OperationResult<bool> operationResult = false;
@@ -145,6 +145,7 @@ namespace Cx.HL2VC
 
                     }
                 }
+                result.Result = true;
             }
             else
             {
