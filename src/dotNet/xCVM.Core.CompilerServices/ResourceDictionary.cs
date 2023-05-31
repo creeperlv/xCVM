@@ -33,7 +33,7 @@ namespace xCVM.Core.CompilerServices
         }
         public static OperationResult<ResourceDictionary> FromTextReader(TextReader reader, DirectoryInfo Parent, string? ID = null)
         {
-            ResourceManifestParser parser = new ResourceManifestParser();
+            ResourceManifestScanner parser = new ResourceManifestScanner();
             var content = reader.ReadToEnd();
             var segments = parser.Parse(content, false, ID);
             SegmentContext context = new SegmentContext(segments);

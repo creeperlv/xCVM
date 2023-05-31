@@ -2,9 +2,9 @@
 
 namespace xCVM.Core.CompilerServices
 {
-    public class ASMParser : GeneralPurposeParser
+    public class ASMScanner : GeneralPurposeScanner
     {
-        public ASMParser()
+        public ASMScanner()
         {
             PredefinedSegmentCharacters.Add(';');
             PredefinedSegmentCharacters.Add(':');

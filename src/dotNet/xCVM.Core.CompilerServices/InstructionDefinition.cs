@@ -5,7 +5,7 @@ namespace xCVM.Core.CompilerServices
     [Serializable]
     public class InstructionDefinition : IContentable
     {
-        public string Name;
+        public string? Name;
         public int ID;
         public int OP0DT;
         public bool OP0REG;
@@ -13,6 +13,6 @@ namespace xCVM.Core.CompilerServices
         public bool OP1REG;
         public int OP2DT;
         public bool OP2REG;
-        public string Content => Name;
+        public string Content => Name??"";
     }
 }

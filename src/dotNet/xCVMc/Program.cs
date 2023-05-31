@@ -306,7 +306,7 @@ namespace xCVM.Compiler
                     }
                     return;
                 }
-                xCVMModule? xCVMModule = null;
+                xCVMModule xCVMModule = null;
                 var result = xCVMAssembler.Assemble(files);
                 if (result.Errors.Count > 0)
                 {

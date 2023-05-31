@@ -1,3 +1,3 @@
 #!/bin/sh
-cd ../src/dotNet
+cd ./src/dotNet
 rm ./**/obj/ -rf

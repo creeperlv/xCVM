@@ -139,7 +139,7 @@ namespace xCVM.Core.CompilerServices
         {
             ResourceDevDef def = new ResourceDevDef();
             OperationResult<ResourceDevDef> result = new OperationResult<ResourceDevDef>(def);
-            ResourceManifestParser parser = new ResourceManifestParser();
+            ResourceManifestScanner parser = new ResourceManifestScanner();
             SegmentContext context = new SegmentContext(parser.Parse(stream.ReadToEnd(), false, ID));
             while (true)
             {
@@ -171,9 +171,9 @@ namespace xCVM.Core.CompilerServices
             return result;
         }
     }
-    public class ResourceManifestParser : GeneralPurposeParser
+    public class ResourceManifestScanner : GeneralPurposeScanner
     {
-        public ResourceManifestParser()
+        public ResourceManifestScanner()
         {
             PredefinedSegmentCharacters.Add('=');
             lineCommentIdentifiers.Add(new LineCommentIdentifier { StartSequence = "#" });

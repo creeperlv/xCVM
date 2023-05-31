@@ -51,7 +51,7 @@ namespace xCVM.Core.CompilerServices
                 return Assemble(sr.ReadToEnd());
             }
         }
-        ASMParser parser = new ASMParser();
+        ASMScanner parser = new ASMScanner();
         void Preprocess(Segment HEAD)
         {
             HEAD.content = Regex.Unescape(HEAD.content);
@@ -525,6 +525,11 @@ namespace xCVM.Core.CompilerServices
                                 return _IC;
                             }
                             var Name = context.Current;
+                            if (Name == null)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                return _IC;
+                            }
                             context.GoNext();
                             if (context.ReachEnd)
                             {
@@ -629,6 +634,11 @@ namespace xCVM.Core.CompilerServices
                                 return _IC;
                             }
                             var Name = context.Current;
+                            if (Name == null)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                                return _IC;
+                            }
                             context.GoNext();
                             if (context.ReachEnd)
                             {
@@ -733,6 +743,11 @@ namespace xCVM.Core.CompilerServices
                 var r = context.MatchNext(":" , true);
                 if (r == MatchResult.Match)
                 {
+                    if (context.Current == null)
+                    {
+                        assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                        return _IC;
+                    }
                     string name = context.Current.Prev.content;
                     Labels.Add(name , _IC + 1);
                 }
