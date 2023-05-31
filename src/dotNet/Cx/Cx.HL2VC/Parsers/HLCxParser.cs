@@ -32,5 +32,6 @@ namespace Cx.HL2VC
         public const int Namespace = 100;
         public const int Generic= 101;
         public const int Using = 102;
+        public const int CallNode = 103;
     }
 }

@@ -16,7 +16,16 @@ namespace xCVM.VM
                 xCVMModule module;
                 using (var s = File.OpenRead(args [ 0 ]))
                 {
-                    module = xCVMModule.FromStream(s);
+                    var m = xCVMModule.FromStream(s);
+                    if (m == null)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("error:");
+                        Console.ResetColor();
+                        Console.WriteLine("Cannot Load Module.");
+                        Environment.Exit(1);
+                    }
+                    module = m;
                 }
 
                 xCVMCore core = new xCVMCore(new xCVMOption() { RegisterSize = Constants.int_size , RegisterCount = 16 } , null,null);

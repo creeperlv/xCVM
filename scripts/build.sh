@@ -1,6 +1,6 @@
 #!/bin/sh
-dotnetinfo=$(dotnet --info)
-if [[ "$dotnetinfo" != *".NET"* ]]
+dotnetinfo=$(type dotnet)
+if [ ! -z "${dotnetinfo##*"is"*}" ]
 then
 	echo ".NET not installed!"
 	exit

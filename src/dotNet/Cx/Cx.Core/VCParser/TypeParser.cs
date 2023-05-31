@@ -50,5 +50,4 @@ namespace Cx.Core.VCParser
             }
         }
     }
-
 }

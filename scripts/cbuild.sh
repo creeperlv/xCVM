@@ -3,7 +3,7 @@ if [ -z $CC ]
 then
 	var_test=$(type clang)
 	#echo $var_test
-	if [[ "$var_test" ==  *"is"* ]]
+	if [ -z "${var_test##*"is"*}" ]
 	then
 		export CC=clang
 	else

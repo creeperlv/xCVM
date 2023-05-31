@@ -1,7 +1,7 @@
 ﻿namespace xCVM.Core
 {
-    public class xCVMRTProgram
-    {
-        public xCVMModule program;
-    }
+    //public class xCVMRTProgram
+    //{
+    //    public xCVMModule? program;
+    //}
 }

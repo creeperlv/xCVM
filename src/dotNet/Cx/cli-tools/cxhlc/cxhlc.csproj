@@ -11,4 +11,8 @@
 		<StripSymbols>true</StripSymbols>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Cx.Core\Cx.Core.csproj" />
+	</ItemGroup>
+
 </Project>
