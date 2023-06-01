@@ -822,7 +822,7 @@ namespace Cx.Preprocessor
         public (string, bool) process_line(string Line)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            var LineParse = CStyleParser.Parse(Line , false);
+            var LineParse = CStyleParser.Scan(Line , false);
             FloatPointScanner.ScanFloatPoint(ref LineParse);
             SegmentContext segmentContext = new SegmentContext(LineParse);
             bool MacroReplaced = false;
@@ -873,7 +873,7 @@ namespace Cx.Preprocessor
                                                            ref int IFSCOPE ,
                                                            ref int SKIP_POINT_IF_LAYER)
         {
-            var LineParse = CStyleParser.Parse(Line [ 1.. ] , false);
+            var LineParse = CStyleParser.Scan(Line [ 1.. ] , false);
             FloatPointScanner.ScanFloatPoint(ref LineParse);
             SegmentContext segmentContext = new SegmentContext(LineParse);
             var macro = segmentContext.MatchCollectionMarch(false , "include" , "define" , "if" , "undefine"

@@ -1,5 +1,11 @@
-﻿using Cx.Core.VCParser;
+﻿using Cx.Core;
+using Cx.Core.VCParser;
+using Cx.HL2VC;
+using Cx.HL2VC.Parsers;
 using System.Reflection.Metadata;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using xCVM.Core;
 
 namespace cxhlc
 {
@@ -14,12 +20,73 @@ namespace cxhlc
         {
             Options options = Options.FromArguments(args);
             if (options.ShowVersion) ShowVersion();
-            
+            var prov = HLCParsers.GetProvider();
+            Dictionary<string , FileInfo> Files = new Dictionary<string , FileInfo>();
+            List<string> References = new List<string>();
+            if (options.TransformInTemp)
+            {
+                if (!Directory.Exists(options.TempFolder))
+                {
+                    Directory.CreateDirectory(options.TempFolder);
+                }
+            }
+            foreach (var item in options.References)
+            {
+                FileInfo info = new FileInfo(item);
+                if (info.Exists)
+                {
+                    References.Add(info.FullName);
+                }
+            }
+            foreach (var item in options.Inputs)
+            {
+                FileInfo info = new FileInfo(item);
+                if (info.Exists)
+                {
+                    Files.Add(info.FullName , info);
+                }
+            }
+            Dictionary<string , Tree> Trees = new Dictionary<string , Tree>();
+            foreach (var item in Files)
+            {
+                var ast_node = FileParser.Parse(prov , item.Value);
+                if (options.TransformInTemp)
+                {
+                    if (References.Contains(item.Key))
+                    {
+                        Trees.Add(item.Key , new Tree(item.Key) { ASTNode = ast_node });
+
+                    }
+                    else
+                    {
+                        var fn = Guid.NewGuid().ToString() + ".tree";
+                        var file_path = Path.Combine(options.TempFolder , fn);
+                        using var fs = File.Open(file_path , FileMode.OpenOrCreate);
+                        fs.SetLength(0);
+                        using var sw = new StreamWriter(fs);
+                        sw.Write(JsonSerializer.Serialize(ast_node , IntermediateSerializationContext.Default.ASTNode));
+                        sw.Flush();
+                        Trees.Add(item.Key , new Tree(item.Key) { FileInDisk = file_path });
+
+                    }
+                }
+                else
+                {
+
+                    Trees.Add(item.Key , new Tree(item.Key) { ASTNode = ast_node });
+                }
+            }
         }
     }
     public class Tree
     {
         public string ID;
+
+        public Tree(string iD)
+        {
+            ID = iD;
+        }
+
         public ASTNode? ASTNode;
         public string? FileInDisk;
     }

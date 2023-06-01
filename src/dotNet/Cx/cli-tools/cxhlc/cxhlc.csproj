@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Cx.Core\Cx.Core.csproj" />
+	  <ProjectReference Include="..\..\Cx.HL2VC\Cx.HL2VC.csproj" />
 	</ItemGroup>
 
 </Project>

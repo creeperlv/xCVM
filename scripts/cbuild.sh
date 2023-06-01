@@ -1,7 +1,8 @@
 #!/bin/sh
 if [ -z $CC ]
 then
-	var_test=$(type clang)
+	var_test=$(type clang 2>/dev/null)
+	var_test="MINIMAL$var_test"
 	#echo $var_test
 	if [ -z "${var_test##*"is"*}" ]
 	then

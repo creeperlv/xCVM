@@ -9,8 +9,4 @@
     <ProjectReference Include="..\Cx.Core\Cx.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Transformers\" />
-  </ItemGroup>
-
 </Project>

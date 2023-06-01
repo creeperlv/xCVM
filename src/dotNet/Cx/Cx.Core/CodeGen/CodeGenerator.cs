@@ -17,7 +17,7 @@ namespace Cx.Core.CodeGen
     public class GeneratorProvider
     {
 
-        Dictionary<int , CodeGenerator> generators = new Dictionary<int , CodeGenerator>();
+        internal Dictionary<int , CodeGenerator> generators = new Dictionary<int , CodeGenerator>();
         public void RegisterGenerator(int ID , CodeGenerator generator)
         {
             if (generators.ContainsKey(ID))

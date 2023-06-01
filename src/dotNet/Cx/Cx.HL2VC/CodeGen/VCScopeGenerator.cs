@@ -13,6 +13,13 @@ namespace Cx.HL2VC.CodeGen
             foreach (ASTNode child in node.Children)
             {
                 var g = provider.GetGenerator(child.Type);
+
+                if (g == null)
+                {
+                    OperationResult<bool> operationResult = new OperationResult<bool>(false);
+                    operationResult.AddError(new GeneratorNotFoundError(child.Segment));
+                    return operationResult;
+                }
                 var r = g.Write(provider , child , writer);
                 if ((r.Errors.Count > 0))
                 {

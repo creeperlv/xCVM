@@ -25,9 +25,10 @@ namespace Cx.Core.VCParser
             return result;
         }
     }
+    
     public class FunctionParser : ContextualParser
     {
-        TypeParser typeParser;
+        internal TypeParser typeParser;
         public FunctionParser()
         {
             typeParser = new TypeParser();
@@ -35,8 +36,10 @@ namespace Cx.Core.VCParser
         public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
-            ASTNode FuncDef = new ASTNode();
-            FuncDef.Type = ASTNodeType.DeclareFunc;
+            ASTNode FuncDef = new ASTNode
+            {
+                Type = ASTNodeType.DeclareFunc
+            };
             var HEAD = context.Current;
             Segment? FirstLP = null;
             Segment? FirstRP = null;

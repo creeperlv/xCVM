@@ -40,6 +40,12 @@ namespace Cx.HL2VC.CodeGen
                     for (int i = 0 ; i < count ; i++)
                     {
                         var item = c1.Children [ i ] as ASTNode;
+                        if (item == null)
+                        {
+                            OperationResult<bool> operationResult = new OperationResult<bool>(false);
+                            operationResult.AddError(new UnexpectedEndError(null));
+                            return operationResult;
+                        }
                         var g = provider.GetGenerator(item.Type);
                         if (g == null)
                         {
@@ -81,6 +87,12 @@ namespace Cx.HL2VC.CodeGen
             foreach (ASTNode child in node.Children)
             {
                 var g = provider.GetGenerator(child.Type);
+                if (g == null)
+                {
+                    OperationResult<bool> operationResult = new OperationResult<bool>(false);
+                    operationResult.AddError(new GeneratorNotFoundError(child.Segment));
+                    return operationResult;
+                }
                 var r = g.Write(provider , child , writer);
                 if ((r.Errors.Count > 0))
                 {

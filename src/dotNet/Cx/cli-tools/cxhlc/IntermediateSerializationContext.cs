@@ -9,5 +9,6 @@ namespace cxhlc
         IncludeFields = true)]
     [JsonSerializable(typeof(ASTNode))]
     [JsonSerializable(typeof(Segment))]
-    public partial class IntermediateSerializationContext { }
+    internal partial class IntermediateSerializationContext : JsonSerializerContext
+    { }
 }

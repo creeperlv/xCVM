@@ -99,7 +99,6 @@ namespace Cx.HL2VC
                                 r.AddError(new IllegalIdentifierError(namespace_name.Current));
                                 return r;
                             }
-                            break;
                     }
                     namespace_name.GoNext();
                 }
