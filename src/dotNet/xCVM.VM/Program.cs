@@ -1,4 +1,5 @@
-﻿using SystemCalls;
+﻿using System.Collections;
+using SystemCalls;
 using xCVM.Core;
 
 namespace xCVM.VM
@@ -43,6 +44,15 @@ namespace xCVM.VM
                     //Setup Resources.
                     core.SetResource(0 , Console.OpenStandardInput());
                     core.SetResource(1 , Console.OpenStandardOutput());
+                }
+                {
+                    var variables=Environment.GetEnvironmentVariables();
+                    List<string> EnvVar=new List<string>();
+                    foreach (DictionaryEntry item in variables)
+                    {
+                        EnvVar.Add($"{item.Key}={item.Value}");
+                    }
+                    core.SetEnvironmentVariable(EnvVar);
                 }
                 core.Load(module);
                 core.Run();

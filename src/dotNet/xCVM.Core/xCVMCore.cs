@@ -91,20 +91,25 @@ namespace xCVM.Core
             }
             runtimeData = new RuntimeData(Registers , MemoryBlocks);
         }
-        public void SetEnvironmentVariable(IDictionary EV)
+        public void SetEnvironmentVariable(List<string> Variables)
         {
-            var EID = MemoryBlocks.MALLOC(EV.Count * Constants.int_size * 2);
+            var EID = MemoryBlocks.MALLOC(Variables.Count * Constants.long_size);
             int C = 0;
-            foreach (var item in EV.Keys)
+            foreach (var item in Variables)
             {
-                var KID = MemoryBlocks.PUT(Encoding.UTF8.GetBytes(item.ToString()));
-                var VID = MemoryBlocks.PUT(Encoding.UTF8.GetBytes(EV [ item ].ToString()));
+                var LB=BitConverter.GetBytes(item.Length);
+                var SB = Encoding.UTF8.GetBytes(item);
+                var Final = new byte [ LB.Length + SB.Length ];
+                LB.CopyTo(Final , 0);
+                SB.CopyTo(Final , LB.Length);
+                var KID = MemoryBlocks.PUT(Final);
                 WriteBytes(KID , MemoryBlocks.Datas [ EID ].data , C);
                 C += Constants.int_size;
-                WriteBytes(VID , MemoryBlocks.Datas [ EID ].data , C);
+                WriteBytes(0 , MemoryBlocks.Datas [ EID ].data , C);
                 C += Constants.int_size;
             }
             WriteBytes(EID , MemoryBlocks.Datas [ 0 ].data , 0);
+            WriteBytes(0 , MemoryBlocks.Datas [ 0 ].data , Constants.int_size);
         }
         public void SetArguments(string [ ] args)
         {
