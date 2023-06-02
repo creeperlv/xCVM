@@ -3,6 +3,7 @@ using Cx.Core.DataValidation;
 using Cx.Core.SegmentContextUtilities;
 using Cx.Core.VCParser;
 using LibCLCC.NET.TextProcessing;
+using System;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.HL2VC
@@ -17,10 +18,18 @@ namespace Cx.HL2VC
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(false);
+
+#if DEBUG
+            Console.WriteLine($"namespace?{context.Current?.content ?? "null"}");
+#endif
             var nr = context.Match("namespace");
             var BRKPNT = context.Current;
             if (nr == MatchResult.Match)
             {
+                context.GoNext();
+#if DEBUG
+                Console.WriteLine($"namespace...:{context.Current?.content??"null"}");
+#endif
                 var HEAD = context.Current;
                 Segment? FirstLB = null;
                 while (true)
@@ -29,6 +38,7 @@ namespace Cx.HL2VC
                     if (res == MatchResult.Match)
                     {
                         FirstLB = context.Last;
+                        break;
                     }
                     else if (res == MatchResult.Mismatch)
                     {
@@ -50,7 +60,7 @@ namespace Cx.HL2VC
                 bool Continue = true;
                 ASTNode root = new ASTNode();
                 root.Type = HLASTNodeType.Namespace;
-                var __head = context.Current;
+                var __head = namespace_name.Current;
                 if (__head == null)
                 {
                     result.AddError(new UnexpectedEndError(__head));
@@ -103,7 +113,10 @@ namespace Cx.HL2VC
                     namespace_name.GoNext();
                 }
                 var __seg = __head.Duplicate();
-                __seg.content = __seg.content = FormedPrefix;
+                __seg.content = FormedPrefix;
+#if DEBUG
+                Console.WriteLine($"namespace:{FormedPrefix}");
+#endif
                 root.Segment = __seg;
                 SegmentContext newContext = new SegmentContext(FirstLB);
                 var __r = ContextClosure.LRClose(newContext , "{" , "}");
@@ -111,9 +124,13 @@ namespace Cx.HL2VC
                 {
                     OperationResult<bool> operationResult = false;
                     operationResult.Errors = __r.Errors;
+#if DEBUG
+                    Console.WriteLine($"Error in LR closure!");
+#endif
                     return operationResult;
                 }
                 {
+                    Parent.AddChild(root);
                     while (true)
                     {
                         if (newContext.ReachEnd) break;

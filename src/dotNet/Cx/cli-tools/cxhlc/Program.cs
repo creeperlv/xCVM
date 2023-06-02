@@ -76,6 +76,19 @@ namespace cxhlc
                     Trees.Add(item.Key , new Tree(item.Key) { ASTNode = ast_node });
                 }
             }
+            if (options.TransformInTemp && !options.KeepTrees)
+            {
+                foreach (var item in Trees)
+                {
+                    if (item.Value.FileInDisk != null)
+                    {
+                        if (File.Exists(item.Value.FileInDisk))
+                        {
+                            File.Delete(item.Value.FileInDisk);
+                        }
+                    }
+                }
+            }
         }
     }
     public class Tree
@@ -98,6 +111,7 @@ namespace cxhlc
         public string TempFolder = "./build/temp/hl/";
         public List<string> References = new List<string>();
         public bool TransformInTemp;
+        public bool KeepTrees = false;
         public static Options FromArguments(string [ ] args)
         {
             Options options = new Options();
@@ -114,6 +128,10 @@ namespace cxhlc
                     case "-m":
                     case "--memoryless":
                         options.TransformInTemp = true;
+                        break;
+                    case "-k":
+                    case "--keep-trees":
+                        options.KeepTrees= true;
                         break;
                     case "-i":
                         Mode = 0;

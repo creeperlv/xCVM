@@ -13,6 +13,7 @@ namespace Cx.HL2VC.Transformers
     public class ASTTransformer
     {
         public ASTReferences ASTReferences=new ASTReferences();
+        public ASTNode? RootNode;
         public virtual void Init()
         {
 

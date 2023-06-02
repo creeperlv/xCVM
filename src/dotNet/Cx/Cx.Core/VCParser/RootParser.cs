@@ -30,6 +30,7 @@ namespace Cx.Core.VCParser
                     var _result = item.Parse(provider, context, Parent);
                     if (_result.Result == true)
                     {
+                        __current = context.Current;
                         Hit = true;
                         break;
                     }
