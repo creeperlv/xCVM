@@ -15,20 +15,25 @@ then
 else
 	echo "CC=$CC"
 fi
+
 if [ ! -d "./bin/c/" ]
 then
 	mkdir ./bin/c
 fi
+
 OutputFile=./bin/c/xcvm_vm
 Sys=$(uname)
-if [[ "$Sys" == *"Win"* ]]
+
+if [ -z "${Sys##*"Win"*}" ]
 then
 	OutputFile=./bin/c/xcvm_vm.exe
 	echo "Set suffix to .exe"
 fi
-if [[ "$Sys" == *"DOS"* ]]
+
+if [ -z "${Sys##*"DOS"*}" ]
 then
         OutputFile=./bin/c/xcvm_vm.exe
         echo "Set suffix to .exe"
 fi
+
 $CC ./src/c/xCVM/xcvm_vm/*.c ./src/c/xCVM/corelib/*.c -o $OutputFile

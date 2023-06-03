@@ -12,11 +12,12 @@ namespace SystemCalls
             var ParameterPointer = core.RegisterToInt32(Constants.fpp);
             var block = core.runtimeData.MemoryBlocks.Datas [ ParameterPointer ];
             var parameter_count = block.data.Length / 4;
-            if (parameter_count == 3)
+            if (parameter_count == 4)
             {
                 int ResourceID = core.ReadInt32(block.data , 0);
                 int data = core.ReadInt32(block.data , 4);
-                int count = core.ReadInt32(block.data , 8);
+                int offset = core.ReadInt32(block.data , 8);
+                int count = core.ReadInt32(block.data , 12);
                 var fs = core.Resources [ ResourceID ] as Stream;
                 if (fs is null)
                 {
@@ -26,13 +27,13 @@ namespace SystemCalls
                 var d = core.runtimeData.MemoryBlocks.Datas [ data ].data;
                 if (count >= 0)
                 {
-                    fs.Write(d , 0 , count);
+                    fs.Write(d , offset , count);
                     core.WriteBytesToRegister(count , Constants.retv);
 
                 }
                 else
                 {
-                    fs.Write(d , 0 , d.Length);
+                    fs.Write(d , offset , d.Length);
                     core.WriteBytesToRegister(d.Length , Constants.retv);
                 }
                 return;

@@ -74,6 +74,7 @@ namespace SystemCalls
                 }
                 var id = core.AddResource(fs);
                 core.WriteBytesToRegister(id , Constants.retv);
+                core.WriteBytesToRegister(0, Constants.retv+Constants.int_size);
             }
         }
     }
