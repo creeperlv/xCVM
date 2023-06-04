@@ -16,6 +16,7 @@ namespace xCVMc.Data
                 { "stdout", "1" },
 
                 { "retv", "1" },
+                { "error", "2" },
 
                 { "func_parameter_pointer", "3" },
                 { "fpp", "3" },

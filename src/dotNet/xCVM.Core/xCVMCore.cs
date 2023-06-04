@@ -217,7 +217,7 @@ namespace xCVM.Core
             return BitConverter.ToUInt16(Registers.data , op_i);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ushort RegisterToByte(byte [ ]? inst_parameter)
+        public byte RegisterToByte(byte [ ]? inst_parameter)
         {
             int op_i = BitConverter.ToInt32(inst_parameter) * RegisterSize;
             if (op_i == 0) return 0;

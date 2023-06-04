@@ -26,11 +26,25 @@ namespace SystemCalls
             var ParameterPointer = core.RegisterToInt32(3);
             var block = core.runtimeData.MemoryBlocks.Datas [ ParameterPointer ];
             var parameter_count = block.data.Length / 4;
-            if (parameter_count == 2)
+            if (parameter_count == 3)
             {
                 var name = core.ReadInt32(block.data , 0);
-                var str = Encoding.UTF8.GetString(core.runtimeData.MemoryBlocks.Datas [ name ].data);
-                var flag = core.ReadInt32(block.data , 4);
+                var pointer_offset = core.ReadInt32(block.data , 4);
+                if (core.runtimeData.MemoryBlocks.Datas.ContainsKey(name) || pointer_offset < 0)
+                {
+                    core.WriteBytesToRegister(ErrorCodes.Error_Bad_Address , Constants.errno);
+                    core.WriteBytesToRegister(-1 , Constants.retv);
+                    return;
+                }
+                var str_buf = core.runtimeData.MemoryBlocks.Datas [ name ].data;
+                var str = Encoding.UTF8.GetString(str_buf , pointer_offset , str_buf.Length - pointer_offset);
+                if (!File.Exists(str))
+                {
+                    core.WriteBytesToRegister(ErrorCodes.Error_File_Or_Folder_Not_Exist , Constants.errno);
+                    core.WriteBytesToRegister(-1 , Constants.retv);
+                    return;
+                }
+                var flag = core.ReadInt32(block.data , 8);
                 var accflg = (ACCESS_FLAG)(flag & 0b0000_0000_0000_0011);
                 FileMode fm = FileMode.Open;
                 var cflg = (CREATE_FLAG)(flag & 0b1111_1111_1111_1100);
@@ -74,7 +88,7 @@ namespace SystemCalls
                 }
                 var id = core.AddResource(fs);
                 core.WriteBytesToRegister(id , Constants.retv);
-                core.WriteBytesToRegister(0, Constants.retv+Constants.int_size);
+                core.WriteBytesToRegister(0 , Constants.retv + Constants.int_size);
             }
         }
     }
