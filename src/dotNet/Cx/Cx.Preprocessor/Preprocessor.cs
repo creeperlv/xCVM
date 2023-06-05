@@ -903,6 +903,10 @@ namespace Cx.Preprocessor
                                         var f = FilesProvider.Find(remain [ ..^1 ]);
                                         if (f != null)
                                         {
+                                            if (preprocessed.ProcessedHeader.ContainsKey(f.ID))
+                                            {
+                                                f = preprocessed.ProcessedHeader [f.ID];
+                                            }
                                             Process(f , preprocessed , true);
                                         }
                                     }
@@ -918,6 +922,10 @@ namespace Cx.Preprocessor
                                     var f = FilesProvider.Find(segmentContext.Current?.content ?? "" , CurrentFile);
                                     if (f != null)
                                     {
+                                        if (preprocessed.ProcessedHeader.ContainsKey(f.ID))
+                                        {
+                                            f = preprocessed.ProcessedHeader [ f.ID ];
+                                        }
                                         Process(f , preprocessed , true);
 #if DEBUG
                                         Console.WriteLine($"Preprocess include:{segmentContext.Current?.content}");
