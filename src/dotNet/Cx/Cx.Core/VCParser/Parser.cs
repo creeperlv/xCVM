@@ -78,9 +78,21 @@ namespace Cx.Core.VCParser
                 }
             }
             if (FirstLP == null)
+            {
+#if DEBUG
+                Console.WriteLine("Function Parser:Missing First LP.");
+#endif
                 return new OperationResult<bool>(false);
+            }
+
             if (FirstLB == null)
+            {
+
+#if DEBUG
+                Console.WriteLine("Function Parser:Missing First LB.");
+#endif
                 return new OperationResult<bool>(false);
+            }
             context.SetCurrent(FirstLP);
             while (true)
             {
@@ -102,6 +114,15 @@ namespace Cx.Core.VCParser
             {
                 return new OperationResult<bool>(false);
             }
+            if (FirstLP == null)
+                return new OperationResult<bool>(false);
+            if (FirstRP == null)
+            {
+#if DEBUG
+                Console.WriteLine("Function Parser:Missing First RP.");
+#endif
+                return new OperationResult<bool>(false);
+            }
             {
                 ASTNode return_type = new ASTNode();
                 FuncDef.AddChild(return_type);
@@ -113,6 +134,15 @@ namespace Cx.Core.VCParser
                 while (true)
                 {
                     //
+                    if (context.ReachEnd)
+                    {
+#if DEBUG
+                        Console.WriteLine("Function Parser: Unexpected end.");
+#endif
+                        var OR = new OperationResult<bool>(false);
+                        OR.AddError(new UnexpectedEndError(context.Current));
+                        return OR;
+                    }
                     if (context.Current > FirstRP)
                     {
                         break;
@@ -156,16 +186,6 @@ namespace Cx.Core.VCParser
             }
             return result;
         }
-    }
-    [Serializable]
-    public class Token
-    {
-        public int TokenType;
-    }
-    public class ASTNode : TreeNode
-    {
-        public int Type;
-        public Segment? Segment;
     }
 
 }

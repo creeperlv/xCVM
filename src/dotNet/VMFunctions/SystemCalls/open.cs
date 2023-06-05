@@ -64,31 +64,48 @@ namespace SystemCalls
                     default:
                         break;
                 }
-                FileStream fs;
-                switch (accflg)
+                try
                 {
-                    case ACCESS_FLAG.O_RDONLY:
-                        {
-                            fs = File.Open(str , fm , FileAccess.Read);
-                        }
-                        break;
-                    case ACCESS_FLAG.O_WRONLY:
-                        {
-                            fs = File.Open(str , fm , FileAccess.Write);
-                        }
-                        break;
-                    case ACCESS_FLAG.O_RDWR:
-                        {
-                            fs = File.Open(str , fm , FileAccess.ReadWrite , FileShare.ReadWrite);
-                        }
-                        break;
-                    default:
-                        fs = File.Open(str , fm , FileAccess.ReadWrite);
-                        break;
+                    FileStream fs;
+                    switch (accflg)
+                    {
+                        case ACCESS_FLAG.O_RDONLY:
+                            {
+                                fs = File.Open(str , fm , FileAccess.Read);
+                            }
+                            break;
+                        case ACCESS_FLAG.O_WRONLY:
+                            {
+                                fs = File.Open(str , fm , FileAccess.Write);
+                            }
+                            break;
+                        case ACCESS_FLAG.O_RDWR:
+                            {
+                                fs = File.Open(str , fm , FileAccess.ReadWrite , FileShare.ReadWrite);
+                            }
+                            break;
+                        default:
+                            fs = File.Open(str , fm , FileAccess.ReadWrite);
+                            break;
+                    }
+                    var id = core.AddResource(fs);
+                    core.WriteBytesToRegister(id , Constants.retv);
+                    core.WriteBytesToRegister(0 , Constants.retv + Constants.int_size);
                 }
-                var id = core.AddResource(fs);
-                core.WriteBytesToRegister(id , Constants.retv);
-                core.WriteBytesToRegister(0 , Constants.retv + Constants.int_size);
+                catch (Exception e)
+                {
+                    if(e is UnauthorizedAccessException)
+                    {
+                        core.WriteBytesToRegister(ErrorCodes.Error_No_Access , Constants.errno);
+                        core.WriteBytesToRegister(-1 , Constants.retv);
+                        return;
+                    }else if(e is FileNotFoundException|| e is DirectoryNotFoundException)
+                    {
+                        core.WriteBytesToRegister(ErrorCodes.Error_File_Or_Folder_Not_Exist , Constants.errno);
+                        core.WriteBytesToRegister(-1 , Constants.retv);
+                        return;
+                    }
+                }
             }
         }
     }

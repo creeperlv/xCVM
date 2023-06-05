@@ -63,9 +63,11 @@ namespace cxhlc
                         var file_path = Path.Combine(options.TempFolder , fn);
                         using var fs = File.Open(file_path , FileMode.OpenOrCreate);
                         fs.SetLength(0);
-                        using var sw = new StreamWriter(fs);
-                        sw.Write(JsonSerializer.Serialize(ast_node , IntermediateSerializationContext.Default.ASTNode));
-                        sw.Flush();
+                        TreeSerializer.Serialize(fs , ast_node);
+                        //using var sw = new StreamWriter(fs);
+                        //sw.Write(JsonSerializer.Serialize(ast_node , IntermediateSerializationContext.Default.ASTNode));
+                        //sw.Flush();
+                        fs.Flush();
                         Trees.Add(item.Key , new Tree(item.Key) { FileInDisk = file_path });
 
                     }
