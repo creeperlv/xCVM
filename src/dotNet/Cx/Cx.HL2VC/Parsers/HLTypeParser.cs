@@ -1,25 +1,31 @@
 ﻿using Cx.Core;
 using Cx.Core.DataValidation;
 using Cx.Core.VCParser;
+using System;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.HL2VC.Parsers
 {
     public class HLTypeParser : Parser
     {
-        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> FinalResult = false;
-            var Current = context.Current;
             string FormedType = "";
             ASTNode _node = new ASTNode();
             _node.Type = ASTNodeType.DataType;
+            DataType LastDT = DataType.Symbol;
+            var HEAD = context.Current;
+            if (HEAD== null) {
+                return FinalResult;
+            }
             while (true)
             {
                 if (context.ReachEnd)
                 {
                     break;
                 }
+                var Current = context.Current;
                 if (Current == null)
                 {
                     break;
@@ -29,13 +35,24 @@ namespace Cx.HL2VC.Parsers
                 {
                     case DataType.String:
                         {
+                            if (LastDT == DataType.String)
+                            {
+                                _node.Segment = HEAD.Duplicate();
+                                _node.Segment.content = FormedType;
+                                Parent.AddChild(_node);
+                                FinalResult.Result = true;
+                                context.GoBack();
+                                return FinalResult;
+                            }
                             if (_node.Type == ASTNodeType.Pointer)
                             {
                                 Parent.AddChild(_node);
                                 FinalResult.Result = true;
+                                context.GoBack();
                                 return FinalResult;
                             }
                             FormedType += Current.content;
+                            LastDT = DT;
                         }
                         break;
                     case DataType.Symbol:
@@ -46,15 +63,19 @@ namespace Cx.HL2VC.Parsers
                                 {
                                     Parent.AddChild(_node);
                                     FinalResult.Result = true;
+                                    context.GoBack();
                                     return FinalResult;
                                 }
                                 FormedType += "_";
                             }
                             else if (Current.content == "*")
                             {
+#if DEBUG
+                                Console.WriteLine($"HLTypeParser: Wrap Pointer.");
+#endif
                                 if (_node.Type == ASTNodeType.DataType)
                                 {
-                                    _node.Segment = Current.Duplicate();
+                                    _node.Segment = HEAD.Duplicate();
                                     _node.Segment.content = FormedType;
                                 }
                                 ASTNode Pointer = new ASTNode();
@@ -68,14 +89,17 @@ namespace Cx.HL2VC.Parsers
 
                                 Parent.AddChild(_node);
                                 FinalResult.Result = true;
+                                context.GoBack();
                                 return FinalResult;
                             }
+                            LastDT = DT;
                         }
                         break;
                     default:
                         {
                             Parent.AddChild(_node);
                             FinalResult.Result = true;
+                            context.GoBack();
                             return FinalResult;
                         }
                 }
@@ -85,6 +109,7 @@ namespace Cx.HL2VC.Parsers
 
                 Parent.AddChild(_node);
                 FinalResult.Result = true;
+                context.GoBack();
                 return FinalResult;
             }
         }

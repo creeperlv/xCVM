@@ -69,13 +69,8 @@ namespace cxhlc
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
-#if DEBUG
-                        Console.WriteLine("Serialize Node:");
-#endif
+
                         {
-#if DEBUG
-                            Console.WriteLine($"\tID:{item.ID}");
-#endif
                             var ID_B = BitConverter.GetBytes(item.ID);
                             stream.Write(ID_B);
                         }
@@ -83,17 +78,11 @@ namespace cxhlc
                         if (node == null)
                             continue;
                         {
-#if DEBUG
-                            Console.WriteLine($"\tType:{node.Type}");
-#endif
                             var ID_B = BitConverter.GetBytes(node.Type);
                             stream.Write(ID_B);
                         }
 
                         {
-#if DEBUG
-                            Console.WriteLine($"\tSegment:{node.Segment?.content??"\x1b[93mnull\x1b[0m"}");
-#endif
                             stream.WriteSegment(node.Segment);
                         }
                         ms.Flush();
@@ -108,15 +97,70 @@ namespace cxhlc
     {
         public List<SerializedIndex> SerializedIndices = new List<SerializedIndex>();
         public List<SerializedNode> SerializedNodes = new List<SerializedNode>();
+#if DEBUG
+        public static void Process(TreeNode node , DiscreteObject discreteObject , int Depth)
+#else
         public static void Process(TreeNode node , DiscreteObject discreteObject)
+#endif
         {
             SerializedNode s_node = new SerializedNode();
             s_node.ID = discreteObject.SerializedNodes.Count;
             s_node.Node = node;
             discreteObject.SerializedNodes.Add(s_node);
+#if DEBUG
+            for (int i = 0 ; i < Depth ; i++)
+            {
+                Console.Write("\t");
+            }
+            Console.WriteLine("\x1b[92m[Tree Node]\x1b[0m");
+#endif
+
+#if DEBUG
+            for (int i = 0 ; i < Depth ; i++)
+            {
+                Console.Write("\t");
+            }
+            Console.WriteLine($" -ID:{s_node.ID}");
+#endif
+#if DEBUG
+            for (int i = 0 ; i < Depth ; i++)
+            {
+                Console.Write("\t");
+            }
+            Console.WriteLine($" -Type:{node.Type}");
+#endif
+#if DEBUG
+            for (int i = 0 ; i < Depth ; i++)
+            {
+                Console.Write("\t");
+            }
+            Console.WriteLine($" -Segment:{node.Segment?.content ?? "\x1b[93mnull\x1b[0m"}");
+#endif
+#if DEBUG
+            if (node.Children.Count > 0)
+            {
+                for (int i = 0 ; i < Depth ; i++)
+                {
+                    Console.Write("\t");
+                }
+                Console.WriteLine($" -Children:");
+            }
+            else
+            {
+                for (int i = 0 ; i < Depth ; i++)
+                {
+                    Console.Write("\t");
+                }
+                Console.WriteLine($"\x1b[94m=Child End Point\x1b[0m");
+            }
+#endif
             foreach (var item in node.Children)
             {
+#if DEBUG
+                Process(item , discreteObject , Depth + 1);
+#else
                 Process(item , discreteObject);
+#endif
             }
         }
         public static void BuildIndex(SerializedNode node , DiscreteObject discreteObject)
@@ -154,8 +198,12 @@ namespace cxhlc
         public static DiscreteObject DiscreteNode(TreeNode node)
         {
             DiscreteObject serializedObject = new DiscreteObject();
+#if DEBUG
+            Process(node , serializedObject , 0);
+#else
             Process(node , serializedObject);
-            BuildIndex(serializedObject.SerializedNodes [ 0 ],serializedObject);
+#endif
+            BuildIndex(serializedObject.SerializedNodes [ 0 ] , serializedObject);
             return serializedObject;
         }
     }
@@ -166,6 +214,9 @@ namespace cxhlc
     }
     public class SerializedIndex
     {
+#if DEBUG
+        public int Depth;
+#endif
         public int ID;
         public int ParentID = -1;
         public List<int> Children = new List<int>();

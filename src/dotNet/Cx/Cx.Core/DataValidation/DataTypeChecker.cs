@@ -11,7 +11,7 @@ namespace Cx.Core.DataValidation
         public static CStyleScanner CStyleParser = new CStyleScanner();
         public static DataType DetermineDataType(string content)
         {
-            if (content.Length == 0)
+            if (content.Length == 1)
                 foreach (var item in CStyleParser.PredefinedSegmentCharacters)
                 {
                     if (item == content [ 0 ]) return DataType.Symbol;
