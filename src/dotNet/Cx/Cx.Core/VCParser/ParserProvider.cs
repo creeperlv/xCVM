@@ -22,16 +22,4 @@ namespace Cx.Core.VCParser
             return null;
         }
     }
-    public static class VanillaCParsers
-    {
-        public static ParserProvider GetProvider()
-        {
-            ParserProvider ParserProvider = new ParserProvider();
-            ParserProvider.RegisterParser(ASTNodeType.Root, new RootParser());
-            ParserProvider.RegisterParser(ASTNodeType.DeclareFunc, new FunctionParser());
-            ParserProvider.RegisterParser(ASTNodeType.DataType, new TypeParser());
-            ParserProvider.RegisterParser(ASTNodeType.Scope, new ScopeParser());
-            return ParserProvider;
-        }
-    }
 }

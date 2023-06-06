@@ -12,7 +12,7 @@ namespace Cx.Core.VCParser
             ConcernedParsers.Add(ASTNodeType.While);
             ConcernedParsers.Add(ASTNodeType.For);
             ConcernedParsers.Add(ASTNodeType.Switch);
-            ConcernedParsers.Add(ASTNodeType.Expression);
+            ConcernedParsers.Add(ASTNodeType.Statement);
         }
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {

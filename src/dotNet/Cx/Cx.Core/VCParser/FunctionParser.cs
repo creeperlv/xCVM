@@ -265,5 +265,4 @@ namespace Cx.Core.VCParser
             return result;
         }
     }
-
 }

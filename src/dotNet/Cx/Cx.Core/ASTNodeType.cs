@@ -29,6 +29,8 @@
         public const int While= 23;
         public const int For= 24;
         public const int Switch= 25;
+        public const int Statement= 26;
+        public const int Call = 27;
     }
 
 }

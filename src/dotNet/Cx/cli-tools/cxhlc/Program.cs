@@ -1,4 +1,5 @@
 ﻿using Cx.Core;
+using Cx.Core.DataValidation;
 using Cx.Core.VCParser;
 using Cx.HL2VC;
 using Cx.HL2VC.Parsers;
@@ -133,7 +134,7 @@ namespace cxhlc
                         break;
                     case "-k":
                     case "--keep-trees":
-                        options.KeepTrees= true;
+                        options.KeepTrees = true;
                         break;
                     case "-i":
                         Mode = 0;
