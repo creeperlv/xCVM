@@ -13,6 +13,8 @@ namespace Cx.HL2VC.Parsers
             ParserProvider.RegisterParser(ASTNodeType.DeclareFunc , new FunctionParser());
             ParserProvider.RegisterParser(ASTNodeType.DataType , new HLTypeParser());
             ParserProvider.RegisterParser(HLASTNodeType.Namespace , new NamespaceParser());
+            ParserProvider.RegisterParser(HLASTNodeType.Using , new UsingParser());
+            ParserProvider.RegisterParser(ASTNodeType.Scope , new ScopeParser());
             return ParserProvider;
         }
     }

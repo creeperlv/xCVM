@@ -23,6 +23,12 @@
         public const int SingleParameter = 17;
         public const int Enum = 18;
         public const int EnumElement = 19;
+        public const int If= 20;
+        public const int Else= 21;
+        public const int IfElse= 22;
+        public const int While= 23;
+        public const int For= 24;
+        public const int Switch= 25;
     }
 
 }

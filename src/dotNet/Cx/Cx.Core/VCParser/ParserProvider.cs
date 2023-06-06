@@ -30,6 +30,7 @@ namespace Cx.Core.VCParser
             ParserProvider.RegisterParser(ASTNodeType.Root, new RootParser());
             ParserProvider.RegisterParser(ASTNodeType.DeclareFunc, new FunctionParser());
             ParserProvider.RegisterParser(ASTNodeType.DataType, new TypeParser());
+            ParserProvider.RegisterParser(ASTNodeType.Scope, new ScopeParser());
             return ParserProvider;
         }
     }

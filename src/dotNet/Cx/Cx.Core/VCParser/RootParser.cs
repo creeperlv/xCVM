@@ -8,7 +8,7 @@ namespace Cx.Core.VCParser
         {
             ConcernedParsers.Add(ASTNodeType.DeclareFunc);
         }
-        public override OperationResult<bool> Parse(ParserProvider provider, SegmentContext context, ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             while (true)
@@ -17,7 +17,7 @@ namespace Cx.Core.VCParser
                 if (context.Current == null) break;
                 if (context.Current.Next == null) break;
                 var Hit = false;
-                var __current= context.Current;
+                var __current = context.Current;
                 foreach (var id in ConcernedParsers)
                 {
                     var item = provider.GetParser(id);
@@ -27,7 +27,7 @@ namespace Cx.Core.VCParser
                         return result;
                     }
                     context.SetCurrent(__current);
-                    var _result = item.Parse(provider, context, Parent);
+                    var _result = item.Parse(provider , context , Parent);
                     if (_result.Result == true)
                     {
                         __current = context.Current;

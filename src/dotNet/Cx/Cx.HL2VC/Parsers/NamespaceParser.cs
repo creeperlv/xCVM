@@ -18,12 +18,11 @@ namespace Cx.HL2VC
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(false);
-
+            var BRKPNT = context.Current;
 #if DEBUG
             Console.WriteLine($"namespace?{context.Current?.content ?? "null"}");
 #endif
             var nr = context.Match("namespace");
-            var BRKPNT = context.Current;
             if (nr == MatchResult.Match)
             {
                 context.GoNext();

@@ -116,13 +116,17 @@ namespace Cx.Core.VCParser
                 parameters.Type = ASTNodeType.Parameters;
                 ASTNode node = new ASTNode();
                 context.SetCurrent(FirstLP.Prev);
-                var Parameters=ContextClosure.LRClose(context , "(" , ")");
-                if (Parameters.Errors.Count>0)
+#if DEBUG
+                Console.WriteLine($"Function Parser: Parameters");
+#endif
+                var Parameters = ContextClosure.LRClose(context , "(" , ")");
+                if (Parameters.Errors.Count > 0)
                 {
                     result.Result = false;
                     result.Errors = Parameters.Errors;
                     return result;
-                }else if (Parameters.Result == null)
+                }
+                else if (Parameters.Result == null)
                 {
                     result.Result = false;
                     return result;
@@ -216,39 +220,48 @@ namespace Cx.Core.VCParser
                     }
                 }
             }
-            Parent.AddChild(FuncDef);
-
-#if DEBUG
-            Console.WriteLine($"Function Parser: Parameters");
-#endif
-            return result;
-            while (true)
             {
-                if (context.ReachEnd) break;
-                if (context.Current == null) break;
-                if (context.Current.Next == null) break;
-                var Hit = false;
-                foreach (var id in ConcernedParsers)
+                context.GoNext();
+#if DEBUG
+                Console.WriteLine($"Function Parser: Parameters Done, Current:{context.Current?.content ?? "null"}");
+#endif
+                ContextualParser? ScopeParser = provider.GetParser(ASTNodeType.Scope);
+                if (ScopeParser == null)
                 {
-                    var item = provider.GetParser(id);
-                    if (item == null)
-                    {
-                        result.AddError(new ParserNotFoundError(null));
-                        return result;
-                    }
-                    var _result = item.Parse(provider , context , Parent);
-                    if (_result.Result == true)
-                    {
-                        Hit = true;
-                        break;
-                    }
+                    result.AddError(new ParserNotFoundError(context.Current));
+                    return result;
                 }
-                if (Hit == false)
+                if (context.ReachEnd)
                 {
-                    result.Result = false;
+                    result.AddError(new UnexpectedEndError(context.Current));
+                    return result;
                 }
+                if (context.Current == null)
+                {
+                    result.AddError(new UnexpectedEndError(context.Current));
+                    return result;
+                }
+                if (context.Current.content == ";")
+                {
+                    Parent.AddChild(FuncDef);
+                    result.Result = true;
+                }
+                else
+                {
+                    var _result = ScopeParser.Parse(provider , context , FuncDef);
+                    if (_result == true)
+                    {
 
+                        Parent.AddChild(FuncDef);
+                        result.Result = true;
+                    }
+                    else
+                    {
+
+                    }
+                }
             }
+
             return result;
         }
     }

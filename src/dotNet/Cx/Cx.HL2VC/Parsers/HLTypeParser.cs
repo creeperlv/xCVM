@@ -6,7 +6,7 @@ using xCVM.Core.CompilerServices;
 
 namespace Cx.HL2VC.Parsers
 {
-    public class HLTypeParser : Parser
+    public class HLTypeParser : ContextualParser
     {
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
         {
