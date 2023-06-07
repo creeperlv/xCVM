@@ -1,5 +1,5 @@
 ﻿using Cx.Core;
-using Cx.Core.DataValidation;
+using Cx.Core.DataTools;
 using Cx.Core.SegmentContextUtilities;
 using Cx.Core.VCParser;
 using LibCLCC.NET.TextProcessing;

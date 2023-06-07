@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text;
+using System.Xml.Linq;
 
-namespace Cx.Core.DataValidation
+namespace Cx.Core.DataTools
 {
     public static class DataTypeChecker
     {
