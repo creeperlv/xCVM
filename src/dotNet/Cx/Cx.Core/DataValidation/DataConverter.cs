@@ -6,6 +6,13 @@ namespace Cx.Core.DataTools
     {
         public static bool TryParse(string input , out int data)
         {
+            bool Negative = input.StartsWith("-");
+            int Start = 0;
+            int Length= 0;
+            if (Negative)
+            {
+                Start = 1;
+            }
             if (input.Last() == 'l' || input.Last() == 'L')
             {
                 data = -1;
@@ -13,24 +20,25 @@ namespace Cx.Core.DataTools
             }
             if (input.StartsWith("0x"))
             {
-                var ch = input [ 2.. ].ToUpper();
+                Start += 2;
+                Length -= 2;
                 int _data = 0;
-                for (int i = 0 ; i < ch.Length ; i++)
+                for (int i = Start; i < Length ; i++)
                 {
                     _data *= 16;
-                    if ((ch [ i ] >= '0' && ch [ i ] <= '9'))
+                    if ((input [ i ] >= '0' && input [ i ] <= '9'))
                     {
-                        _data += ch [ i ] - '0';
+                        _data += input [ i ] - '0';
                     }
                     else
-                    if ((ch [ i ] >= 'A' && ch [ i ] <= 'F'))
+                    if ((input [ i ] >= 'A' && input [ i ] <= 'F'))
                     {
-                        _data += ch [ i ] - 'A' + 10;
+                        _data += input [ i ] - 'A' + 10;
                     }
                     else
-                    if ((ch [ i ] >= 'a' && ch [ i ] <= 'f'))
+                    if ((input [ i ] >= 'a' && input [ i ] <= 'f'))
                     {
-                        _data += ch [ i ] - 'a' + 10;
+                        _data += input [ i ] - 'a' + 10;
                     }
                     else
                     {
@@ -38,19 +46,20 @@ namespace Cx.Core.DataTools
                         return false;
                     }
                 }
-                data = _data;
+                data = _data * (Negative ? -1 : 1);
                 return true;
             }
             else if (input.StartsWith("0o"))
             {
-                var ch = input [ 2.. ].ToUpper();
+                Start += 2;
+                Length -= 2;
                 int _data = 8;
-                for (int i = 0 ; i < ch.Length ; i++)
+                for (int i = Start; i < Length ; i++)
                 {
                     _data *= 16;
-                    if ((ch [ i ] >= '0' && ch [ i ] <= '7'))
+                    if ((input [ i ] >= '0' && input [ i ] <= '7'))
                     {
-                        _data += ch [ i ] - '0';
+                        _data += input [ i ] - '0';
                     }
                     else
                     {
@@ -58,23 +67,24 @@ namespace Cx.Core.DataTools
                         return false;
                     }
                 }
-                data = _data;
+                data = _data * (Negative ? -1 : 1);
                 return true;
             }
             else
             if (input.StartsWith("0b"))
             {
-                var ch = input [ 2.. ].ToUpper();
+                Start += 2;
+                Length -= 2;
                 int _data = 0;
-                for (int i = 0 ; i < ch.Length ; i++)
+                for (int i = Start; i < Length ; i++)
                 {
                     _data *= 2;
-                    if (ch [ i ] == '0')
+                    if (input [ i ] == '0')
                     {
                         _data += 0;
                     }
                     else
-                    if (ch [ i ] == '1')
+                    if (input [ i ] == '1')
                     {
                         _data += 1;
                     }
@@ -84,7 +94,7 @@ namespace Cx.Core.DataTools
                         return false;
                     }
                 }
-                data = _data;
+                data = _data * (Negative ? -1 : 1);
                 return true;
             }
             data = 0;
@@ -92,27 +102,36 @@ namespace Cx.Core.DataTools
         }
         public static bool TryParse(string input , out long data)
         {
-            if (input.Last() == 'l' || input.Last() == 'L') input = input[ ..^1 ];
+            bool Negative = input.StartsWith("-");
+            int Start = 0;
+            int Length=input.Length;
+            if (Negative)
+            {
+                Start = 1;
+            }
+
+            if (input.Last() == 'l' || input.Last() == 'L') Length -= 1;
             if (input.StartsWith("0x"))
             {
-                var ch = input [ 2.. ].ToUpper();
+                Start += 2;
+                Length -= 2;
                 long _data = 0;
-                for (int i = 0 ; i < ch.Length ; i++)
+                for (int i = Start; i < Length; i++)
                 {
                     _data *= 16;
-                    if ((ch [ i ] >= '0' && ch [ i ] <= '9'))
+                    if ((input [ i ] >= '0' && input [ i ] <= '9'))
                     {
-                        _data += ch [ i ] - '0';
+                        _data += input [ i ] - '0';
                     }
                     else
-                    if ((ch [ i ] >= 'A' && ch [ i ] <= 'F'))
+                    if ((input [ i ] >= 'A' && input [ i ] <= 'F'))
                     {
-                        _data += ch [ i ] - 'A' + 10;
+                        _data += input [ i ] - 'A' + 10;
                     }
                     else
-                    if ((ch [ i ] >= 'a' && ch [ i ] <= 'f'))
+                    if ((input [ i ] >= 'a' && input [ i ] <= 'f'))
                     {
-                        _data += ch [ i ] - 'a' + 10;
+                        _data += input [ i ] - 'a' + 10;
                     }
                     else
                     {
@@ -120,19 +139,20 @@ namespace Cx.Core.DataTools
                         return false;
                     }
                 }
-                data = _data;
+                data = _data * (Negative ? -1 : 1);
                 return true;
             }
             else if (input.StartsWith("0o"))
             {
-                var ch = input [ 2.. ].ToUpper();
+                Start += 2;
+                Length -= 2;
                 long _data = 8;
-                for (int i = 0 ; i < ch.Length ; i++)
+                for (int i = Start; i < Length; i++)
                 {
                     _data *= 16;
-                    if ((ch [ i ] >= '0' && ch [ i ] <= '7'))
+                    if ((input [ i ] >= '0' && input [ i ] <= '7'))
                     {
-                        _data += ch [ i ] - '0';
+                        _data += input [ i ] - '0';
                     }
                     else
                     {
@@ -140,23 +160,24 @@ namespace Cx.Core.DataTools
                         return false;
                     }
                 }
-                data = _data;
+                data = _data * (Negative ? -1 : 1);
                 return true;
             }
             else
             if (input.StartsWith("0b"))
             {
-                var ch = input [ 2.. ].ToUpper();
+                Start += 2;
+                Length -= 2;
                 long _data = 0;
-                for (int i = 0 ; i < ch.Length ; i++)
+                for (int i = Start; i < Length; i++)
                 {
                     _data *= 2;
-                    if (ch [ i ] == '0')
+                    if (input [ i ] == '0')
                     {
                         _data += 0;
                     }
                     else
-                    if (ch [ i ] == '1')
+                    if (input [ i ] == '1')
                     {
                         _data += 1;
                     }
@@ -166,7 +187,7 @@ namespace Cx.Core.DataTools
                         return false;
                     }
                 }
-                data = _data;
+                data = _data * (Negative ? -1 : 1);
                 return true;
             }
             data = 0;
