@@ -69,7 +69,7 @@ namespace Cx.Core.DataTools
         }
         public static bool ValidateULong(string input)
         {
-            return false;
+            return DataConverter.TryParse(input , out ulong _);
         }
         public static DataType DetermineDataType(string content)
         {
