@@ -154,11 +154,6 @@ namespace Cx.Core.DataTools
                     {
                         _data += (uint)(input [ i ] - 'A') + 10;
                     }
-                    else
-                    if ((input [ i ] >= 'a' && input [ i ] <= 'f'))
-                    {
-                        _data += (uint)(input [ i ] - 'a') + 10;
-                    }
                     else if ((input [ i ] == '_')) continue;
                     else
                     {
@@ -253,7 +248,7 @@ namespace Cx.Core.DataTools
             }
 
             if (input.Last() == 'l' || input.Last() == 'L') Length -= 1;
-            if (input.StartsWith("0x"))
+            if (input.StartsWith("0X"))
             {
                 Start += 2;
                 Length -= 2;
@@ -270,11 +265,6 @@ namespace Cx.Core.DataTools
                     {
                         _data += input [ i ] - 'A' + 10;
                     }
-                    else
-                    if ((input [ i ] >= 'a' && input [ i ] <= 'f'))
-                    {
-                        _data += input [ i ] - 'a' + 10;
-                    }
                     else if ((input [ i ] == '_')) continue;
                     else
                     {
@@ -285,7 +275,7 @@ namespace Cx.Core.DataTools
                 data = _data * (Negative ? -1 : 1);
                 return true;
             }
-            else if (input.StartsWith("0o"))
+            else if (input.StartsWith("0O"))
             {
                 Start += 2;
                 Length -= 2;
@@ -308,7 +298,7 @@ namespace Cx.Core.DataTools
                 return true;
             }
             else
-            if (input.StartsWith("0b"))
+            if (input.StartsWith("0B"))
             {
                 Start += 2;
                 Length -= 2;

@@ -1,6 +1,5 @@
 ﻿using Cx.Core;
 using Cx.Core.VCParser;
-using System.Collections.Generic;
 
 namespace Cx.HL2VC.Parsers
 {
@@ -16,22 +15,6 @@ namespace Cx.HL2VC.Parsers
             ParserProvider.RegisterParser(HLASTNodeType.Using , new UsingParser());
             ParserProvider.RegisterParser(ASTNodeType.Scope , new ScopeParser());
             return ParserProvider;
-        }
-    }
-    public class HLRootParser : RootParser
-    {
-        public HLRootParser()
-        {
-            var old_list = ConcernedParsers;
-            ConcernedParsers = new List<int>
-            {
-                HLASTNodeType.Namespace ,
-                HLASTNodeType.Using
-            };
-            foreach (var item in old_list)
-            {
-                ConcernedParsers.Add(item);
-            }
         }
     }
 }

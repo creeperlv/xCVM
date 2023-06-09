@@ -11,6 +11,7 @@ namespace Cx.HL2VC.Parsers
         {
             OperationResult<bool> __result = false;
             {
+                var HEAD = context.Current;
                 var r = context.Match("using");
                 if (r == MatchResult.Match)
                 {
@@ -18,6 +19,7 @@ namespace Cx.HL2VC.Parsers
                     var cr = ContextClosure.RClose(context , ";");
                     if (cr.Errors.Count > 0)
                     {
+                        context.SetCurrent(HEAD);
                         __result.Errors = cr.Errors;
                         return __result;
                     }
@@ -80,8 +82,13 @@ namespace Cx.HL2VC.Parsers
                             }
                             node.Segment = namespace_name.HEAD.Duplicate();
                             node.Segment.content = FormedPrefix;
+                            context.SetCurrent(cr.Result.EndPoint!.Next);
                         }
                     }
+                }
+                else
+                {
+                    context.SetCurrent(HEAD);
                 }
             }
             return __result;

@@ -13,55 +13,56 @@ namespace Cx.Core.DataTools
         public static CStyleScanner CStyleParser = new CStyleScanner();
         public static bool ValidateLong(string input)
         {
-            if (input.StartsWith("0x"))
-            {
-                var ch = input [ 2.. ].ToUpper();
-                for (int i = 0 ; i < ch.Length ; i++)
-                {
-                    if ((ch [ i ] >= '0' && ch [ i ] <= '9') || (ch [ i ] >= 'A' && ch [ i ] <= 'F') || ch [ i ] == '_')
-                    {
+            return DataConverter.TryParse(input , out long _);
+            //if (input.StartsWith("0x"))
+            //{
+            //    var ch = input [ 2.. ].ToUpper();
+            //    for (int i = 0 ; i < ch.Length ; i++)
+            //    {
+            //        if ((ch [ i ] >= '0' && ch [ i ] <= '9') || (ch [ i ] >= 'A' && ch [ i ] <= 'F') || ch [ i ] == '_')
+            //        {
 
-                    }
-                    else return false;
-                }
-                return true;
-            }
-            else if (input.StartsWith("0b"))
-            {
-                var ch = input [ 2.. ];
-                for (int i = 0 ; i < ch.Length ; i++)
-                {
-                    if (ch [ i ] != '0' && ch [ i ] != '1' && ch [ i ] != '_')
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            else if (input.StartsWith("0o"))
-            {
-                var ch = input [ 2.. ];
-                for (int i = 0 ; i < ch.Length ; i++)
-                {
-                    if ((ch [ i ] >= '0' && ch [ i ] <= '7') || ch [ i ] == '_')
-                    {
-                    }
-                    else return false;
-                }
-                return true;
-            }
-            else
-            {
-                for (int i = 0 ; i < input.Length ; i++)
-                {
-                    if ((input [ i ] >= '0' && input [ i ] <= '9') || input [ i ] == '_')
-                    {
+            //        }
+            //        else return false;
+            //    }
+            //    return true;
+            //}
+            //else if (input.StartsWith("0b"))
+            //{
+            //    var ch = input [ 2.. ];
+            //    for (int i = 0 ; i < ch.Length ; i++)
+            //    {
+            //        if (ch [ i ] != '0' && ch [ i ] != '1' && ch [ i ] != '_')
+            //        {
+            //            return false;
+            //        }
+            //    }
+            //    return true;
+            //}
+            //else if (input.StartsWith("0o"))
+            //{
+            //    var ch = input [ 2.. ];
+            //    for (int i = 0 ; i < ch.Length ; i++)
+            //    {
+            //        if ((ch [ i ] >= '0' && ch [ i ] <= '7') || ch [ i ] == '_')
+            //        {
+            //        }
+            //        else return false;
+            //    }
+            //    return true;
+            //}
+            //else
+            //{
+            //    for (int i = 0 ; i < input.Length ; i++)
+            //    {
+            //        if ((input [ i ] >= '0' && input [ i ] <= '9') || input [ i ] == '_')
+            //        {
 
-                    }
-                    else return false;
-                }
-                return true;
-            }
+            //        }
+            //        else return false;
+            //    }
+            //    return true;
+            //}
         }
         public static bool ValidateDouble(string input)
         {
