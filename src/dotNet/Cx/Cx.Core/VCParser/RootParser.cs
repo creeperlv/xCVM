@@ -8,7 +8,7 @@ namespace Cx.Core.VCParser
         {
             ConcernedParsers.Add(ASTNodeType.DeclareFunc);
         }
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             while (true)

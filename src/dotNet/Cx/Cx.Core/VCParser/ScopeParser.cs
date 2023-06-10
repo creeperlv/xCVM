@@ -14,7 +14,7 @@ namespace Cx.Core.VCParser
             ConcernedParsers.Add(ASTNodeType.Switch);
             ConcernedParsers.Add(ASTNodeType.Statement);
         }
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(false);
             var HEAD = context.Current;
@@ -31,7 +31,7 @@ namespace Cx.Core.VCParser
                 {
                     result.AddError(new OperationError(context.Current , "Closure Failed"));
                 }
-                ASTNode scope_body = new ASTNode();
+                TreeNode scope_body = new TreeNode();
                 scope_body.Type = ASTNodeType.Scope;
 
                 Parent.AddChild(scope_body);
@@ -44,5 +44,4 @@ namespace Cx.Core.VCParser
             return result;
         }
     }
-
 }

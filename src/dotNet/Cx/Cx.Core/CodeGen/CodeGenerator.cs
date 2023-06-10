@@ -1,5 +1,4 @@
-﻿using Cx.Core.VCParser;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -9,7 +8,7 @@ namespace Cx.Core.CodeGen
 {
     public class CodeGenerator
     {
-        public virtual OperationResult<bool> Write(GeneratorProvider provider,ASTNode node , StreamWriter writer)
+        public virtual OperationResult<bool> Write(GeneratorProvider provider, TreeNode node , StreamWriter writer)
         {
             return new OperationResult<bool>(false);
         }

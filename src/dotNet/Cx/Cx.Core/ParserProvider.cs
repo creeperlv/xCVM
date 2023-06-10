@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Cx.Core.VCParser
+namespace Cx.Core
 {
     public class ParserProvider
     {

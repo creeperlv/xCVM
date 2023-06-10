@@ -15,7 +15,7 @@ namespace Cx.HL2VC
             ConcernedParsers.Add(ASTNodeType.DeclareFunc);
             ConcernedParsers.Add(ASTNodeType.DeclareStruct);
         }
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(false);
             var BRKPNT = context.Current;
@@ -57,7 +57,7 @@ namespace Cx.HL2VC
                 namespace_name.SetEndPoint(FirstLB);
                 string FormedPrefix = "";
                 bool Continue = true;
-                ASTNode root = new ASTNode();
+                TreeNode root = new TreeNode();
                 root.Type = HLASTNodeType.Namespace;
                 var __head = namespace_name.Current;
                 if (__head == null)

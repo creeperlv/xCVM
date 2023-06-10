@@ -1,6 +1,5 @@
 ﻿using Cx.Core;
 using Cx.Core.DataTools;
-using Cx.Core.VCParser;
 using System;
 using xCVM.Core.CompilerServices;
 
@@ -8,11 +7,11 @@ namespace Cx.HL2VC.Parsers
 {
     public class HLTypeParser : ContextualParser
     {
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> FinalResult = false;
             string FormedType = "";
-            ASTNode _node = new ASTNode();
+            TreeNode _node = new TreeNode();
             _node.Type = ASTNodeType.DataType;
             DataType LastDT = DataType.Symbol;
             var HEAD = context.Current;
@@ -88,7 +87,7 @@ namespace Cx.HL2VC.Parsers
                                             _node.Segment = HEAD.Duplicate();
                                             _node.Segment.content = FormedType;
                                         }
-                                        ASTNode Pointer = new ASTNode();
+                                        TreeNode Pointer = new TreeNode();
                                         Pointer.Segment = Current;
                                         Pointer.Type = ASTNodeType.Pointer;
                                         Pointer.AddChild(_node);
@@ -176,7 +175,7 @@ namespace Cx.HL2VC.Parsers
                                     _node.Segment = HEAD.Duplicate();
                                     _node.Segment.content = FormedType;
                                 }
-                                ASTNode Pointer = new ASTNode();
+                                TreeNode Pointer = new TreeNode();
                                 Pointer.Segment = Current;
                                 Pointer.Type = ASTNodeType.Pointer;
                                 Pointer.AddChild(_node);

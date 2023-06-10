@@ -1,5 +1,4 @@
 ﻿using Cx.Core;
-using Cx.Core.VCParser;
 using LibCLCC.NET.IO;
 using LibCLCC.NET.TextProcessing;
 using System.Linq;

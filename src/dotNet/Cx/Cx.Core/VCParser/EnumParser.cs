@@ -6,7 +6,7 @@ namespace Cx.Core.VCParser
 {
     public class EnumParser : ContextualParser
     {
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             var FinalResult = new OperationResult<bool>(false);
             var em = context.Match("enum");
@@ -23,7 +23,7 @@ namespace Cx.Core.VCParser
                     FinalResult.AddError(new UnexpectedEndError(context.Current));
                     return FinalResult;
                 }
-                ASTNode EnumNode = new ASTNode();
+                TreeNode EnumNode = new TreeNode();
                 var name = context.Current.content;
                 if (DataTypeChecker.DetermineDataType(name) != DataType.String)
                 {

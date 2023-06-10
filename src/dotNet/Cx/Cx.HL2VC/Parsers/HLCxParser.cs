@@ -11,17 +11,17 @@ namespace Cx.HL2VC
         public HLCxParser()
         {
         }
-        public OperationResult<ASTNode> ParseAST(Segment HEAD)
+        public OperationResult<TreeNode> ParseAST(Segment HEAD)
         {
             ParserProvider provider = VanillaCParsers.GetProvider();
             SegmentContext segmentContext = new SegmentContext(HEAD);
-            ASTNode root = new ASTNode();
-            OperationResult<ASTNode> result = new OperationResult<ASTNode>(root);
+            TreeNode root = new TreeNode();
+            OperationResult<TreeNode> result = new OperationResult<TreeNode>(root);
             Parse(provider,segmentContext , root);
             return result;
         }
 
-        public override OperationResult<bool> Parse(ParserProvider provider,SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider,SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> result = new OperationResult<bool>(true);
             return result;

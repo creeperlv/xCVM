@@ -10,7 +10,7 @@ namespace Cx.Core
 {
     public static class FileParser
     {
-        public static OperationResult<ASTNode> Parse(ParserProvider provider , FileInfo InputFile)
+        public static OperationResult<TreeNode> Parse(ParserProvider provider , FileInfo InputFile)
         {
             CStyleScanner scanner = new CStyleScanner();
             using var fs = InputFile.OpenRead();
@@ -21,21 +21,21 @@ namespace Cx.Core
     }
     public static class SegmentParser
     {
-        public static OperationResult<ASTNode> Parse(ParserProvider provider , Segment HEAD)
+        public static OperationResult<TreeNode> Parse(ParserProvider provider , Segment HEAD)
         {
             SegmentContext segmentContext = new SegmentContext(HEAD);
             var pr = provider.GetParser(ASTNodeType.Root);
-            ASTNode root = new ASTNode
+            TreeNode root = new TreeNode
             {
                 Type = ASTNodeType.Root
             };
             if (pr == null)
             {
-                OperationResult<ASTNode> result = new OperationResult<ASTNode>(root);
+                OperationResult<TreeNode> result = new OperationResult<TreeNode>(root);
                 result.AddError(new ParserNotFoundError(HEAD));
                 return result;
             }
-            OperationResult<ASTNode> _result = new OperationResult<ASTNode>(root);
+            OperationResult<TreeNode> _result = new OperationResult<TreeNode>(root);
             var r = pr.Parse(provider , segmentContext , root);
             if (r.Errors.Count > 0)
             {

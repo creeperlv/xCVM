@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Cx.Core;
-using Cx.Core.VCParser;
 using LibCLCC.NET.Delegates;
 using LibCLCC.NET.TextProcessing;
 using xCVM.Core.CompilerServices;
@@ -111,7 +110,7 @@ namespace Cx.Preprocessor
             }
             return Hit;
         }
-        public OperationResult<ASTNode?> SearchUnaryExpression(SegmentContext context , params string [ ] operators)
+        public OperationResult<TreeNode?> SearchUnaryExpression(SegmentContext context , params string [ ] operators)
         {
 
             while (true)
@@ -127,12 +126,12 @@ namespace Cx.Preprocessor
                     var mr = context.MatchCollection(true , operators);
                     if (mr.Item1 == MatchResult.Match)
                     {
-                        ASTNode node = new ASTNode();
+                        TreeNode node = new TreeNode();
                         node.Segment = context.Current;
                         node.Type = ASTNodeType.BinaryExpression;
                         if (context.Current == null)
                         {
-                            var or = new OperationResult<ASTNode?>(null);
+                            var or = new OperationResult<TreeNode?>(null);
                             or.AddError(new UnexpectedEndOfFileError(context.Current));
                             return or;
                         }
@@ -152,7 +151,7 @@ namespace Cx.Preprocessor
                             }
                             else
                             {
-                                return new OperationResult<ASTNode?>(null) { Errors = RR.Errors };
+                                return new OperationResult<TreeNode?>(null) { Errors = RR.Errors };
                             }
                         }
                         return node;
@@ -163,9 +162,9 @@ namespace Cx.Preprocessor
                     }
                 }
             }
-            return new OperationResult<ASTNode?>(null);
+            return new OperationResult<TreeNode?>(null);
         }
-        public OperationResult<ASTNode?> SearchBinaryExpression(SegmentContext context , params string [ ] operators)
+        public OperationResult<TreeNode?> SearchBinaryExpression(SegmentContext context , params string [ ] operators)
         {
             while (true)
             {
@@ -173,7 +172,7 @@ namespace Cx.Preprocessor
                 var mr = context.MatchCollection(true , operators);
                 if (mr.Item1 == MatchResult.Match)
                 {
-                    ASTNode node = new ASTNode();
+                    TreeNode node = new TreeNode();
                     node.Segment = context.Current;
                     node.Type = ASTNodeType.BinaryExpression;
                     {
@@ -182,7 +181,7 @@ namespace Cx.Preprocessor
                         var LR = ParseEval(LC);
                         if (LR.Result == null)
                         {
-                            OperationResult<ASTNode?> result = new OperationResult<ASTNode?>(null);
+                            OperationResult<TreeNode?> result = new OperationResult<TreeNode?>(null);
                             result.Errors = LR.Errors;
                             result.AddError(new UnableToParseExpressionError(context.Current));
                             return result;
@@ -194,7 +193,7 @@ namespace Cx.Preprocessor
                     }
                     if (context.Current == null)
                     {
-                        var or = new OperationResult<ASTNode?>(null);
+                        var or = new OperationResult<TreeNode?>(null);
                         or.AddError(new UnexpectedEndOfFileError(context.Current));
                         return or;
                     }
@@ -215,7 +214,7 @@ namespace Cx.Preprocessor
                         }
                         else
                         {
-                            return new OperationResult<ASTNode?>(null) { Errors = RR.Errors };
+                            return new OperationResult<TreeNode?>(null) { Errors = RR.Errors };
                         }
                     }
                     return node;
@@ -225,27 +224,27 @@ namespace Cx.Preprocessor
                     context.GoNext();
                 }
             }
-            return new OperationResult<ASTNode?>(null);
+            return new OperationResult<TreeNode?>(null);
         }
-        public OperationResult<ASTNode?> ParseEval(SegmentContext context)
+        public OperationResult<TreeNode?> ParseEval(SegmentContext context)
         {
             SegmentContext segmentContext = new SegmentContext(context.Current);
             segmentContext.SetEndPoint(context.EndPoint);
             if (segmentContext.Current == null)
             {
-                return new OperationResult<ASTNode?>(null);
+                return new OperationResult<TreeNode?>(null);
             }
             if (segmentContext.Current.Next == null)
             {
-                return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+                return new OperationResult<TreeNode?>(new TreeNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
             }
             if (segmentContext.Current.Next.content == "" && segmentContext.Current.Next.Next == null)
             {
-                return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+                return new OperationResult<TreeNode?>(new TreeNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
             }
             if (segmentContext.Current == segmentContext.EndPoint)
             {
-                return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+                return new OperationResult<TreeNode?>(new TreeNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
             }
             if (context.Current!.Prev == null)
             {
@@ -279,19 +278,19 @@ namespace Cx.Preprocessor
                         }
                         else
                         {
-                            return new OperationResult<ASTNode?>(null) { Errors = opres.Errors };
+                            return new OperationResult<TreeNode?>(null) { Errors = opres.Errors };
                         }
                     }
                     else
                     {
-                        return new OperationResult<ASTNode?>(new ASTNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
+                        return new OperationResult<TreeNode?>(new TreeNode { Segment = segmentContext.Current , Type = ASTNodeType.EndNode });
                     }
                 }
             }
             var or = PerformClosure(segmentContext , "(" , ")");
             if (or.Errors.Count > 0)
             {
-                return new OperationResult<ASTNode?>(null) { Errors = or.Errors };
+                return new OperationResult<TreeNode?>(null) { Errors = or.Errors };
             }
             segmentContext.ResetCurrent();
             {
@@ -333,9 +332,9 @@ namespace Cx.Preprocessor
                     return result.Result;
                 }
             }
-            return new OperationResult<ASTNode?>(null);
+            return new OperationResult<TreeNode?>(null);
         }
-        public OperationResult<object?> Eval(ASTNode node)
+        public OperationResult<object?> Eval(TreeNode node)
         {
 #if DEBUG
             if (node == null)
@@ -389,8 +388,8 @@ namespace Cx.Preprocessor
                     {
                         case "==":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -401,8 +400,8 @@ namespace Cx.Preprocessor
                             }
                         case "&&":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -430,8 +429,8 @@ namespace Cx.Preprocessor
                             }
                         case "||":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -459,8 +458,8 @@ namespace Cx.Preprocessor
                             }
                         case "!=":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -471,8 +470,8 @@ namespace Cx.Preprocessor
                             }
                         case "*":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -521,8 +520,8 @@ namespace Cx.Preprocessor
                             }
                         case "/":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -571,8 +570,8 @@ namespace Cx.Preprocessor
                             }
                         case "+":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -621,8 +620,8 @@ namespace Cx.Preprocessor
                             }
                         case "-":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -671,8 +670,8 @@ namespace Cx.Preprocessor
                             }
                         case ">=":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
                                 var RR = Eval(RN!);
@@ -682,8 +681,8 @@ namespace Cx.Preprocessor
                             }
                         case ">":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -694,8 +693,8 @@ namespace Cx.Preprocessor
                             }
                         case "<=":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -706,8 +705,8 @@ namespace Cx.Preprocessor
                             }
                         case "<":
                             {
-                                var LN = node.Children [ 0 ] as ASTNode;
-                                var RN = node.Children [ 1 ] as ASTNode;
+                                var LN = node.Children [ 0 ] as TreeNode;
+                                var RN = node.Children [ 1 ] as TreeNode;
 
                                 var LR = Eval(LN!);
                                 if (LR.Errors.Count > 0) return new OperationResult<object?>(null) { Errors = LR.Errors };
@@ -725,14 +724,14 @@ namespace Cx.Preprocessor
                 if (node.Segment != null)
                     if (node.Segment.content == "defined")
                     {
-                        var n = node.Children.First() as ASTNode;
+                        var n = Enumerable.First<TreeNode>(node.Children) as TreeNode;
                         var r = Eval(n!);
                         if (r.Errors.Count > 0) return new OperationResult<object?>(false) { Errors = r.Errors };
                         return defined(r.Result as string ?? "");
                     }
                     else if (node.Segment.content == "!")
                     {
-                        var n = node.Children.First() as ASTNode;
+                        var n = Enumerable.First<TreeNode>(node.Children) as TreeNode;
                         var r = Eval(n!);
                         if (r.Errors.Count > 0) return new OperationResult<object?>(false) { Errors = r.Errors };
                         switch (r.Result)

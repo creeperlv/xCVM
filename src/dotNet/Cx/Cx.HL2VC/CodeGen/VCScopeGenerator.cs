@@ -1,5 +1,5 @@
-﻿using Cx.Core.CodeGen;
-using Cx.Core.VCParser;
+﻿using Cx.Core;
+using Cx.Core.CodeGen;
 using System.IO;
 using xCVM.Core.CompilerServices;
 
@@ -7,10 +7,10 @@ namespace Cx.HL2VC.CodeGen
 {
     public class VCScopeGenerator : CodeGenerator
     {
-        public override OperationResult<bool> Write(GeneratorProvider provider , ASTNode node , StreamWriter writer)
+        public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
         {
             writer.Write("{");
-            foreach (ASTNode child in node.Children)
+            foreach (TreeNode child in node.Children)
             {
                 var g = provider.GetGenerator(child.Type);
 

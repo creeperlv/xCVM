@@ -1,4 +1,5 @@
-﻿using Cx.Core.DataTools;
+﻿using Cx.Core;
+using Cx.Core.DataTools;
 using Cx.Core.SegmentContextUtilities;
 using Cx.Core.VCParser;
 using xCVM.Core.CompilerServices;
@@ -7,7 +8,7 @@ namespace Cx.HL2VC.Parsers
 {
     public class UsingParser : RootParser
     {
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> __result = false;
             {
@@ -74,7 +75,7 @@ namespace Cx.HL2VC.Parsers
                             namespace_name.GoNext();
                         }
                         {
-                            ASTNode node = new ASTNode();
+                            TreeNode node = new TreeNode();
                             node.Type = HLASTNodeType.Using;
                             if (namespace_name.HEAD == null)
                             {

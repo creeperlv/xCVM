@@ -11,10 +11,10 @@ namespace Cx.Core.VCParser
             ConcernedParsers.Add(ASTNodeType.Expression);
             ConcernedParsers.Add(ASTNodeType.Call);
         }
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> FinalResult = false;
-            ASTNode root = new ASTNode();
+            TreeNode root = new TreeNode();
             root.Type = ASTNodeType.Statement;
             foreach (var item in ConcernedParsers)
             {

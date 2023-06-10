@@ -1,6 +1,5 @@
 ﻿using Cx.Core;
 using Cx.Core.DataTools;
-using Cx.Core.VCParser;
 using Cx.HL2VC;
 using Cx.HL2VC.Parsers;
 using System.Reflection.Metadata;
@@ -66,7 +65,7 @@ namespace cxhlc
                         fs.SetLength(0);
                         TreeSerializer.Serialize(fs , ast_node);
                         //using var sw = new StreamWriter(fs);
-                        //sw.Write(JsonSerializer.Serialize(ast_node , IntermediateSerializationContext.Default.ASTNode));
+                        //sw.Write(JsonSerializer.Serialize(ast_node , IntermediateSerializationContext.Default.TreeNode));
                         //sw.Flush();
                         fs.Flush();
                         Trees.Add(item.Key , new Tree(item.Key) { FileInDisk = file_path });
@@ -103,7 +102,7 @@ namespace cxhlc
             ID = iD;
         }
 
-        public ASTNode? ASTNode;
+        public TreeNode? ASTNode;
         public string? FileInDisk;
     }
     public class Options

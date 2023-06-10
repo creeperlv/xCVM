@@ -1,5 +1,5 @@
-﻿using Cx.Core.CodeGen;
-using Cx.Core.VCParser;
+﻿using Cx.Core;
+using Cx.Core.CodeGen;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +10,7 @@ namespace Cx.HL2VC.CodeGen
 {
     public class VCTypeGenerator : CodeGenerator
     {
-        public override OperationResult<bool> Write(GeneratorProvider provider , ASTNode node , StreamWriter writer)
+        public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
         {
             writer.Write(node.Segment);
             return true;
@@ -18,10 +18,10 @@ namespace Cx.HL2VC.CodeGen
     }
     public class VCFunctionGenerator : CodeGenerator
     {
-        public override OperationResult<bool> Write(GeneratorProvider provider , ASTNode node , StreamWriter writer)
+        public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
         {
             var children = node.Children;
-            if (children [ 0 ] is ASTNode c0)
+            if (children [ 0 ] is TreeNode c0)
             {
                 var g0 = provider.GetGenerator(c0.Type);
                 if (g0 == null)
@@ -34,12 +34,12 @@ namespace Cx.HL2VC.CodeGen
                 writer.Write(" ");
                 writer.Write(node.Segment!.content);
                 writer.Write("(");
-                if (children [ 1 ] is ASTNode c1)
+                if (children [ 1 ] is TreeNode c1)
                 {
                     var count = c1.Children.Count;
                     for (int i = 0 ; i < count ; i++)
                     {
-                        var item = c1.Children [ i ] as ASTNode;
+                        var item = c1.Children [ i ] as TreeNode;
                         if (item == null)
                         {
                             OperationResult<bool> operationResult = new OperationResult<bool>(false);
@@ -63,7 +63,7 @@ namespace Cx.HL2VC.CodeGen
                 }
                 {
 
-                    if (children [ 2 ] is ASTNode item)
+                    if (children [ 2 ] is TreeNode item)
                     {
                         var g = provider.GetGenerator(item.Type);
                         if (g == null)
@@ -82,9 +82,9 @@ namespace Cx.HL2VC.CodeGen
     }
     public class VCRootGenerator : CodeGenerator
     {
-        public override OperationResult<bool> Write(GeneratorProvider provider , ASTNode node , StreamWriter writer)
+        public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
         {
-            foreach (ASTNode child in node.Children)
+            foreach (TreeNode child in node.Children)
             {
                 var g = provider.GetGenerator(child.Type);
                 if (g == null)

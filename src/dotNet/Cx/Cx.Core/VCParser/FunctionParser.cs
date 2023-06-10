@@ -8,7 +8,7 @@ namespace Cx.Core.VCParser
 {
     public class FunctionParser : ContextualParser
     {
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             ContextualParser? typeParser = provider.GetParser(ASTNodeType.DataType);
             if (typeParser == null)
@@ -17,7 +17,7 @@ namespace Cx.Core.VCParser
                 return _result;
             }
             OperationResult<bool> result = new OperationResult<bool>(true);
-            ASTNode FuncDef = new ASTNode
+            TreeNode FuncDef = new TreeNode
             {
                 Type = ASTNodeType.DeclareFunc
             };
@@ -105,16 +105,16 @@ namespace Cx.Core.VCParser
                 return new OperationResult<bool>(false);
             }
             {
-                ASTNode return_type = new ASTNode();
+                TreeNode return_type = new TreeNode();
                 FuncDef.AddChild(return_type);
                 return_type.Type = ASTNodeType.ReturnType;
                 typeParser.Parse(provider , new SegmentContext(HEAD) , return_type);
             }
             {
-                ASTNode parameters = new ASTNode();
+                TreeNode parameters = new TreeNode();
                 FuncDef.AddChild(parameters);
                 parameters.Type = ASTNodeType.Parameters;
-                ASTNode node = new ASTNode();
+                TreeNode node = new TreeNode();
                 context.SetCurrent(FirstLP.Prev);
 #if DEBUG
                 Console.WriteLine($"Function Parser: Parameters");
@@ -216,7 +216,7 @@ namespace Cx.Core.VCParser
                         Console.WriteLine($"Function Parser: Name Done, Current:{_context.Current?.content ?? "null"}");
 #endif
                         parameters.AddChild(node);
-                        node = new ASTNode();
+                        node = new TreeNode();
                     }
                 }
             }

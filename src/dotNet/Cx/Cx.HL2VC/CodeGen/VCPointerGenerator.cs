@@ -1,5 +1,5 @@
-﻿using Cx.Core.CodeGen;
-using Cx.Core.VCParser;
+﻿using Cx.Core;
+using Cx.Core.CodeGen;
 using System.IO;
 using xCVM.Core.CompilerServices;
 
@@ -7,11 +7,11 @@ namespace Cx.HL2VC.CodeGen
 {
     public class VCPointerGenerator : CodeGenerator
     {
-        public override OperationResult<bool> Write(GeneratorProvider provider , ASTNode node , StreamWriter writer)
+        public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
         {
             if (node.Children.Count > 0)
             {
-                if (node.Children [ 0 ] is ASTNode n)
+                if (node.Children [ 0 ] is TreeNode n)
                 {
                     var g = provider.GetGenerator(n.Type);
                     if (g == null)

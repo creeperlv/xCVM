@@ -6,7 +6,7 @@ namespace Cx.Core.VCParser
 {
     public class CallParser : ContextualParser
     {
-        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , ASTNode Parent)
+        public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> FinalResult = false;
             var HEAD = context.Current;
@@ -36,7 +36,7 @@ namespace Cx.Core.VCParser
                 {
                     return FinalResult;
                 }
-                ASTNode node = new ASTNode();
+                TreeNode node = new TreeNode();
                 node.Type = ASTNodeType.Call;
                 node.Segment = HEAD;
                 var _context = Arguments.Result;
