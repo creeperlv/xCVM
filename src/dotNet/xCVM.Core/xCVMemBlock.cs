@@ -6,6 +6,7 @@ namespace xCVM.Core
 {
     public class xCVMemBlock
     {
+        public long TotalMemory = 0;
         public Dictionary<int , xCVMem> Datas = new Dictionary<int , xCVMem>();
         public int PUT(byte [ ] data , int ForceKey = -1)
         {
@@ -14,6 +15,7 @@ namespace xCVM.Core
                 var mem = new xCVMem(data);
                 var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
                 Datas.Add(K , mem);
+                TotalMemory += data.Length;
                 return K;
 
             }
@@ -22,24 +24,26 @@ namespace xCVM.Core
                 return -1;
             }
         }
-        public void Push(int ID , byte [ ] data,int offset,int len)
+        public void Push(int ID , byte [ ] data , int offset , int len)
         {
             Stack<byte> bytes = new Stack<byte>(Datas [ ID ].data);
             var L = len;
             for (int i = 0 ; i < L ; i++)
             {
-                bytes.Push(data [ offset+i ]);
+                bytes.Push(data [ offset + i ]);
             }
+            TotalMemory += data.Length;
             Datas [ ID ].data = bytes.ToArray();
         }
         public void Pop(int ID , int Len , bool IsStack , byte [ ] reciver , int Offset)
         {
             if (IsStack)
             {
-                var span = Datas [ID].data.AsSpan ();
-                var poped = span.Slice(span.Length - Len , Len).ToArray() ;
+                var span = Datas [ ID ].data.AsSpan();
+                var poped = span.Slice(span.Length - Len , Len).ToArray();
                 poped.CopyTo(reciver , Offset);
-                Datas [ ID ].data=span.Slice(0, span.Length - Len).ToArray();
+                Datas [ ID ].data = span.Slice(0 , span.Length - Len).ToArray();
+                TotalMemory -= Len;
                 //Stack<byte> bytes = new Stack<byte>(Datas [ ID ].data);
                 //for (int i = 0 ; i < Len ; i++)
                 //{
@@ -54,6 +58,7 @@ namespace xCVM.Core
                 {
                     reciver [ Offset + i ] = bytes.Dequeue();
                 }
+                TotalMemory -=Len;
                 Datas [ ID ].data = bytes.ToArray();
             }
         }
@@ -66,6 +71,7 @@ namespace xCVM.Core
                 var mem = new xCVMem(b);
                 var K = ForceKey == -1 ? mem.GetHashCode() : ForceKey;
                 Datas.Add(K , mem);
+                TotalMemory += Size;
                 return K;
             }
             catch (Exception)
@@ -77,6 +83,7 @@ namespace xCVM.Core
         {
             if (Datas.ContainsKey(Key))
             {
+                TotalMemory -= Datas [ Key ].data.Length;
                 Datas.Remove(Key);
             }
         }
@@ -85,9 +92,10 @@ namespace xCVM.Core
             try
             {
                 if (!Datas.ContainsKey(Key)) return -1;
+                TotalMemory -= Datas [ Key ].data.Length;
                 var newD = new xCVMem(new byte [ NewSize ]);
                 var old = Datas [ Key ].data.AsSpan();
-                
+
                 var L = Math.Min(old.Length , NewSize);
                 var OL = old.Length - 1;
                 if (RightAligned)
@@ -104,6 +112,7 @@ namespace xCVM.Core
                         newD.data [ i ] = old [ i ];
                     }
                 }
+                TotalMemory +=NewSize;
                 return Key;
             }
             catch (Exception)

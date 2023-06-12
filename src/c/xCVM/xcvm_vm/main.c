@@ -16,7 +16,7 @@ int main(int argc, char** argv)
         SetFG(ANSI_Red + ANSI_Bright);
         Write("error:");
         ResetColors();
-        WriteLine("File Not Found.");
+        WriteLine("file not found.");
         return 0;
     }
     Result r = LoadModule(f);
