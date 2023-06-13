@@ -7,10 +7,12 @@
             ParserProvider ParserProvider = new ParserProvider();
             ParserProvider.RegisterParser(ASTNodeType.Root, new RootParser());
             ParserProvider.RegisterParser(ASTNodeType.DeclareFunc, new FunctionParser());
+            ParserProvider.RegisterParser(ASTNodeType.DeclareVar, new DeclareVariableParser());
             ParserProvider.RegisterParser(ASTNodeType.DataType, new TypeParser());
             ParserProvider.RegisterParser(ASTNodeType.Scope, new ScopeParser());
             ParserProvider.RegisterParser(ASTNodeType.Call, new CallParser());
             ParserProvider.RegisterParser(ASTNodeType.Statement, new StatementParser());
+            ParserProvider.RegisterParser(ASTNodeType.TypeDef, new TypeDefParser());
             return ParserProvider;
         }
     }

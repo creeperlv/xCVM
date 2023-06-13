@@ -7,6 +7,8 @@ namespace Cx.Core.VCParser
         public RootParser()
         {
             ConcernedParsers.Add(ASTNodeType.DeclareFunc);
+            ConcernedParsers.Add(ASTNodeType.TypeDef);
+            ConcernedParsers.Add(ASTNodeType.DeclareStruct);
         }
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {

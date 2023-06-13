@@ -31,6 +31,7 @@
         public const int Switch= 25;
         public const int Statement= 26;
         public const int Call = 27;
+        public const int TypeDef = 28;
     }
 
 }

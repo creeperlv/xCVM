@@ -10,6 +10,23 @@ namespace Cx.HL2VC.Parsers
 {
     public class Utilities
     {
+        public static TreeNode? GetRootNode(TreeNode node)
+        {
+            TreeNode? Current = node;
+            if (Current == null) return null;
+            while (true)
+            {
+                if (Current.Type == ASTNodeType.Root)
+                {
+                    return Current;
+                }
+                if (Current.Parent == null)
+                {
+                    return Current;
+                }
+                Current = Current.Parent;
+            }
+        }
         public static TreeNode? GetNamespaceNode(TreeNode node)
         {
             TreeNode? Current = node;

@@ -1,5 +1,6 @@
 using Cx.Core;
 using Cx.Core.SegmentContextUtilities;
+using Cx.Core.VCParser;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.HL2VC.Parsers
@@ -19,7 +20,7 @@ namespace Cx.HL2VC.Parsers
             {
                 context.GoNext();
                 var FormedName = Utilities.FormName(context , false);
-                if (FormedName.Errors.Count > 0)
+                if (FinalResult.CheckAndInheritAbnormalities(FormedName))
                 {
                     FinalResult.Errors = FormedName.Errors;
                     return FinalResult;
@@ -27,23 +28,32 @@ namespace Cx.HL2VC.Parsers
                 else
                 {
                     var StructureName = FormedName.Result;
-                    if(context.Match("{")== MatchResult.Match)
+                    if (context.Match("{") == MatchResult.Match)
                     {
-                        var ClosedResult=ContextClosure.LRClose(context , "{" , "}");
-                        if (ClosedResult.Errors.Count > 0)
+                        var DeclareStruct = provider.GetParser(ASTNodeType.DeclareStruct);
+                        if (DeclareStruct == null)
                         {
-                            FinalResult.Errors = ClosedResult.Errors;
+                            FinalResult.AddError(new ParserNotFoundError(context.Current));
                             return FinalResult;
                         }
-                        if (ClosedResult.Result == null)
+                        var _context = new SegmentContext(HEAD);
+                        var TargetRootNode = Utilities.GetNamespaceNode(Parent);
+                        if (TargetRootNode == null)
                         {
-                            return FinalResult;
+                            TargetRootNode = Utilities.GetRootNode(Parent);
+                            if (TargetRootNode == null)
+                            {
+                                FinalResult.AddError(new CannotFoundNodeError(context.Current , ASTNodeType.Root));
+                                FinalResult.AddError(new CannotFoundNodeError(context.Current , HLASTNodeType.Namespace));
+                                return FinalResult;
+                            }
                         }
-
+                        DeclareStruct.Parse(provider , _context , TargetRootNode);
                     }
                     TreeNode node = new TreeNode();
                     node.Segment = HEAD.Duplicate();
                     node.Segment.content = StructureName;
+                    FinalResult.Result = true;
                 }
             }
             return FinalResult;

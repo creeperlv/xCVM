@@ -15,6 +15,17 @@ namespace xCVM.Core.CompilerServices
         public ConnectableList<OperationError> Errors = new ConnectableList<OperationError>();
         public void AddWarning(OperationWarn warn) => Warnings.Add(warn);
         public ConnectableList<OperationWarn> Warnings = new ConnectableList<OperationWarn>();
+        public bool CheckAndInheritAbnormalities<V>(OperationResult<V> Old)
+        {
+            Errors.ConnectAfterEnd(Old.Errors);
+            Warnings.ConnectAfterEnd(Old.Warnings);
+            return Errors.Count > 0;
+        }
+        public void InheritAbnormalities<V>(OperationResult<V> Old)
+        {
+            Errors.ConnectAfterEnd(Old.Errors);
+            Warnings.ConnectAfterEnd(Old.Warnings);
+        }
         public static implicit operator T(OperationResult<T> result) => result.Result;
         public static implicit operator OperationResult<T>(T d) => new OperationResult<T>(d);
     }

@@ -2,7 +2,7 @@
 
 namespace Cx.Core.VCParser
 {
-    public class DeclareTypeParser : ContextualParser
+    public class TypeDefParser : ContextualParser
     {
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
