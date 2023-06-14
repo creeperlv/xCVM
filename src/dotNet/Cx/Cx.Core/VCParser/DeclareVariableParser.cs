@@ -2,6 +2,11 @@
 
 namespace Cx.Core.VCParser
 {
+    /// <summary>
+    /// Ends at where the name is.
+    /// int a = ...
+    ///     ^ This is where the Current is when parsed successfully.
+    /// </summary>
     public class DeclareVariableParser : ContextualParser
     {
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
@@ -21,6 +26,7 @@ namespace Cx.Core.VCParser
                 result.InheritAbnormalities(tr);
                 return false;
             }
+            result.Result = true;
             node.Segment=context.Current;
             return result;
         }
