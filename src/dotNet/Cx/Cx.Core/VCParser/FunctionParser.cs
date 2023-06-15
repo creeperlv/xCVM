@@ -2,6 +2,7 @@
 using Cx.Core.SegmentContextUtilities;
 using LibCLCC.NET.TextProcessing;
 using System;
+using System.Linq;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.Core.VCParser
@@ -22,7 +23,7 @@ namespace Cx.Core.VCParser
                 Type = ASTNodeType.DeclareFunc
             };
 #if DEBUG
-            Console.WriteLine($"FuncParser: {context.Current?.content??"null"}");
+            Console.WriteLine($"FuncParser: {context.Current?.content ?? "null"}");
 #endif
             var HEAD = context.Current;
             Segment? FirstLP = null;
@@ -111,7 +112,12 @@ namespace Cx.Core.VCParser
                 TreeNode return_type = new TreeNode();
                 FuncDef.AddChild(return_type);
                 return_type.Type = ASTNodeType.ReturnType;
-                typeParser.Parse(provider , new SegmentContext(HEAD) , return_type);
+                var RetTpeRes=typeParser.Parse(provider , new SegmentContext(HEAD) , return_type);
+                if (result.CheckAndInheritAbnormalities(RetTpeRes)) return result;
+                if (!RetTpeRes.Result)
+                {
+                    result.AddError(new ParseFailError(HEAD , ASTNodeType.DataType));
+                }
             }
             {
                 TreeNode parameters = new TreeNode();
@@ -122,19 +128,25 @@ namespace Cx.Core.VCParser
 #if DEBUG
                 Console.WriteLine($"Function Parser: Parameters");
 #endif
-                var Parameters = ContextClosure.LRClose(context , "(" , ")");
-                if (Parameters.Errors.Count > 0)
+                var ParameterClosure = ContextClosure.LRClose(context , "(" , ")");
+                if (ParameterClosure.Errors.Count > 0)
                 {
                     result.Result = false;
-                    result.Errors = Parameters.Errors;
+                    result.Errors = ParameterClosure.Errors;
                     return result;
                 }
-                else if (Parameters.Result == null)
+                else if (ParameterClosure.Result == null)
                 {
                     result.Result = false;
                     return result;
                 }
-                SegmentContext _context = Parameters.Result;
+                SegmentContext _context = ParameterClosure.Result;
+                var DeclareVariableParser = provider.GetParser(ASTNodeType.DeclareVar);
+                if (DeclareVariableParser == null)
+                {
+                    result.Errors.Add(new ParserNotFoundError(_context.Current , ASTNodeType.DeclareVar));
+                    return result;
+                }
                 while (true)
                 {
                     //Parser Parameter
@@ -160,66 +172,27 @@ namespace Cx.Core.VCParser
                     //    break;
                     //}
                     var content = _context.Current.content;
-                    switch (DataTypeChecker.DetermineDataType(content))
+                    var par_res = DeclareVariableParser.Parse(provider , _context , parameters);
+                    if (result.CheckAndInheritAbnormalities(par_res)) return result;
+                    if (par_res.Result == false)
                     {
-                        case DataType.String:
-                            {
-
-                            }
-                            break;
-                        case DataType.Symbol:
-                            {
-                                if (content == ",")
-                                {
-                                    _context.GoNext();
-                                    continue;
-                                }
-                                else
-                                if (content == "(")
-                                {
-                                    _context.GoNext();
-                                    continue;
-                                }
-                                else
-                                if (content == ")")
-                                {
-                                    break;
-                                }
-                                else
-                                {
-#if DEBUG
-                                    Console.WriteLine($"Function Parser: Illegal Identifier, Current:{_context.Current?.content ?? "null"}");
-#endif
-                                    var res = new OperationResult<bool>(false);
-                                    res.AddError(new IllegalIdentifierError(_context.Current));
-                                    return res;
-                                }
-                            }
-                        default:
-                            {
-                                var res = new OperationResult<bool>(false);
-                                res.AddError(new IllegalIdentifierError(_context.Current));
-                                return res;
-                            }
+                        result.AddError(new ParseFailError(_context.Current , ASTNodeType.DeclareVar));
+                        return result;
                     }
-#if DEBUG
-                    Console.WriteLine($"Function Parser: Will Type, Current:{_context.Current?.content ?? "null"}");
-#endif
-                    var tr = typeParser.Parse(provider , _context , node);
-                    if (tr.Result == true)
+                    parameters.Children.Last().Type = ASTNodeType.SingleParameter;
+                    _context.GoNext();
+                    if (_context.Current.content == ")")
+                    {
+                        break;
+                    }
+                    else if (_context.Current.content == ",")
                     {
                         _context.GoNext();
-#if DEBUG
-                        Console.WriteLine($"Function Parser: Type Done, Current:{_context.Current?.content ?? "null"}");
-#endif
-                        node.Type = ASTNodeType.SingleParameter;
-                        node.Segment = _context.Current;
-                        _context.GoNext();
-#if DEBUG
-                        Console.WriteLine($"Function Parser: Name Done, Current:{_context.Current?.content ?? "null"}");
-#endif
-                        parameters.AddChild(node);
-                        node = new TreeNode();
+                    }
+                    else
+                    {
+                        result.AddError(new IllegalIdentifierError(_context.Current));
+                        return result;
                     }
                 }
             }
