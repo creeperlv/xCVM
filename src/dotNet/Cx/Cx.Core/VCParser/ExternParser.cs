@@ -2,24 +2,20 @@
 
 namespace Cx.Core.VCParser
 {
-    public class RootParser : ContextualParser
+    public class ExternParser : ContextualParser
     {
-        public RootParser()
+        public ExternParser()
         {
-            ConcernedParsers.Add(ASTNodeType.Extern);
-            ConcernedParsers.Add(ASTNodeType.DeclareStruct);
             ConcernedParsers.Add(ASTNodeType.DeclareFunc);
-            ConcernedParsers.Add(ASTNodeType.TypeDef);
+            ConcernedParsers.Add(ASTNodeType.DeclareStruct);
         }
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
-            OperationResult<bool> result = new OperationResult<bool>(true);
-            while (true)
+            if (context.Match("extern") == MatchResult.Match)
             {
-                if (context.ReachEnd) break;
-                if (context.Current == null) break;
-                if (context.Current.Next == null) break;
-                var Hit = false;
+                bool Hit = false;
+                var result = new OperationResult<bool>(false);
+                context.GoNext();
                 var __current = context.Current;
                 foreach (var id in ConcernedParsers)
                 {
@@ -41,11 +37,16 @@ namespace Cx.Core.VCParser
                 if (Hit == false)
                 {
                     result.Result = false;
+                    foreach (var item in ConcernedParsers)
+                    {
+                        result.AddError(new ParseFailError(context.Current , item));
+                    }
+                    return result;
                 }
-
+                result.Result = true;
+                return result;
             }
-            return result;
+            return false;
         }
     }
-
 }

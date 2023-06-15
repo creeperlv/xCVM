@@ -6,11 +6,23 @@ namespace Cx.Core.VCParser
 {
     public class ParserNotFoundError : OperationError
     {
-        public ParserNotFoundError(Segment? binded) : base(binded , null)
+        int _TargetType;
+        public ParserNotFoundError(Segment? binded , int TargetType) : base(binded , null)
         {
+            _TargetType = TargetType;
         }
 
-        public override string Message => $"Parser Not Found.";
+        public override string Message => $"Parser Not Found:{_TargetType}";
+    }
+    public class ParseFailError : OperationError
+    {
+        int _TargetType;
+        public ParseFailError(Segment? binded , int TargetType) : base(binded , null)
+        {
+            _TargetType = TargetType;
+        }
+
+        public override string Message => $"Parser Not Found:{_TargetType}";
     }
     public class IllegalIdentifierError : OperationError
     {

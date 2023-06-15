@@ -46,23 +46,26 @@ namespace cxp
             }
             preprocessor.OnSingleFileProcessComplete.Add((f) =>
             {
-                if (f.ID.EndsWith(".c"))
-                    using (var fs = File.Open(Path.Combine(opt.OutputFolder , string.Format(opt.CFileNameScheme , ID)) , FileMode.OpenOrCreate))
-                    {
-                        fs.SetLength(0);
-                        f.Dump(fs);
-#if DEBUG
-                        Console.WriteLine($"Dumped:{f.ID}");
-#endif
-                        ID++;
-                    }
-                else
+                foreach (var item in Input)
                 {
+                    if (f.ID == item.ID)
+                    {
+                        using (var fs = File.Open(Path.Combine(opt.OutputFolder , string.Format(opt.CFileNameScheme , ID)) , FileMode.OpenOrCreate))
+                        {
+                            fs.SetLength(0);
+                            f.Dump(fs);
+#if DEBUG
+                            Console.WriteLine($"Dumped:{f.ID}");
+#endif
+                            ID++;
+                            return;
+                        }
+                    }
+                }
 
 #if DEBUG
-                    Console.WriteLine($"Ignored:{f.ID}");
+                Console.WriteLine($"Ignored:{f.ID}");
 #endif
-                }
                 return;
             });
             foreach (var input in Input)

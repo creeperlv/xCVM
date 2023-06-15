@@ -12,6 +12,8 @@ namespace Cx.HL2VC.Parsers
             ParserProvider.RegisterParser(ASTNodeType.DeclareFunc , new FunctionParser());
             ParserProvider.RegisterParser(ASTNodeType.DataType , new HLTypeParser());
             ParserProvider.RegisterParser(ASTNodeType.DeclareStruct , new HLDeclareStructParser());
+            ParserProvider.RegisterParser(ASTNodeType.DeclareVar , new DeclareVariableParser());
+            ParserProvider.RegisterParser(ASTNodeType.Extern , new ExternParser());
             ParserProvider.RegisterParser(HLASTNodeType.Namespace , new NamespaceParser());
             ParserProvider.RegisterParser(HLASTNodeType.Using , new UsingParser());
             ParserProvider.RegisterParser(ASTNodeType.Scope , new ScopeParser());

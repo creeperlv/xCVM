@@ -1,6 +1,8 @@
 using Cx.Core;
 using Cx.Core.SegmentContextUtilities;
 using Cx.Core.VCParser;
+using LibCLCC.NET.TextProcessing;
+using System;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.HL2VC.Parsers
@@ -16,6 +18,8 @@ namespace Cx.HL2VC.Parsers
             {
                 return false;
             }
+            TreeNode node = new TreeNode();
+            node.Segment = HEAD.Duplicate();
             if (headmatch == MatchResult.Match)
             {
                 context.GoNext();
@@ -27,26 +31,20 @@ namespace Cx.HL2VC.Parsers
                 else
                 {
                     var StructureName = FormedName.Result;
-                    if (context.Match("{") == MatchResult.Match)
+#if DEBUG
+                    Console.WriteLine($"HLDeclareStructParser:{StructureName},{context.Current?.content??"null"}");
+#endif
+                    var LBTest = context.Match("{");
+                    if ( LBTest== MatchResult.Match)
                     {
                         var DeclareVar = provider.GetParser(ASTNodeType.DeclareVar);
                         if (DeclareVar == null)
                         {
-                            FinalResult.AddError(new ParserNotFoundError(context.Current));
+                            FinalResult.AddError(new ParserNotFoundError(context.Current , ASTNodeType.DeclareVar));
                             return FinalResult;
                         }
                         var _context = new SegmentContext(HEAD);
-                        var TargetRootNode = Utilities.GetNamespaceNode(Parent);
-                        if (TargetRootNode == null)
-                        {
-                            TargetRootNode = Utilities.GetRootNode(Parent);
-                            if (TargetRootNode == null)
-                            {
-                                FinalResult.AddError(new CannotFoundNodeError(context.Current , ASTNodeType.Root));
-                                FinalResult.AddError(new CannotFoundNodeError(context.Current , HLASTNodeType.Namespace));
-                                return FinalResult;
-                            }
-                        }
+                       
                         var ClosedResult = ContextClosure.LRClose(context , "{" , "}");
                         if (FinalResult.CheckAndInheritAbnormalities(ClosedResult))
                         {
@@ -58,13 +56,17 @@ namespace Cx.HL2VC.Parsers
                             return FinalResult;
                         }
                         SegmentContext ClosedContext = ClosedResult.Result;
+                        ClosedContext.GoNext();
                         while (true)
                         {
                             if (ClosedContext.ReachEnd)
                             {
                                 break;
                             }
-                            var dsr = DeclareVar.Parse(provider , _context , TargetRootNode);
+#if DEBUG
+                            Console.WriteLine($"HLDCParser: Fields: {ClosedContext.Current?.content??"null"}");
+#endif
+                            var dsr = DeclareVar.Parse(provider , ClosedContext , node);
 
                             if (FinalResult.CheckAndInheritAbnormalities(dsr))
                             {
@@ -72,33 +74,51 @@ namespace Cx.HL2VC.Parsers
                             }
                             if (dsr.Result == false)
                             {
-                                FinalResult.AddError(new WrongSubASTNode(_context.Current , ASTNodeType.DeclareVar));
+                                FinalResult.AddError(new WrongSubASTNode(ClosedContext.Current , ASTNodeType.DeclareVar));
                                 return FinalResult;
                             }
-                            _context.GoNext();
+#if DEBUG
+                            Console.WriteLine($"HLDCParser: Fields Done 0: {ClosedContext.Current?.content ?? "null"}");
+#endif
+                            ClosedContext.GoNext();
+#if DEBUG
+                            Console.WriteLine($"HLDCParser: Fields Done 1: {ClosedContext.Current?.content ?? "null"}");
+#endif
                             if (ClosedContext.ReachEnd)
                             {
-                                FinalResult.AddError(new UnexpectedEndError(_context.Current));
+                                FinalResult.AddError(new UnexpectedEndError(ClosedContext.Current));
                                 return FinalResult;
                             }
-                            if (_context.Current?.content != ";")
+                            if (ClosedContext.Current?.content != ";")
                             {
+#if DEBUG
+                                Console.WriteLine($"\x1b[31mError\x1b[0m HLDCParser: Not Semi-colon");
+#endif
                                 FinalResult.AddError(new IllegalIdentifierError(_context.Current));
                                 return FinalResult;
                             }
-                            _context.GoNext();
+                            ClosedContext.GoNext();
                         }
+                        context.SetCurrent(ClosedContext.EndPoint);
+#if DEBUG
+                        Console.WriteLine("HLDCParser:Done!");
+#endif
                     }
                     else
                     {
                         return FinalResult;
                     }
-                    TreeNode node = new TreeNode();
-                    node.Segment = HEAD.Duplicate();
                     node.Segment.content = StructureName;
+                    node.Type = ASTNodeType.DeclareStruct;
                     FinalResult.Result = true;
                     Parent.AddChild(node);
                 }
+            }
+            else
+            {
+#if DEBUG
+                Console.WriteLine("HLDSParser: Not A Struct!!");
+#endif
             }
             return FinalResult;
         }

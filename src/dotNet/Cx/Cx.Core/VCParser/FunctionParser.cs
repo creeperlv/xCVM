@@ -21,6 +21,9 @@ namespace Cx.Core.VCParser
             {
                 Type = ASTNodeType.DeclareFunc
             };
+#if DEBUG
+            Console.WriteLine($"FuncParser: {context.Current?.content??"null"}");
+#endif
             var HEAD = context.Current;
             Segment? FirstLP = null;
             Segment? FirstRP = null;
@@ -228,7 +231,7 @@ namespace Cx.Core.VCParser
                 ContextualParser? ScopeParser = provider.GetParser(ASTNodeType.Scope);
                 if (ScopeParser == null)
                 {
-                    result.AddError(new ParserNotFoundError(context.Current));
+                    result.AddError(new ParserNotFoundError(context.Current , ASTNodeType.Scope));
                     return result;
                 }
                 if (context.ReachEnd)

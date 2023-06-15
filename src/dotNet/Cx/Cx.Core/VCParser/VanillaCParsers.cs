@@ -13,6 +13,7 @@
             ParserProvider.RegisterParser(ASTNodeType.Call, new CallParser());
             ParserProvider.RegisterParser(ASTNodeType.Statement, new StatementParser());
             ParserProvider.RegisterParser(ASTNodeType.TypeDef, new TypeDefParser());
+            ParserProvider.RegisterParser(ASTNodeType.Extern, new ExternParser());
             return ParserProvider;
         }
     }

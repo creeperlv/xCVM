@@ -13,21 +13,22 @@ namespace Cx.Core.VCParser
         {
             OperationResult<bool> result = false;
             var TypeParser = provider.GetParser(ASTNodeType.DataType);
-            if(TypeParser == null )
+            if (TypeParser == null)
             {
-                result.AddError(new ParserNotFoundError(context.Current));
+                result.AddError(new ParserNotFoundError(context.Current , ASTNodeType.DataType));
                 return result;
             }
-            TreeNode node=new TreeNode();
+            TreeNode node = new TreeNode();
             node.Type = ASTNodeType.DeclareVar;
-            var tr=TypeParser.Parse(provider , context , node);
+            var tr = TypeParser.Parse(provider , context , node);
             if (!tr.Result)
             {
                 result.InheritAbnormalities(tr);
                 return false;
             }
             result.Result = true;
-            node.Segment=context.Current;
+            node.Segment = context.Current;
+            Parent.AddChild(node);
             return result;
         }
     }

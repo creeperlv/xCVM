@@ -32,7 +32,7 @@ namespace Cx.Core
             if (pr == null)
             {
                 OperationResult<TreeNode> result = new OperationResult<TreeNode>(root);
-                result.AddError(new ParserNotFoundError(HEAD));
+                result.AddError(new ParserNotFoundError(HEAD, ASTNodeType.Root));
                 return result;
             }
             OperationResult<TreeNode> _result = new OperationResult<TreeNode>(root);

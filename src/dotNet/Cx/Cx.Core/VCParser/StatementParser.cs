@@ -30,7 +30,7 @@ namespace Cx.Core.VCParser
                 }
                 else
                 {
-                    FinalResult.AddError(new ParserNotFoundError(context.Current));
+                    FinalResult.AddError(new ParserNotFoundError(context.Current , item));
                     return FinalResult;
                 }
             }

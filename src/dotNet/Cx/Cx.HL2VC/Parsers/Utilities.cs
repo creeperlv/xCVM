@@ -55,6 +55,16 @@ namespace Cx.HL2VC.Parsers
             }
             return false;
         }
+        /// <summary>
+        /// Ends with the Segment that farther than the real end name segment.
+        /// <br/>
+        /// A . B =
+        /// <br/>
+        /// Ends at '='
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="AppendSplitter"></param>
+        /// <returns></returns>
         public static OperationResult<string> FormName(SegmentContext context , bool AppendSplitter)
         {
 
