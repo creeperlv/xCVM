@@ -26,120 +26,49 @@ namespace Cx.Core.VCParser
             Console.WriteLine($"FuncParser: {context.Current?.content ?? "null"}");
 #endif
             var HEAD = context.Current;
-            Segment? FirstLP = null;
-            Segment? FirstRP = null;
-            Segment? FirstLB = null;
-            while (true)
-            {
-                var res = context.MatchMarch("{");
-                if (res == MatchResult.Match)
-                {
-                    FirstLB = context.Last;
-                }
-                else if (res == MatchResult.Mismatch)
-                {
-                    context.GoNext();
-                }
-                else
-                {
-                    break;
-                }
-            }
-            context.SetCurrent(HEAD);
-            while (true)
-            {
-                var res = context.MatchMarch("(");
-                if (res == MatchResult.Match)
-                {
-                    FirstLP = context.Last;
-                }
-                else if (res == MatchResult.Mismatch)
-                {
-                    context.GoNext();
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if (FirstLP == null)
-            {
-#if DEBUG
-                Console.WriteLine("Function Parser:Missing First LP.");
-#endif
-                return new OperationResult<bool>(false);
-            }
-
-            if (FirstLB == null)
-            {
-
-#if DEBUG
-                Console.WriteLine("Function Parser:Missing First LB.");
-#endif
-                return new OperationResult<bool>(false);
-            }
-            context.SetCurrent(FirstLP);
-            while (true)
-            {
-                var res = context.MatchMarch(")");
-                if (res == MatchResult.Match)
-                {
-                    FirstRP = context.Last;
-                }
-                else if (res == MatchResult.Mismatch)
-                {
-                    context.GoNext();
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if (FirstLP > FirstLB)
-            {
-                return new OperationResult<bool>(false);
-            }
-            if (FirstLP == null)
-                return new OperationResult<bool>(false);
-            if (FirstRP == null)
-            {
-#if DEBUG
-                Console.WriteLine("Function Parser:Missing First RP.");
-#endif
-                return new OperationResult<bool>(false);
-            }
             {
                 TreeNode return_type = new TreeNode();
                 FuncDef.AddChild(return_type);
                 return_type.Type = ASTNodeType.ReturnType;
-                var RetTpeRes=typeParser.Parse(provider , new SegmentContext(HEAD) , return_type);
+                var RetTpeRes=typeParser.Parse(provider , context, return_type);
                 if (result.CheckAndInheritAbnormalities(RetTpeRes)) return result;
                 if (!RetTpeRes.Result)
                 {
                     result.AddError(new ParseFailError(HEAD , ASTNodeType.DataType));
                 }
             }
+#if DEBUG
+            Console.WriteLine($"FuncParser: ReturnType Done, At: {context.Current?.content ?? "null"}");
+#endif
+            {
+                FuncDef.Segment = context.Current;
+                context.GoNext();
+            }
             {
                 TreeNode parameters = new TreeNode();
                 FuncDef.AddChild(parameters);
                 parameters.Type = ASTNodeType.Parameters;
                 TreeNode node = new TreeNode();
-                context.SetCurrent(FirstLP.Prev);
+                //context.SetCurrent(FirstLP.Prev);
 #if DEBUG
                 Console.WriteLine($"Function Parser: Parameters");
 #endif
                 var ParameterClosure = ContextClosure.LRClose(context , "(" , ")");
-                if (ParameterClosure.Errors.Count > 0)
+                if (result.CheckAndInheritAbnormalities(ParameterClosure))
                 {
-                    result.Result = false;
-                    result.Errors = ParameterClosure.Errors;
                     return result;
                 }
                 else if (ParameterClosure.Result == null)
                 {
+#if DEBUG
+                    Console.WriteLine($"Function Parser: Parameters Closure failed");
+#endif
                     result.Result = false;
                     return result;
                 }
+#if DEBUG
+                Console.WriteLine($"Function Parser: LRClosed.");
+#endif
                 SegmentContext _context = ParameterClosure.Result;
                 var DeclareVariableParser = provider.GetParser(ASTNodeType.DeclareVar);
                 if (DeclareVariableParser == null)
@@ -147,6 +76,7 @@ namespace Cx.Core.VCParser
                     result.Errors.Add(new ParserNotFoundError(_context.Current , ASTNodeType.DeclareVar));
                     return result;
                 }
+                _context.GoNext();
                 while (true)
                 {
                     //Parser Parameter
@@ -163,41 +93,59 @@ namespace Cx.Core.VCParser
                         OR.AddError(new UnexpectedEndError(_context.Current));
                         return OR;
                     }
-                    //if (_context.Current > FirstRP)
-                    //{
-                    //    break;
-                    //}
-                    //if (_context.Current.Index >= FirstRP.Index)
-                    //{
-                    //    break;
-                    //}
-                    var content = _context.Current.content;
+
+#if DEBUG
+                    Console.WriteLine($"FuncParser: Paras: \x1b[33mReady Try\x1b[0m, at: {_context.Current?.content ?? "null"}");
+#endif
                     var par_res = DeclareVariableParser.Parse(provider , _context , parameters);
-                    if (result.CheckAndInheritAbnormalities(par_res)) return result;
+                    if (result.CheckAndInheritAbnormalities(par_res))
+                    {
+#if DEBUG
+                        Console.WriteLine($"FuncParser: Paras: \x1b[31mFailed\x1b[0m, at: {_context.Current?.content ?? "null"}");
+#endif
+                        return result;
+                    }
+
                     if (par_res.Result == false)
                     {
+#if DEBUG
+                        Console.WriteLine($"FuncParser: Paras: \x1b[31mFailed\x1b[0m, at: {_context.Current?.content ?? "null"}");
+#endif
                         result.AddError(new ParseFailError(_context.Current , ASTNodeType.DeclareVar));
                         return result;
                     }
                     parameters.Children.Last().Type = ASTNodeType.SingleParameter;
                     _context.GoNext();
-                    if (_context.Current.content == ")")
+#if DEBUG
+                    Console.WriteLine($"FuncParser: Paras: Done one 0, at: {_context.Current?.content ?? "null"}");
+#endif
+                    if (_context.Match(")") == MatchResult.Match)
                     {
+#if DEBUG
+                        Console.WriteLine($"FuncParser: Stop at }}.");
+#endif
                         break;
                     }
-                    else if (_context.Current.content == ",")
+                    else if (_context.Match(",") == MatchResult.Match)
                     {
                         _context.GoNext();
                     }
-                    else
+                    else if(!_context.ReachEnd)
                     {
                         result.AddError(new IllegalIdentifierError(_context.Current));
                         return result;
                     }
+#if DEBUG
+                    Console.WriteLine($"FuncParser: Paras: Done one 1, at: {_context.Current?.content??"null"}");
+#endif
+                  
                 }
+#if DEBUG
+                Console.WriteLine($"Function Parser: Parameters Done, EndPoint:{_context.EndPoint?.content ?? "null"}");
+#endif
+                context.SetCurrent(_context.EndPoint!.Next);
             }
             {
-                context.GoNext();
 #if DEBUG
                 Console.WriteLine($"Function Parser: Parameters Done, Current:{context.Current?.content ?? "null"}");
 #endif
@@ -217,6 +165,9 @@ namespace Cx.Core.VCParser
                     result.AddError(new UnexpectedEndError(context.Current));
                     return result;
                 }
+#if DEBUG
+                Console.WriteLine($"FuncParse::{context.Current.content}");
+#endif
                 if (context.Current.content == ";")
                 {
                     Parent.AddChild(FuncDef);

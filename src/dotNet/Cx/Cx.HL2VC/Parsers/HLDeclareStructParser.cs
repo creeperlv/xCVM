@@ -31,9 +31,9 @@ namespace Cx.HL2VC.Parsers
                 else
                 {
                     var StructureName = FormedName.Result;
-#if DEBUG
-                    Console.WriteLine($"HLDeclareStructParser:{StructureName},{context.Current?.content??"null"}");
-#endif
+//#if DEBUG
+//                    Console.WriteLine($"HLDeclareStructParser:{StructureName},{context.Current?.content??"null"}");
+//#endif
                     var LBTest = context.Match("{");
                     if ( LBTest== MatchResult.Match)
                     {
@@ -63,9 +63,9 @@ namespace Cx.HL2VC.Parsers
                             {
                                 break;
                             }
-#if DEBUG
-                            Console.WriteLine($"HLDCParser: Fields: {ClosedContext.Current?.content??"null"}");
-#endif
+//#if DEBUG
+//                            Console.WriteLine($"HLDCParser: Fields: {ClosedContext.Current?.content??"null"}");
+//#endif
                             var dsr = DeclareVar.Parse(provider , ClosedContext , node);
 
                             if (FinalResult.CheckAndInheritAbnormalities(dsr))
@@ -77,13 +77,13 @@ namespace Cx.HL2VC.Parsers
                                 FinalResult.AddError(new WrongSubASTNode(ClosedContext.Current , ASTNodeType.DeclareVar));
                                 return FinalResult;
                             }
-#if DEBUG
-                            Console.WriteLine($"HLDCParser: Fields Done 0: {ClosedContext.Current?.content ?? "null"}");
-#endif
+//#if DEBUG
+//                            Console.WriteLine($"HLDCParser: Fields Done 0: {ClosedContext.Current?.content ?? "null"}");
+//#endif
                             ClosedContext.GoNext();
-#if DEBUG
-                            Console.WriteLine($"HLDCParser: Fields Done 1: {ClosedContext.Current?.content ?? "null"}");
-#endif
+//#if DEBUG
+//                            Console.WriteLine($"HLDCParser: Fields Done 1: {ClosedContext.Current?.content ?? "null"}");
+//#endif
                             if (ClosedContext.ReachEnd)
                             {
                                 FinalResult.AddError(new UnexpectedEndError(ClosedContext.Current));

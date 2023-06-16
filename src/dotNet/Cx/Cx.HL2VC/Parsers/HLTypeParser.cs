@@ -108,16 +108,17 @@ namespace Cx.HL2VC.Parsers
                 string str = NameResult;
                 _node.Segment = HEAD.Duplicate();
                 _node.Segment.content = str;
-                context.GoNext();
+                //context.GoNext();
                 while (true)
                 {
                     if (context.ReachEnd) break;
                     if (context.Current == null) break;
+
+#if DEBUG
+                    Console.WriteLine($"HLTP: Wrap Pointer? {context.Current.content}");
+#endif
                     if (context.Current.content == "*")
                     {
-#if DEBUG
-                        Console.WriteLine("HLTP: Wrap Pointer");
-#endif
                         TreeNode PointerWrapper = new TreeNode();
                         PointerWrapper.Type = ASTNodeType.Pointer;
                         PointerWrapper.Segment = null;
@@ -137,7 +138,7 @@ namespace Cx.HL2VC.Parsers
                 Console.WriteLine($"HLTP: End 0:{context.Current?.content??"null"}");
 #endif
                 Parent.AddChild(_node);
-                context.GoBack();
+                //context.GoBack();
                 FinalResult.Result = true;
                 return FinalResult;
             }

@@ -50,6 +50,23 @@ namespace cxhlc
             foreach (var item in Files)
             {
                 var ast_node = FileParser.Parse(prov , item.Value);
+                if (ast_node.Errors.Count > 0)
+                {
+                    foreach (var error in ast_node.Errors)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("error:");
+                        Console.ResetColor();
+                        Console.Write(error.Message);
+                        Console.Write(", at:");
+                        if (error.Segment != null)
+                        {
+                            var seg = error.Segment;
+                            Console.WriteLine($"{seg.content}, {seg.ID}:{seg.LineNumber}");
+                        }
+                        Console.WriteLine($"\x1b[33mnull\x1b[0m");
+                    }
+                }
                 if (options.TransformInTemp)
                 {
                     if (References.Contains(item.Key))
