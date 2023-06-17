@@ -14,6 +14,9 @@
             ParserProvider.RegisterParser(ASTNodeType.Statement, new StatementParser());
             ParserProvider.RegisterParser(ASTNodeType.TypeDef, new TypeDefParser());
             ParserProvider.RegisterParser(ASTNodeType.Extern, new ExternParser());
+            ParserProvider.RegisterParser(ASTNodeType.If, new IfParser());
+            ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_NonSemicolonStatement, new NonSemiColonStatementParser());
+            ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatement, new AllStatementParser());
             return ParserProvider;
         }
     }

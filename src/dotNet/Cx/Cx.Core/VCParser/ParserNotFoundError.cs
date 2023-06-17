@@ -14,6 +14,14 @@ namespace Cx.Core.VCParser
 
         public override string Message => $"Parser Not Found:{_TargetType}";
     }
+    public class StatementRequiredError : OperationError
+    {
+        public StatementRequiredError(Segment? binded) : base(binded , null)
+        {
+        }
+
+        public override string Message => $"Require a statement.";
+    }
     public class ParseFailError : OperationError
     {
         int _TargetType;
@@ -61,7 +69,7 @@ namespace Cx.Core.VCParser
         {
             this.ASTNodeIDs = ASTNodeIDs;
         }
-        string? _message=null;
+        string? _message = null;
         public override string Message
         {
             get
@@ -71,7 +79,7 @@ namespace Cx.Core.VCParser
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append("Mismatch ASTNodes:");
                     stringBuilder.Append(string.Join(", " , ASTNodeIDs));
-                    _message= stringBuilder.ToString();
+                    _message = stringBuilder.ToString();
                 }
                 return _message;
             }
