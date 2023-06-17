@@ -42,19 +42,38 @@ namespace Cx.Core.VCParser
                     var AllStatement = provider.GetParser(IntermediateASTNodeType.Intermediate_AllStatement);
                     if(AllStatement==null)
                     {
-                        FinalResult.AddError(new ParserNotFoundError(context.Current , IntermediateASTNodeType.Intermediate_AllStatement));
+                        FinalResult.AddError(new ParserNotFoundError(context.Current , IntermediateASTNodeType.Intermediate_AllStatementAndAScope));
                         return FinalResult;
                     }
                     var ASResult=AllStatement.Parse(provider , context , node);
                     if (FinalResult.CheckAndInheritAbnormalities(ASResult)) return FinalResult;
-                    if(FinalResult.Result == false)
+                    if(ASResult.Result == false)
                     {
                         FinalResult.AddError(new StatementRequiredError(context.Current));
                         return FinalResult;
                     }
                     if (context.Match("else") == MatchResult.Match)
                     {
+                        Parent.AddChild(node);
+                        context.GoNext();
+                        TreeNode _else = new TreeNode();
+                        _else.Type = ASTNodeType.Else;
+
+                        var Else_ASResult = AllStatement.Parse(provider , context , _else);
+                        if (FinalResult.CheckAndInheritAbnormalities(Else_ASResult)) return FinalResult;
+                        if (Else_ASResult.Result == false)
+                        {
+                            FinalResult.AddError(new StatementRequiredError(context.Current));
+                            return FinalResult;
+                        }
+                        node.AddChild(_else);
+                        return true;
+                    }
+                    else
+                    {
                         context.GoBack();
+                        Parent.AddChild(node);
+                        return true;
                     }
                 }
                 else if (MR_LP == MatchResult.Mismatch)
