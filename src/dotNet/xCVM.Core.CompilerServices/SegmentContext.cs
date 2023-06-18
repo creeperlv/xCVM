@@ -93,6 +93,18 @@ namespace xCVM.Core.CompilerServices
             }
             return (MatchResult.Mismatch, null);
         }
+        public (MatchResult, string?) MatchCollectionReturnName(params string [ ] matches)
+        {
+            if (Current == null) return (MatchResult.ReachEnd, null);
+            for (int i = 0 ; i < matches.Length ; i++)
+            {
+                if (Current.content == matches [ i ])
+                {
+                    return (MatchResult.Match, matches [ i ]);
+                }
+            }
+            return (MatchResult.Mismatch, null);
+        }
         public (MatchResult, int) MatchCollection(bool CaseSensitive = true , params string [ ] matches)
         {
 

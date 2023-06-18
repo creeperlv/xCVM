@@ -34,4 +34,11 @@
         public const int TypeDef = 28;
         public const int Extern = 29;
     }
+    public static class Symbols
+    {
+        public const string Multiply = "*";
+        public const string Divide= "/";
+        public const string Add= "+";
+        public const string Sub= "-";
+    }
 }
