@@ -15,6 +15,7 @@
             ParserProvider.RegisterParser(ASTNodeType.TypeDef, new TypeDefParser());
             ParserProvider.RegisterParser(ASTNodeType.Extern, new ExternParser());
             ParserProvider.RegisterParser(ASTNodeType.If, new IfParser());
+            ParserProvider.RegisterParser(ASTNodeType.While, new WhileParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_NonSemicolonStatement, new NonSemiColonStatementParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatement, new AllStatementParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatementAndAScope , new AllStatementAndScopeParser());

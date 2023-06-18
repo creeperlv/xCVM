@@ -34,10 +34,4 @@
         public const int TypeDef = 28;
         public const int Extern = 29;
     }
-
-    public static class IntermediateASTNodeType { 
-        public const int Intermediate_NonSemicolonStatement= 200;
-        public const int Intermediate_AllStatement= 201;
-        public const int Intermediate_AllStatementAndAScope= 202;
-    }
 }

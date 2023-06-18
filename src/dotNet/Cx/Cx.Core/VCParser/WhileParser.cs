@@ -3,12 +3,12 @@ using xCVM.Core.CompilerServices;
 
 namespace Cx.Core.VCParser
 {
-    public class IfParser : ContextualParser
+    public class WhileParser : ContextualParser
     {
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> FinalResult = new OperationResult<bool>(false);
-            if (context.Match("if") == MatchResult.Match)
+            if (context.Match("while") == MatchResult.Match)
             {
                 context.GoNext();
                 var MR_LP = context.Match("(");
@@ -52,24 +52,6 @@ namespace Cx.Core.VCParser
                         FinalResult.AddError(new StatementRequiredError(context.Current));
                         return FinalResult;
                     }
-                    if (context.Match("else") == MatchResult.Match)
-                    {
-                        Parent.AddChild(node);
-                        context.GoNext();
-                        TreeNode _else = new TreeNode();
-                        _else.Type = ASTNodeType.Else;
-
-                        var Else_ASResult = AllStatement.Parse(provider , context , _else);
-                        if (FinalResult.CheckAndInheritAbnormalities(Else_ASResult)) return FinalResult;
-                        if (Else_ASResult.Result == false)
-                        {
-                            FinalResult.AddError(new StatementRequiredError(context.Current));
-                            return FinalResult;
-                        }
-                        node.AddChild(_else);
-                        return true;
-                    }
-                    else
                     {
                         context.GoBack();
                         Parent.AddChild(node);
