@@ -40,21 +40,54 @@ namespace Cx.Core.VCParser
             OperationResult<bool> FinalResult = false;
             return FinalResult;
         }
-        public SegmentContext TerminateExpression(SegmentContext context) {
+        public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
+        {
             var HEAD = context.Current;
             var ENDPOINT = context.EndPoint;
+            int PairCount = 0;
+            var Terminator = ExpressionSymbols.Termination;
             while (true)
             {
-
+                if (context.ReachEnd)
+                {
+                    break;
+                }
+                var match = context.MatchCollection(true , Terminator);
+                if (match.Item1 == MatchResult.Match)
+                {
+                    if (PairCount <= 0)
+                    {
+                        break;
+                    }
+                }
+                var MR = context.Match("(");
+                if (MR == MatchResult.Match)
+                {
+                    PairCount++;
+                }
+                else
+                {
+                    MR = context.Match(")");
+                    if (MR == MatchResult.Match)
+                        PairCount--;
+                }
+                context.GoNext();
             }
-            SegmentContext Result=new SegmentContext(HEAD);
+            SegmentContext Result = new SegmentContext(HEAD);
             Result.SetEndPoint(ENDPOINT);
-            
+            return Result;
         }
-        public OperationResult<ExpressionSegment?> FirstPass_SubstituteCalls(SegmentContext context)
+        public OperationResult<ExpressionSegment?> FirstPass_SubstituteCalls(ParserProvider provider , SegmentContext context)
         {
             OperationResult<ExpressionSegment?> FinalResult = new OperationResult<ExpressionSegment?>(null);
+            var HEAD = context.Current;
 
+            var CallParser = provider.GetParser(ASTNodeType.Call);
+            if (CallParser == null)
+            {
+                FinalResult.AddError(new ParserNotFoundError(HEAD , ASTNodeType.Call));
+                return FinalResult;
+            }
             return FinalResult;
         }
     }
