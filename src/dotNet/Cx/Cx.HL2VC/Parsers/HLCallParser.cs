@@ -27,7 +27,10 @@ namespace Cx.HL2VC.Parsers
                     TreeNode node = new TreeNode();
                     node.Segment = HEAD.Duplicate();
                     node.Segment.content = name_result.Result;
-                    node.Type=ASTNodeType.Call;
+                    node.Type = ASTNodeType.Call;
+                    TreeNode parameters = new TreeNode();
+                    parameters.Type = ASTNodeType.Arguments;
+                    node.AddChild(parameters);
                     var ParametersClosure = ContextClosure.LRClose(context , "(" , ")");
                     if (FinalResult.CheckAndInheritAbnormalities(ParametersClosure))
                     {
@@ -39,15 +42,48 @@ namespace Cx.HL2VC.Parsers
                         return FinalResult;
                     }
                     var ClosedParametersContext = ParametersClosure.Result;
-                    if(ClosedParametersContext.Current?.Next==ClosedParametersContext.EndPoint)
+                    if (ClosedParametersContext.Current?.Next == ClosedParametersContext.EndPoint)
                     {
                         Parent.AddChild(node);
+                        context.SetCurrent(ClosedParametersContext.EndPoint);
+                        context.GoNext();
                         return true;
                     }
                     else
                     {
-
+                        var ExpressionParser = provider.GetParser(ASTNodeType.Expression);
+                        if (ExpressionParser == null)
+                        {
+                            FinalResult.AddError(new ParserNotFoundError(context.Current , ASTNodeType.Expression));
+                            return FinalResult;
+                        }
+                        while (true)
+                        {
+                            if (ClosedParametersContext.ReachEnd) break;
+                            if (ClosedParametersContext.Match(")") == MatchResult.Match) break;
+                            var ValueResult = ExpressionParser.Parse(provider , ClosedParametersContext , parameters);
+                            if (FinalResult.CheckAndInheritAbnormalities(ValueResult)) return FinalResult;
+                            if (FinalResult.Result == false)
+                            {
+                                FinalResult.AddError(new ParseFailError(context.Current , ASTNodeType.Expression));
+                                return FinalResult;
+                            }
+                            if (ClosedParametersContext.Match(",") == MatchResult.Match) { ClosedParametersContext.GoNext(); }
+                            else
+                            if (ClosedParametersContext.Match(")") == MatchResult.Match) { break; }
+                            else
+                            {
+                                if (ClosedParametersContext.ReachEnd) break;
+                                else
+                                {
+                                    FinalResult.AddError(new IllegalIdentifierError(ClosedParametersContext.Current));
+                                    return FinalResult;
+                                }
+                            }
+                        }
                     }
+                    context.SetCurrent(ClosedParametersContext.EndPoint);
+                    context.GoNext();
                     return FinalResult;
                 }
                 else

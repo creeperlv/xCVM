@@ -11,10 +11,30 @@ namespace Cx.Core.VCParser
         public Segment? Segment;
         public TreeNode? Node;
         public ExpressionSegmentContext? Context;
+        public void AttachNext(ExpressionSegment next)
+        {
+            Next = next;
+            next.Prev = this;
+        }
     }
     public class ExpressionSegmentContext
     {
         public ExpressionSegment HEAD;
+        public int Count
+        {
+            get
+            {
+                ExpressionSegment Current = HEAD;
+                int Count = 1;
+                while (true)
+                {
+                    if (Current.Next == null)
+                    {
+                        return Count;
+                    }
+                }
+            }
+        }
         public ExpressionSegment? this [ int index ]
         {
             get
@@ -38,6 +58,14 @@ namespace Cx.Core.VCParser
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> FinalResult = false;
+            {
+                var TER = TerminateExpression(provider , context);
+                if (FinalResult.CheckAndInheritAbnormalities(TER)) return FinalResult;
+                var _newContext = TER.Result;
+                var FPR = FirstPass_SubstituteCalls(provider , _newContext);
+                if (FinalResult.CheckAndInheritAbnormalities(FPR)) return FinalResult;
+
+            }
             return FinalResult;
         }
         public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
@@ -88,7 +116,49 @@ namespace Cx.Core.VCParser
                 FinalResult.AddError(new ParserNotFoundError(HEAD , ASTNodeType.Call));
                 return FinalResult;
             }
-            return FinalResult;
+            TreeNode Reciver = new TreeNode();
+            ExpressionSegment? ES_HEAD = null;
+            ExpressionSegment? Current = null;
+            while (true)
+            {
+                if (context.ReachEnd) break;
+                var CPR = CallParser.Parse(provider , context , Reciver);
+                if (FinalResult.CheckAndInheritAbnormalities(CPR)) { return FinalResult; }
+                if (CPR.Result)
+                {
+                    var NewNode = Reciver.Children [ 0 ];
+                    Reciver.Children.Clear();
+                    ExpressionSegment new_segment = new ExpressionSegment();
+                    new_segment.Node = NewNode;
+                    if (ES_HEAD == null || Current == null)
+                    {
+                        ES_HEAD = new_segment;
+                        Current = new_segment;
+                    }
+                    else
+                    {
+                        Current.AttachNext(new_segment);
+                        Current = new_segment;
+                    }
+                }
+                else
+                {
+                    ExpressionSegment new_segment = new ExpressionSegment();
+                    new_segment.Segment = context.Current;
+                    if (ES_HEAD == null || Current == null)
+                    {
+                        ES_HEAD = new_segment;
+                        Current = new_segment;
+                    }
+                    else
+                    {
+                        Current.AttachNext(new_segment);
+                        Current = new_segment;
+                    }
+                    context.GoNext();
+                }
+            }
+            return ES_HEAD;
         }
     }
     public static class ExpressionSymbols
