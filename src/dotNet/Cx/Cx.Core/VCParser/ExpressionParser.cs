@@ -18,6 +18,11 @@ namespace Cx.Core.VCParser
             next.Prev = this;
         }
     }
+    public class ExpressionTreeNode : TreeNode
+    {
+        public List<ExpressionSegment> ExpressionChildren = new List<ExpressionSegment>();
+        public bool IsFormed=false;
+    }
     public class ExpressionParser : ContextualParser
     {
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
@@ -40,13 +45,14 @@ namespace Cx.Core.VCParser
             }
             return FinalResult;
         }
-        public OperationResult<TreeNode> ParseExpressionTree(ParserProvider provider , ExpressionSegmentContext context)
+        public OperationResult<TreeNode> ParseExpressionTree(ParserProvider provider , ExpressionSegmentContext context) 
         {
-            TreeNode Node = new TreeNode();
+            TreeNode Node = new ExpressionTreeNode();
             Node.Type = ASTNodeType.Expression;
             OperationResult<TreeNode> FinalResult = new OperationResult<TreeNode>(Node);
             var SP_C_R=SecondPass_Closures(provider , context);
             if(FinalResult.CheckAndInheritAbnormalities(SP_C_R))return FinalResult;
+            CustomPass_BinaryExpression(provider , context , ExpressionSymbols.Binary_0st);
             return FinalResult;
         }
         public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
@@ -86,9 +92,40 @@ namespace Cx.Core.VCParser
             Result.SetEndPoint(ENDPOINT);
             return Result;
         }
-        public OperationResult<bool> CustomPass_BinaryExpression(ParserProvider provider , SegmentContext context , params string [ ] symbols)
+        public OperationResult<bool> CustomPass_BinaryExpression(ParserProvider provider , ExpressionSegmentContext context , params string [ ] symbols)
         {
             OperationResult<bool> FinalResult = new OperationResult<bool>(false);
+            while (true)
+            {
+                if (context.IsReachEnd) break;
+                var ESMR=context.MatchCollection(symbols);
+                if(ESMR== ESCMatchResult.Match)
+                {
+
+                    ExpressionTreeNode expressionTreeNode=new ExpressionTreeNode();
+                    expressionTreeNode.Segment = context.Current?.Segment;
+                    expressionTreeNode.Type = ASTNodeType.BinaryExpression;
+                    ExpressionSegment? prev = context.Prev;
+                    ExpressionSegment? next = context.Next;
+                    if (prev == null)
+                    {
+                        FinalResult.AddError(new BinaryExpressionMissingPartError(context.Current?.Segment , true));
+                        return FinalResult;
+                    }
+
+                    if (next == null)
+                    {
+                        FinalResult.AddError(new BinaryExpressionMissingPartError(context.Current?.Segment , false));
+                        return FinalResult;
+                    }
+                    ExpressionSegment NewSegment = new ExpressionSegment();
+                    NewSegment.Node=expressionTreeNode;
+                    expressionTreeNode.ExpressionChildren.Add(prev);
+                    expressionTreeNode.ExpressionChildren.Add(next);
+                    context.SubstituteSegment_0(prev , next,NewSegment);
+                }
+                context.GoNext();
+            }
             return FinalResult;
         }
         public OperationResult<bool> SecondPass_Closures(ParserProvider provider , ExpressionSegmentContext context)

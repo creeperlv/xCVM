@@ -72,6 +72,24 @@
 
             }
         }
+        public (ESCMatchResult,string?) MatchCollectionWithMatchItem(params string [ ] contents)
+        {
+            switch (CurrentType)
+            {
+                case ExpressionSegmentType.PlainContent:
+                    foreach (var content in contents)
+                    {
+                        if (Current?.Segment?.content == content) return (ESCMatchResult.Match,content);
+                    }
+                    return (ESCMatchResult.MismatchContent,null);
+                case ExpressionSegmentType.TreeNode:
+                case ExpressionSegmentType.Closure:
+                    return (ESCMatchResult.MismatchType,null);
+                default:
+                    return (ESCMatchResult.ReachEnd,null);
+
+            }
+        }
         public void SetCurrent(ExpressionSegment? current)
         {
             _Current = current;

@@ -22,6 +22,18 @@ namespace Cx.Core.VCParser
 
         public override string Message => $"Require a statement.";
     }
+    public class BinaryExpressionMissingPartError : OperationError
+    {
+        bool _Position;
+        public BinaryExpressionMissingPartError(Segment? binded, bool isLeft) : base(binded , null)
+        {
+            _Position = isLeft;
+        }
+
+        string Left = "Left";
+        string Right= "Right";
+        public override string Message => $"Missing {(_Position?Left:Right)}";
+    }
     public class ParseFailError : OperationError
     {
         int _TargetType;
