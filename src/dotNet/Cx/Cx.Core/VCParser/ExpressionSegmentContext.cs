@@ -2,7 +2,7 @@
 {
     public enum ExpressionSegmentType
     {
-        PlainContent, TreeNode, Closure, NULL
+        PlainContent, TreeNode, ESTreeNode,Closure, NULL
     }
     public enum ESCMatchResult
     {
@@ -33,9 +33,7 @@
         {
             get
             {
-                if (Current?.Segment != null) return ExpressionSegmentType.PlainContent;
-                if (Current?.Node != null) return ExpressionSegmentType.TreeNode;
-                if (Current?.Context != null) return ExpressionSegmentType.Closure;
+                if (Current!=null)return Current.SegmentType;
                 return ExpressionSegmentType.NULL;
             }
         }
@@ -134,6 +132,13 @@
             R.Next.Prev = L.Prev;
             return true;
         }
+        /// <summary>
+        /// Exclusive Substitute, LeftEnd and RightEnd will be preserved.
+        /// </summary>
+        /// <param name="LeftEnd"></param>
+        /// <param name="RightEnd"></param>
+        /// <param name="NewSegment"></param>
+        /// <returns></returns>
         public bool SubstituteSegment_0(ExpressionSegment? LeftEnd , ExpressionSegment? RightEnd , ExpressionSegment NewSegment)
         {
             var segment_l_end = LeftEnd;

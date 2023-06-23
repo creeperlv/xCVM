@@ -1,27 +1,17 @@
-﻿using LibCLCC.NET.TextProcessing;
+﻿using Cx.Core.DataTools;
 using System.Collections.Generic;
 using xCVM.Core.CompilerServices;
 
 namespace Cx.Core.VCParser
 {
-    public class ExpressionSegment
-    {
-        public ExpressionSegment? Prev;
-        public ExpressionSegment? Next;
-        public Segment? Segment;
-        public TreeNode? Node;
-        public ExpressionSegmentContext? Context;
-        public int ID;
-        public void AttachNext(ExpressionSegment next)
-        {
-            Next = next;
-            next.Prev = this;
-        }
-    }
+    //public enum ExpressionSegmentType
+    //{
+    //    NA,Segment,TreeNode,ESTreeNode,ESContext
+    //}
     public class ExpressionTreeNode : TreeNode
     {
         public List<ExpressionSegment> ExpressionChildren = new List<ExpressionSegment>();
-        public bool IsFormed=false;
+        public bool IsFormed = false;
     }
     public class ExpressionParser : ContextualParser
     {
@@ -45,14 +35,49 @@ namespace Cx.Core.VCParser
             }
             return FinalResult;
         }
-        public OperationResult<TreeNode> ParseExpressionTree(ParserProvider provider , ExpressionSegmentContext context) 
+        public OperationResult<TreeNode> ParseExpressionTree(ParserProvider provider , ExpressionSegmentContext context)
         {
             TreeNode Node = new ExpressionTreeNode();
             Node.Type = ASTNodeType.Expression;
             OperationResult<TreeNode> FinalResult = new OperationResult<TreeNode>(Node);
-            var SP_C_R=SecondPass_Closures(provider , context);
-            if(FinalResult.CheckAndInheritAbnormalities(SP_C_R))return FinalResult;
-            CustomPass_BinaryExpression(provider , context , ExpressionSymbols.Binary_0st);
+            var SP_C_R = SecondPass_Closures(provider , context);
+            if (FinalResult.CheckAndInheritAbnormalities(SP_C_R)) return FinalResult;
+            {
+                var CPBER = CustomPass_RightHandSideUnaryExpression(provider , context , ExpressionSymbols.RightHand_Unary_0st);
+                if (FinalResult.CheckAndInheritAbnormalities(CPBER)) return FinalResult;
+                if (!CPBER.Result)
+                {
+                    FinalResult.AddError(new ParseFailError(context.HEAD.Segment , ASTNodeType.BinaryExpression));
+                    return FinalResult;
+                }
+            }
+            {
+                var CPBER = CustomPass_BinaryExpression(provider , context , ExpressionSymbols.Binary_0st);
+                if (FinalResult.CheckAndInheritAbnormalities(CPBER)) return FinalResult;
+                if (!CPBER.Result)
+                {
+                    FinalResult.AddError(new ParseFailError(context.HEAD.Segment , ASTNodeType.BinaryExpression));
+                    return FinalResult;
+                }
+            }
+            {
+                var CPBER = CustomPass_BinaryExpression(provider , context , ExpressionSymbols.Binary_1st);
+                if (FinalResult.CheckAndInheritAbnormalities(CPBER)) return FinalResult;
+                if (!CPBER.Result)
+                {
+                    FinalResult.AddError(new ParseFailError(context.HEAD.Segment , ASTNodeType.BinaryExpression));
+                    return FinalResult;
+                }
+            }
+            {
+                var CPBER = CustomPass_BinaryExpression(provider , context , ExpressionSymbols.Binary_2st);
+                if (FinalResult.CheckAndInheritAbnormalities(CPBER)) return FinalResult;
+                if (!CPBER.Result)
+                {
+                    FinalResult.AddError(new ParseFailError(context.HEAD.Segment , ASTNodeType.BinaryExpression));
+                    return FinalResult;
+                }
+            }
             return FinalResult;
         }
         public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
@@ -92,17 +117,18 @@ namespace Cx.Core.VCParser
             Result.SetEndPoint(ENDPOINT);
             return Result;
         }
+
         public OperationResult<bool> CustomPass_BinaryExpression(ParserProvider provider , ExpressionSegmentContext context , params string [ ] symbols)
         {
             OperationResult<bool> FinalResult = new OperationResult<bool>(false);
             while (true)
             {
                 if (context.IsReachEnd) break;
-                var ESMR=context.MatchCollection(symbols);
-                if(ESMR== ESCMatchResult.Match)
+                var ESMR = context.MatchCollection(symbols);
+                if (ESMR == ESCMatchResult.Match)
                 {
 
-                    ExpressionTreeNode expressionTreeNode=new ExpressionTreeNode();
+                    ExpressionTreeNode expressionTreeNode = new ExpressionTreeNode();
                     expressionTreeNode.Segment = context.Current?.Segment;
                     expressionTreeNode.Type = ASTNodeType.BinaryExpression;
                     ExpressionSegment? prev = context.Prev;
@@ -118,14 +144,118 @@ namespace Cx.Core.VCParser
                         FinalResult.AddError(new BinaryExpressionMissingPartError(context.Current?.Segment , false));
                         return FinalResult;
                     }
+                    if(!prev.IsOkayForExpressionPart|| !next.IsOkayForExpressionPart)
+                    {
+                        context.GoNext();
+                        continue;
+                    }
                     ExpressionSegment NewSegment = new ExpressionSegment();
-                    NewSegment.Node=expressionTreeNode;
+                    NewSegment.Node = expressionTreeNode;
                     expressionTreeNode.ExpressionChildren.Add(prev);
                     expressionTreeNode.ExpressionChildren.Add(next);
-                    context.SubstituteSegment_0(prev , next,NewSegment);
+                    context.SubstituteSegment_0(prev.Prev , next.Next , NewSegment);
                 }
                 context.GoNext();
             }
+            FinalResult.Result = true;
+            return FinalResult;
+        }
+
+        public OperationResult<bool> CustomPass_RightHandSideUnaryExpression(ParserProvider provider , ExpressionSegmentContext context , params string [ ] symbols)
+        {
+            OperationResult<bool> FinalResult = new OperationResult<bool>(false);
+            while (true)
+            {
+                if (context.IsReachEnd) break;
+                var ESMR = context.MatchCollection(symbols);
+                if (ESMR == ESCMatchResult.Match)
+                {
+
+                    ExpressionTreeNode expressionTreeNode = new ExpressionTreeNode();
+                    expressionTreeNode.Segment = context.Current?.Segment;
+                    expressionTreeNode.Type = ASTNodeType.BinaryExpression;
+                    ExpressionSegment? prev = context.Prev;
+                    ExpressionSegment? next = context.Next;
+                    bool isHit = false;
+                    if (prev == null)
+                    {
+                        isHit = true;
+                    }
+                    else
+                    {
+                        if (prev.Segment != null)
+                        {
+                            var dt = DataTypeChecker.DetermineDataType(prev.Segment.content);
+                            if (dt == DataType.String || dt == DataType.IntegerAny || dt == DataType.DecimalAny)
+                            {
+                                isHit = true;
+                            }
+                        }
+                    }
+
+                    if (next == null)
+                    {
+                        FinalResult.AddError(new UnaryExpressionMissingPartError(context.Current?.Segment));
+                        return FinalResult;
+                    }
+                    if (isHit)
+                    {
+                        ExpressionSegment NewSegment = new ExpressionSegment();
+                        NewSegment.Node = expressionTreeNode;
+                        expressionTreeNode.ExpressionChildren.Add(next);
+                        context.SubstituteSegment_0(prev , next.Next , NewSegment);
+                    }
+                }
+                context.GoNext();
+            }
+            FinalResult.Result = true;
+            return FinalResult;
+        }
+
+        public OperationResult<bool> CustomPass_LeftHandSideUnaryExpression(ParserProvider provider , ExpressionSegmentContext context , params string [ ] symbols)
+        {
+            OperationResult<bool> FinalResult = new OperationResult<bool>(false);
+            while (true)
+            {
+                if (context.IsReachEnd) break;
+                var ESMR = context.MatchCollection(symbols);
+                if (ESMR == ESCMatchResult.Match)
+                {
+
+                    ExpressionTreeNode expressionTreeNode = new ExpressionTreeNode();
+                    expressionTreeNode.Segment = context.Current?.Segment;
+                    expressionTreeNode.Type = ASTNodeType.BinaryExpression;
+                    ExpressionSegment? prev = context.Prev;
+                    ExpressionSegment? next = context.Next;
+                    bool isHit = false;
+                    if (prev == null)
+                    {
+                        FinalResult.AddError(new UnaryExpressionMissingPartError(context.Current?.Segment));
+                        return FinalResult;
+                    }
+                    {
+                        string content = prev.Segment.content;
+                        var dt = DataTypeChecker.DetermineDataType(content);
+                        if (dt == DataType.String || dt == DataType.IntegerAny || dt == DataType.DecimalAny)
+                        {
+                            isHit = true;
+                        }
+                    }
+
+                    if (next == null)
+                    {
+                    }
+                    //if (isHit)
+                    {
+                        ExpressionSegment NewSegment = new ExpressionSegment();
+                        NewSegment.Node = expressionTreeNode;
+                        expressionTreeNode.ExpressionChildren.Add(prev);
+                        context.SubstituteSegment_0(prev.Prev , next , NewSegment);
+                    }
+                }
+                context.GoNext();
+            }
+            FinalResult.Result = true;
             return FinalResult;
         }
         public OperationResult<bool> SecondPass_Closures(ParserProvider provider , ExpressionSegmentContext context)
@@ -234,6 +364,8 @@ namespace Cx.Core.VCParser
     public static class ExpressionSymbols
     {
         public static readonly string [ ] Termination = new string [ ] { "," , ")" , ";" };
+        public static readonly string [ ] RightHand_Unary_0st = new string [ ] { "!" , "++" , "--" };
+        public static readonly string [ ] LeftHand_Unary_0st = new string [ ] { "++" , "--" };
         public static readonly string [ ] Binary_0st = new string [ ] { "&&" , "||" , "&" , "|" };
         public static readonly string [ ] Binary_1st = new string [ ] { "*" , "/" , "%" };
         public static readonly string [ ] Binary_2st = new string [ ] { "+" , "-" };

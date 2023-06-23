@@ -25,14 +25,21 @@ namespace Cx.Core.VCParser
     public class BinaryExpressionMissingPartError : OperationError
     {
         bool _Position;
-        public BinaryExpressionMissingPartError(Segment? binded, bool isLeft) : base(binded , null)
+        public BinaryExpressionMissingPartError(Segment? binded , bool isLeft) : base(binded , null)
         {
             _Position = isLeft;
         }
 
         string Left = "Left";
-        string Right= "Right";
-        public override string Message => $"Missing {(_Position?Left:Right)}";
+        string Right = "Right";
+        public override string Message => $"Missing {(_Position ? Left : Right)} part of the binary expression";
+    }
+    public class UnaryExpressionMissingPartError : OperationError
+    {
+        public UnaryExpressionMissingPartError(Segment? binded) : base(binded , null)
+        {
+        }
+        public override string Message => $"Missing Right-hand part of the unary expression.";
     }
     public class ParseFailError : OperationError
     {
