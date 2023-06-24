@@ -43,6 +43,15 @@ namespace Cx.Core.VCParser
                 return false;
             }
         }
+        public ExpressionSegment GetEnd()
+        {
+            ExpressionSegment segment=this;
+            while (true) {
+                if (segment.Next == null) break;
+                segment=segment.Next;
+            }
+            return segment;
+        }
         public void AttachNext(ExpressionSegment next)
         {
             Next = next;

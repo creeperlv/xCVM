@@ -1,4 +1,6 @@
 ﻿using Cx.Core.DataTools;
+using LibCLCC.NET.TextProcessing;
+using System;
 using System.Collections.Generic;
 using xCVM.Core.CompilerServices;
 
@@ -18,11 +20,31 @@ namespace Cx.Core.VCParser
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {
             OperationResult<bool> FinalResult = false;
+            if (context.ReachEnd)
             {
+                return FinalResult;
+            }
+            if(context.Current==null)
+            {
+                return FinalResult;
+            }
+            {
+                Segment HEAD = context.Current;
                 var TER = TerminateExpression(provider , context);
                 if (FinalResult.CheckAndInheritAbnormalities(TER)) return FinalResult;
                 var _newContext = TER.Result;
 
+#if DEBUG
+                Console.WriteLine("Terminated.");
+                while (!_newContext.ReachEnd)
+                {
+                    Console.Write($"{_newContext.Current?.content??"null"}");
+                    Console.Write("\t");
+                    _newContext.GoNext();
+                }
+                Console.WriteLine();
+                _newContext.ResetCurrent();
+#endif
                 var FPR = FirstPass_SubstituteCalls(provider , _newContext);
                 if (FinalResult.CheckAndInheritAbnormalities(FPR)) return FinalResult;
                 if (FPR.Result == null)
@@ -30,18 +52,30 @@ namespace Cx.Core.VCParser
                     FinalResult.AddError(new ParseFailError(_newContext.HEAD , ASTNodeType.Expression));
                     return FinalResult;
                 }
+#if DEBUG
+                Console.WriteLine("Call Processed.");
+#endif
                 ExpressionSegmentContext ES_Context = new ExpressionSegmentContext(FPR.Result);
-                ParseExpressionTree(provider , ES_Context);
+                var node_result=ParseExpressionTree(provider , ES_Context,HEAD);
+                if (FinalResult.CheckAndInheritAbnormalities(node_result)) return FinalResult;
+                Parent.AddChild(node_result.Result);
+                FinalResult.Result = true;
             }
             return FinalResult;
         }
-        public OperationResult<TreeNode> ParseExpressionTree(ParserProvider provider , ExpressionSegmentContext context)
+        public OperationResult<TreeNode> ParseExpressionTree(ParserProvider provider , ExpressionSegmentContext context,Segment HEAD)
         {
+#if DEBUG
+            Console.WriteLine("Start process expression tree.");
+#endif
             TreeNode Node = new ExpressionTreeNode();
             Node.Type = ASTNodeType.Expression;
             OperationResult<TreeNode> FinalResult = new OperationResult<TreeNode>(Node);
-            var SP_C_R = SecondPass_Closures(provider , context);
+            var SP_C_R = SecondPass_Closures(provider , context, HEAD);
             if (FinalResult.CheckAndInheritAbnormalities(SP_C_R)) return FinalResult;
+#if DEBUG
+            Console.WriteLine("Closure Done.");
+#endif
             {
                 var CPBER = CustomPass_RightHandSideUnaryExpression(provider , context , ExpressionSymbols.RightHand_Unary_0st);
                 if (FinalResult.CheckAndInheritAbnormalities(CPBER)) return FinalResult;
@@ -78,8 +112,16 @@ namespace Cx.Core.VCParser
                     return FinalResult;
                 }
             }
+            {
+                if (context.Count > 1)
+                {
+                    FinalResult.AddError(new ExpressionRemainsMoreThanOneSegmentError(HEAD));
+                    return FinalResult;
+                }
+            }
             return FinalResult;
         }
+
         public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
         {
             var HEAD = context.Current;
@@ -258,7 +300,7 @@ namespace Cx.Core.VCParser
             FinalResult.Result = true;
             return FinalResult;
         }
-        public OperationResult<bool> SecondPass_Closures(ParserProvider provider , ExpressionSegmentContext context)
+        public OperationResult<bool> SecondPass_Closures(ParserProvider provider , ExpressionSegmentContext context,Segment HEAD)
         {
             OperationResult<bool> FinalResult = new OperationResult<bool>(false);
             ExpressionSegment? FirstParentheses_L = null;
@@ -292,13 +334,14 @@ namespace Cx.Core.VCParser
                         context.GoNext();
                         context.SubstituteSegment_0(FirstParentheses_L?.Prev , R?.Next , Closure);
                         //Recursive Parse.
-                        var CResult = ParseExpressionTree(provider , Closed);
+                        var CResult = ParseExpressionTree(provider , Closed,HEAD);
                         if (FinalResult.CheckAndInheritAbnormalities(CResult)) return FinalResult;
                         var nt = CResult.Result;
                         Closure.Node = nt;
                         FirstParentheses_L = null;
                     }
                 }
+                context.GoNext();
             }
             FinalResult.Result = true;
             return FinalResult;
@@ -361,9 +404,16 @@ namespace Cx.Core.VCParser
             return ES_HEAD;
         }
     }
+    public class ExpressionRemainsMoreThanOneSegmentError : OperationError
+    {
+        public ExpressionRemainsMoreThanOneSegmentError(Segment? binded ) : base(binded , null)
+        {
+        }
+        public override string? Message => "Expression remains more than one segment after parsing.";
+    }
     public static class ExpressionSymbols
     {
-        public static readonly string [ ] Termination = new string [ ] { "," , ")" , ";" };
+        public static readonly string [ ] Termination = new string [ ] { "," , ")" , ";" ,""};
         public static readonly string [ ] RightHand_Unary_0st = new string [ ] { "!" , "++" , "--" };
         public static readonly string [ ] LeftHand_Unary_0st = new string [ ] { "++" , "--" };
         public static readonly string [ ] Binary_0st = new string [ ] { "&&" , "||" , "&" , "|" };

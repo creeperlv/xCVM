@@ -2,7 +2,7 @@
 {
     public enum ExpressionSegmentType
     {
-        PlainContent, TreeNode, ESTreeNode,Closure, NULL
+        PlainContent, TreeNode, ESTreeNode, Closure, NULL
     }
     public enum ESCMatchResult
     {
@@ -33,7 +33,7 @@
         {
             get
             {
-                if (Current!=null)return Current.SegmentType;
+                if (Current != null) return Current.SegmentType;
                 return ExpressionSegmentType.NULL;
             }
         }
@@ -70,21 +70,21 @@
 
             }
         }
-        public (ESCMatchResult,string?) MatchCollectionWithMatchItem(params string [ ] contents)
+        public (ESCMatchResult, string?) MatchCollectionWithMatchItem(params string [ ] contents)
         {
             switch (CurrentType)
             {
                 case ExpressionSegmentType.PlainContent:
                     foreach (var content in contents)
                     {
-                        if (Current?.Segment?.content == content) return (ESCMatchResult.Match,content);
+                        if (Current?.Segment?.content == content) return (ESCMatchResult.Match, content);
                     }
-                    return (ESCMatchResult.MismatchContent,null);
+                    return (ESCMatchResult.MismatchContent, null);
                 case ExpressionSegmentType.TreeNode:
                 case ExpressionSegmentType.Closure:
-                    return (ESCMatchResult.MismatchType,null);
+                    return (ESCMatchResult.MismatchType, null);
                 default:
-                    return (ESCMatchResult.ReachEnd,null);
+                    return (ESCMatchResult.ReachEnd, null);
 
             }
         }
@@ -97,7 +97,25 @@
             _ep = expressionSegment;
         }
         public bool IsReachEnd { get { return Current == EndPoint || Current?.Next == null; } }
-        public bool SubstituteSegment_1(ExpressionSegment? L,ExpressionSegment? R)
+
+        public int Count
+        {
+            get
+            {
+                int _Count= 1;
+                while (true)
+                {
+                    if(IsReachEnd)
+                    {
+                        break;
+                    }
+                    _Count++;
+                }
+                return _Count;
+            }
+        }
+
+        public bool SubstituteSegment_1(ExpressionSegment? L , ExpressionSegment? R)
         {
             if (L == null && R == null) return false;
             if (L?.Next == R) return false;
@@ -123,7 +141,7 @@
                 L.Prev.Next = null;
                 return true;
             }
-            if(R.Next==null)
+            if (R.Next == null)
             {
                 L.Prev.Next = null;
                 return true;
@@ -159,7 +177,7 @@
             }
             else
             {
-                SetEndPoint(NewSegment);
+                SetEndPoint(NewSegment.GetEnd());
             }
             return true;
         }

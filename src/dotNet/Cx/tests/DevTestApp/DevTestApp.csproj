@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cx.Core\Cx.Core.csproj" />
+    <ProjectReference Include="..\..\Cx.HL2VC\Cx.HL2VC.csproj" />
+  </ItemGroup>
+
+</Project>
