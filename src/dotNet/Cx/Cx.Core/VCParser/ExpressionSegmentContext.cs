@@ -1,4 +1,6 @@
-﻿namespace Cx.Core.VCParser
+﻿using System;
+
+namespace Cx.Core.VCParser
 {
     public enum ExpressionSegmentType
     {
@@ -92,7 +94,7 @@
         {
             _Current = current;
         }
-        public void SetEndPoint(ExpressionSegment expressionSegment)
+        public void SetEndPoint(ExpressionSegment? expressionSegment)
         {
             _ep = expressionSegment;
         }
@@ -102,10 +104,10 @@
         {
             get
             {
-                int _Count= 1;
+                int _Count = 1;
                 while (true)
                 {
-                    if(IsReachEnd)
+                    if (IsReachEnd)
                     {
                         break;
                     }
@@ -163,6 +165,9 @@
             var segment_r_end = RightEnd;
             if (segment_l_end == null)
             {
+#if DEBUG
+                Console.WriteLine("Replaced HEAD.");
+#endif
                 this.HEAD = NewSegment;
             }
             else
@@ -177,9 +182,46 @@
             }
             else
             {
-                SetEndPoint(NewSegment.GetEnd());
+                if (NewSegment.Next == null)
+                {
+                    ExpressionSegment Empty = new ExpressionSegment();
+                    NewSegment.AttachNext(Empty);
+                }
+                SetEndPoint(NewSegment.GetEnd().Next);
             }
             return true;
+        }
+        public ExpressionSegmentContext? SubContext(ExpressionSegment? L , ExpressionSegment? R)
+        {
+            ExpressionSegment? Start = HEAD;
+            if (L != null)
+                while (true)
+                {
+                    if (Start == L) break;
+                    if (Start == null) return null;
+                    Start = Start.Next;
+                }
+            ExpressionSegment? Current = Start;
+            ExpressionSegment? _Current = null;
+            ExpressionSegment? _HEAD = null;
+            while (true)
+            {
+                if (Current == R) break;
+                if (Current == null) break;
+                if (_Current == null || _HEAD == null)
+                {
+                    _Current = Start.Duplicate();
+                    _HEAD = _Current;
+                }
+                else
+                {
+                    _Current.AttachNext(Current.Duplicate());
+                }
+                Current = Current.Next;
+            }
+            if (_HEAD == null) return null;
+            return new ExpressionSegmentContext(_HEAD);
+
         }
         public ExpressionSegmentContext(ExpressionSegment head)
         {

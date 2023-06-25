@@ -62,6 +62,8 @@ namespace DevTestApp
         {
            CStyleScanner cStyleScanner=new CStyleScanner();
             TestExpression(cStyleScanner , "1+2");
+            TestExpression(cStyleScanner , "1+2+3");
+            TestExpression(cStyleScanner , "1+(2*3)");
         }
     }
 }

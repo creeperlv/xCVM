@@ -5,26 +5,27 @@ namespace Cx.Core.VCParser
 {
     public class ExpressionSegment
     {
-        public ExpressionSegment? Prev;
-        public ExpressionSegment? Next;
-        public Segment? Segment;
-        public TreeNode? Node;
+        public ExpressionSegment? Prev = null;
+        public ExpressionSegment? Next = null;
+        public Segment? Segment = null;
+        public TreeNode? Node = null;
         public ExpressionSegmentContext? Context;
+        public ExpressionSegment Duplicate() => new ExpressionSegment { Prev=null,Next=null, Segment = Segment , Node = Node , Context = Context , ID = ID };
         public ExpressionSegmentType SegmentType
         {
             get
             {
 
-                if (Segment != null) return ExpressionSegmentType.PlainContent;
                 if (Node != null)
                 {
-                    if(Node is ExpressionTreeNode)
+                    if (Node is ExpressionTreeNode)
                     {
-                    return ExpressionSegmentType.ESTreeNode;
+                        return ExpressionSegmentType.ESTreeNode;
 
                     }
                     return ExpressionSegmentType.TreeNode;
                 }
+                if (Segment != null) return ExpressionSegmentType.PlainContent;
                 if (Context != null) return ExpressionSegmentType.Closure;
                 return ExpressionSegmentType.NULL;
             }
@@ -45,10 +46,11 @@ namespace Cx.Core.VCParser
         }
         public ExpressionSegment GetEnd()
         {
-            ExpressionSegment segment=this;
-            while (true) {
+            ExpressionSegment segment = this;
+            while (true)
+            {
                 if (segment.Next == null) break;
-                segment=segment.Next;
+                segment = segment.Next;
             }
             return segment;
         }
