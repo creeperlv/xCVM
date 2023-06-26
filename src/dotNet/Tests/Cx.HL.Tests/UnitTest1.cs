@@ -72,7 +72,7 @@ namespace Cx.HL.Tests
             CStyleScanner scanner = new CStyleScanner();
             TestExpression(scanner , "1+2" , false);
             TestExpression(scanner , "1+asd" , false);
-            TestExpression(scanner , "1++asd" , false);
+            TestExpression(scanner , "1++asd" , true);
             TestExpression(scanner , "1+&asd" , false);
             Assert.Pass();
         }

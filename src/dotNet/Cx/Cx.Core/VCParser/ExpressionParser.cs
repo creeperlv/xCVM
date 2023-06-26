@@ -22,7 +22,33 @@ namespace Cx.Core.VCParser
         {
             while (!ES_Context.IsReachEnd)
             {
-                Console.Write($"{ES_Context.Current?.Segment?.content ?? "null"}");
+                var current = ES_Context.Current;
+                if (current != null)
+                {
+                    switch (current.SegmentType)
+                    {
+                        case ExpressionSegmentType.PlainContent:
+                            Console.Write($"{current?.Segment?.content ?? "null"}");
+                            break;
+                        case ExpressionSegmentType.TreeNode:
+                            Console.Write($"TreeNode");
+                            break;
+                        case ExpressionSegmentType.ESTreeNode:
+                            Console.Write($"ESTreeNode");
+                            break;
+                        case ExpressionSegmentType.Closure:
+                            Console.Write($"CLOSURE");
+                            break;
+                        case ExpressionSegmentType.NULL:
+                            Console.Write($"NULL");
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+                else
+                    Console.Write($"NULL");
                 Console.Write("\t");
                 ES_Context.GoNext();
             }
@@ -101,6 +127,9 @@ namespace Cx.Core.VCParser
             if (FinalResult.CheckAndInheritAbnormalities(SP_C_R)) return FinalResult;
 #if DEBUG
             Console.WriteLine("Closure Done.");
+
+            context.SetCurrent(context.HEAD);
+            PrintESContext(context);
 #endif
             {
                 context.SetCurrent(context.HEAD);
@@ -112,6 +141,21 @@ namespace Cx.Core.VCParser
                     return FinalResult;
                 }
             }
+            {
+                context.SetCurrent(context.HEAD);
+                var CPBER = CustomPass_LeftHandSideUnaryExpression(provider , context , ExpressionSymbols.LeftHand_Unary_0st);
+                if (FinalResult.CheckAndInheritAbnormalities(CPBER)) return FinalResult;
+                if (!CPBER.Result)
+                {
+                    FinalResult.AddError(new ParseFailError(context.HEAD.Segment , ASTNodeType.BinaryExpression));
+                    return FinalResult;
+                }
+            }
+#if DEBUG
+            Console.WriteLine("Unary Done!");
+            PrintESContext(context);
+            context.SetCurrent(context.HEAD);
+#endif
             {
                 context.SetCurrent(context.HEAD);
                 var CPBER = CustomPass_BinaryExpression(provider , context , ExpressionSymbols.Binary_0st);
@@ -143,7 +187,14 @@ namespace Cx.Core.VCParser
                 }
             }
 #if DEBUG
-            Console.WriteLine($"Final Stage: Context Count:{context.Count}.");
+            Console.WriteLine($"Final Stage: Reset Context");
+#endif
+            context.SetCurrent(context.HEAD);
+#if DEBUG
+            Console.WriteLine($"Final Stage: Context Reset!");
+            Console.WriteLine($"Final Stage: Context Count:{context.Count}. HEAD?{context.HEAD}");
+            PrintESContext(context);
+            context.SetCurrent(context.HEAD);
 #endif
             {
                 if (context.Count > 1)
@@ -235,6 +286,10 @@ namespace Cx.Core.VCParser
 #endif
                     if (!prev.IsOkayForExpressionPart || !next.IsOkayForExpressionPart)
                     {
+#if DEBUG
+                        Console.WriteLine($"Binary Expression: REJECTED, L:{!prev.IsOkayForExpressionPart}{prev.GetString()}," +
+                            $" R:{next.IsOkayForExpressionPart}{next.GetString()}");
+#endif
                         context.GoNext();
                         continue;
                     }
@@ -275,6 +330,7 @@ namespace Cx.Core.VCParser
         }
         public void Finalize(ExpressionTreeNode Node)
         {
+            if (Node.IsFormed) return;
             foreach (var item in Node.ExpressionChildren)
             {
                 if (item.SegmentType == ExpressionSegmentType.PlainContent)
@@ -300,22 +356,30 @@ namespace Cx.Core.VCParser
                     }
                 }
             }
+            Node.IsFormed = true;
         }
         public OperationResult<bool> CustomPass_RightHandSideUnaryExpression(ParserProvider provider , ExpressionSegmentContext context , params string [ ] symbols)
         {
             OperationResult<bool> FinalResult = new OperationResult<bool>(false);
+#if DEBUG
+            Console.WriteLine($">>>>>>Start RHS Unary:{context.Current?.Segment?.content ?? "NULL"}(Is End:{context.IsReachEnd})");
+            PrintESContext(context);
+#endif
             while (true)
             {
                 if (context.IsReachEnd) break;
                 var ESMR = context.MatchCollection(symbols);
                 if (ESMR == ESCMatchResult.Match)
                 {
+#if DEBUG
+                    Console.WriteLine($">>>>>>RHS UnaryExp:{context.Current?.Segment?.content ?? "NULL"}");
+#endif
 
                     ExpressionTreeNode expressionTreeNode = new ExpressionTreeNode();
                     expressionTreeNode.Segment = context.Current?.Segment;
-                    expressionTreeNode.Type = ASTNodeType.BinaryExpression;
-                    ExpressionSegment? prev = context.Prev;
-                    ExpressionSegment? next = context.Next;
+                    expressionTreeNode.Type = ASTNodeType.UnaryExpression;
+                    ExpressionSegment? prev = context.Current?.Prev;
+                    ExpressionSegment? next = context.Current?.Next;
                     bool isHit = false;
                     if (prev == null)
                     {
@@ -323,18 +387,34 @@ namespace Cx.Core.VCParser
                     }
                     else
                     {
-                        if (prev.Segment != null)
+                        if (prev.IsOkayForExpressionPart)
                         {
-                            var dt = DataTypeChecker.DetermineDataType(prev.Segment.content);
-                            if (dt == DataType.String || dt == DataType.IntegerAny || dt == DataType.DecimalAny)
-                            {
-                                isHit = true;
-                            }
+                            isHit = false;
+                        }
+                        else
+                        {
+                            isHit = true;
+#if DEBUG
+                            Console.WriteLine($">>>>>>RHS UnaryExp:prev not suitable for exp part");
+#endif
                         }
                     }
 
                     if (next == null)
                     {
+                        FinalResult.AddError(new UnaryExpressionMissingPartError(context.Current?.Segment));
+                        return FinalResult;
+                    }
+                    if (next.IsOkayForExpressionPart)
+                    {
+                        isHit &= true;
+#if DEBUG
+                        Console.WriteLine($">>>>>>RHS UnaryExp:next suitable for exp part, isHit={isHit}");
+#endif
+                    }
+                    else
+                    {
+                        isHit = false;
                         FinalResult.AddError(new UnaryExpressionMissingPartError(context.Current?.Segment));
                         return FinalResult;
                     }
@@ -354,6 +434,10 @@ namespace Cx.Core.VCParser
 
         public OperationResult<bool> CustomPass_LeftHandSideUnaryExpression(ParserProvider provider , ExpressionSegmentContext context , params string [ ] symbols)
         {
+#if DEBUG
+            Console.WriteLine($">>>>>>Start LHS Unary:{context.Current?.Segment?.content ?? "NULL"}(Is End:{context.IsReachEnd})");
+            PrintESContext(context);
+#endif
             OperationResult<bool> FinalResult = new OperationResult<bool>(false);
             while (true)
             {
@@ -364,9 +448,12 @@ namespace Cx.Core.VCParser
 
                     ExpressionTreeNode expressionTreeNode = new ExpressionTreeNode();
                     expressionTreeNode.Segment = context.Current?.Segment;
-                    expressionTreeNode.Type = ASTNodeType.BinaryExpression;
-                    ExpressionSegment? prev = context.Prev;
-                    ExpressionSegment? next = context.Next;
+#if DEBUG
+                    Console.WriteLine($">>>>>>UnaryExp:{context.Current?.Segment?.content??"NULL"}");
+#endif
+                    expressionTreeNode.Type = ASTNodeType.UnaryExpression;
+                    ExpressionSegment? prev = context.Current?.Prev;
+                    ExpressionSegment? next = context.Current?.Next;
                     bool isHit = false;
                     if (prev == null)
                     {
@@ -374,17 +461,16 @@ namespace Cx.Core.VCParser
                         return FinalResult;
                     }
                     {
-                        string content = prev.Segment.content;
-                        var dt = DataTypeChecker.DetermineDataType(content);
-                        if (dt == DataType.String || dt == DataType.IntegerAny || dt == DataType.DecimalAny)
+                        if (prev.IsOkayForExpressionPart)
                         {
                             isHit = true;
                         }
                     }
-
-                    if (next == null)
-                    {
-                    }
+                    if (next != null)
+                        if (next.IsOkayForExpressionPart)
+                        {
+                            isHit = false;
+                        }
                     if (isHit)
                     {
                         ExpressionSegment NewSegment = new ExpressionSegment();
@@ -468,28 +554,32 @@ namespace Cx.Core.VCParser
                     ParenthesesDepth--;
                     if (ParenthesesDepth == 0)
                     {
-                        var R = context.Current!.Prev.Duplicate();
-                        R.Next = null;
-                        R.Prev = context.Current!.Prev.Prev;
-                        var L = FirstParentheses_L.Next!.Duplicate();
-                        L.Prev = null;
-                        L.Next = FirstParentheses_L.Next!.Next;
-                        ExpressionSegmentContext Closed = new ExpressionSegmentContext(L);
-                        Closed.SetEndPoint(R);
+                        var R = context.Current!;
+                        var L = FirstParentheses_L.Next;
+                        ExpressionSegmentContext? Closed = context.SubContext(L , R);
+                        if (Closed == null)
+                        {
+                            FinalResult.AddError(new ClosureError(context.HEAD.Segment , "(" , ")"));
+                            return FinalResult;
+                        }
                         context.GoNext();
                         //Recursive Parse.
                         var CResult = ParseExpressionTree(provider , Closed);
 #if DEBUG
-                        Console.WriteLine($"Sub Expression Tree done.");
+                        Console.WriteLine($"Sub Expression Tree done:");
                         PrintESTree(CResult.Result ?? new TreeNode() , 0);
 #endif
                         if (FinalResult.CheckAndInheritAbnormalities(CResult)) return FinalResult;
                         ExpressionSegment Closure = new ExpressionSegment();
-                        Closure.Context = Closed;
+                        //Closure.Context = Closed;
                         var nt = CResult.Result;
                         Closure.Node = nt;
-                        FirstParentheses_L = null;
+#if DEBUG
+
+                        Console.WriteLine($"L:{FirstParentheses_L?.Prev?.GetString()??"<NULL>"},R:{R?.Next?.GetString()}");
+#endif
                         context.SubstituteSegment_0(FirstParentheses_L?.Prev , R?.Next , Closure);
+                        FirstParentheses_L = null;
                     }
                 }
                 context.GoNext();

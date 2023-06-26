@@ -104,13 +104,15 @@ namespace Cx.Core.VCParser
         {
             get
             {
-                int _Count = 1;
+                int _Count = 0;
+                var current = HEAD;
                 while (true)
                 {
-                    if (IsReachEnd)
+                    if (current == EndPoint || current?.Next == null)
                     {
                         break;
                     }
+                    current=current.Next;
                     _Count++;
                 }
                 return _Count;
@@ -152,6 +154,26 @@ namespace Cx.Core.VCParser
             R.Next.Prev = L.Prev;
             return true;
         }
+        public bool IsInside(ExpressionSegment? L, ExpressionSegment? R, ExpressionSegment? Item)
+        {
+            ExpressionSegment? Start = HEAD;
+            if (L != null)
+                while (true)
+                {
+                    if (Start == L) break;
+                    if (Start == null) return false;
+                    Start = Start.Next;
+                }
+            ExpressionSegment? Current = Start;
+            while (true)
+            {
+                if (Current == R) break;
+                if (Current == null) break;
+                if (Current == Item) return true;
+                Current = Current.Next;
+            }
+            return false;
+        }
         /// <summary>
         /// Exclusive Substitute, LeftEnd and RightEnd will be preserved.
         /// </summary>
@@ -163,6 +185,10 @@ namespace Cx.Core.VCParser
         {
             var segment_l_end = LeftEnd;
             var segment_r_end = RightEnd;
+            if (IsInside(LeftEnd , RightEnd , Current))
+            {
+                _Current = NewSegment;
+            }
             if (segment_l_end == null)
             {
 #if DEBUG
@@ -172,13 +198,20 @@ namespace Cx.Core.VCParser
             }
             else
             {
+#if DEBUG
+                Console.WriteLine($"\tSub0:{segment_l_end.GetString()}");
+#endif
                 segment_l_end.Next = NewSegment;
                 NewSegment.Prev = segment_l_end;
             }
             if (segment_r_end != null)
             {
-                NewSegment.Next = segment_r_end;
-                segment_r_end.Prev = NewSegment;
+                var end = NewSegment.GetEnd();
+#if DEBUG
+                Console.WriteLine($"{end.GetString()} appended with:{segment_r_end.GetString()}");
+#endif
+                end.Next = segment_r_end;
+                segment_r_end.Prev = end;
             }
             else
             {
@@ -216,10 +249,16 @@ namespace Cx.Core.VCParser
                 else
                 {
                     _Current.AttachNext(Current.Duplicate());
+                    _Current = _Current.Next;
                 }
                 Current = Current.Next;
             }
             if (_HEAD == null) return null;
+            if (_Current != null)
+            {
+                ExpressionSegment EndPoint = new ExpressionSegment();
+                _Current.AttachNext(EndPoint);
+            }
             return new ExpressionSegmentContext(_HEAD);
 
         }

@@ -8,7 +8,7 @@ namespace DevTestApp
 {
     internal class Program
     {
-       static void PrintDepth(int depth , string content)
+        static void PrintDepth(int depth , string content)
         {
             for (int i = 0 ; i < depth ; i++)
             {
@@ -47,7 +47,7 @@ namespace DevTestApp
                 PrintESTree(item , Depth + 1);
             }
         }
-        static void TestExpression(GeneralPurposeScanner scanner , string input )
+        static void TestExpression(GeneralPurposeScanner scanner , string input)
         {
             ExpressionParser parser = new ExpressionParser();
             var seg = scanner.Scan(input , false);
@@ -56,14 +56,29 @@ namespace DevTestApp
             root.Type = ASTNodeType.Root;
             var result = parser.Parse(p , new xCVM.Core.CompilerServices.SegmentContext(seg) , root);
             PrintESTree(root , 0);
-            
+            if (result.Errors.Count > 0)
+            {
+                Console.WriteLine("\x1b[93mError!\x1b[0m");
+                foreach (var item in result.Errors)
+                {
+                    Console.WriteLine("\t\t" + item.Message);
+                }
+            }
         }
         static void Main(string [ ] args)
         {
-           CStyleScanner cStyleScanner=new CStyleScanner();
+            CStyleScanner cStyleScanner = new CStyleScanner();
+            {
+                var seg = cStyleScanner.Scan("1++2" , false);
+                Console.WriteLine(seg.SequentialToString());
+            }
             TestExpression(cStyleScanner , "1+2");
             TestExpression(cStyleScanner , "1+2+3");
             TestExpression(cStyleScanner , "1+(2*3)");
+            TestExpression(cStyleScanner , "1+2*3");
+            TestExpression(cStyleScanner , "(1+2)*3");
+            TestExpression(cStyleScanner , "(1+2)*3++");
+            TestExpression(cStyleScanner , "1+&a");
         }
     }
 }
