@@ -33,6 +33,9 @@
         public const int Call = 27;
         public const int TypeDef = 28;
         public const int Extern = 29;
+        public const int AssignedDeclareVariable = 30;
+        public const int CombinedSymbol = 31;
+        public const int CombinedAssign = 32;
     }
     public static class Symbols
     {

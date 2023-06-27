@@ -19,7 +19,11 @@ namespace Cx.HL2VC.Parsers
             ParserProvider.RegisterParser(ASTNodeType.Scope , new ScopeParser());
             ParserProvider.RegisterParser(ASTNodeType.If , new IfParser());
             ParserProvider.RegisterParser(ASTNodeType.While , new WhileParser());
+            ParserProvider.RegisterParser(ASTNodeType.Expression , new ExpressionParser());
             ParserProvider.RegisterParser(ASTNodeType.Call , new HLCallParser());
+            ParserProvider.RegisterParser(ASTNodeType.AssignedDeclareVariable , new AssignedDeclareVariableParser());
+            ParserProvider.RegisterParser(ASTNodeType.Assign , new AssignParser());
+            ParserProvider.RegisterParser(ASTNodeType.CombinedAssign , new CombinedAssignParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_NonSemicolonStatement , new NonSemiColonStatementParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatement , new AllStatementParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatementAndAScope , new AllStatementAndScopeParser());

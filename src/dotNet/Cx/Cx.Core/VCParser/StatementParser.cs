@@ -7,6 +7,7 @@ namespace Cx.Core.VCParser
         public StatementParser()
         {
             ConcernedParsers.Add(ASTNodeType.Assign);
+            ConcernedParsers.Add(ASTNodeType.AssignedDeclareVariable);
             ConcernedParsers.Add(ASTNodeType.DeclareVar);
             ConcernedParsers.Add(ASTNodeType.Expression);
             ConcernedParsers.Add(ASTNodeType.Call);
