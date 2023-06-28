@@ -10,7 +10,7 @@ namespace Cx.Core.VCParser
         public AllStatementParser()
         {
             ConcernedParsers.Add(IntermediateASTNodeType.Intermediate_NonSemicolonStatement);
-            //ConcernedParsers.Add(ASTNodeType.Statement);
+            ConcernedParsers.Add(ASTNodeType.Statement);
         }
         public override OperationResult<bool> Parse(ParserProvider provider , SegmentContext context , TreeNode Parent)
         {

@@ -24,7 +24,7 @@ namespace Cx.Core.VCParser
                 result.AddError(new UnexpectedEndError(c));
                 return result;
             }
-            if (DataTypeChecker.DetermineDataType(c.content) == DataType.S)
+            if (DataTypeChecker.DetermineDataType(c.content) == DataType.String)
             {
                 context.GoNext();
                 if (context.Match("=") == MatchResult.Match)

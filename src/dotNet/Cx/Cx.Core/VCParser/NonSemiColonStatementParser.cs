@@ -10,7 +10,7 @@ namespace Cx.Core.VCParser
         public NonSemiColonStatementParser()
         {
             ConcernedParsers.Add(ASTNodeType.If);
-            //ConcernedParsers.Add(ASTNodeType.While);
+            ConcernedParsers.Add(ASTNodeType.While);
             //ConcernedParsers.Add(ASTNodeType.For);
             //ConcernedParsers.Add(ASTNodeType.Switch);
         }
