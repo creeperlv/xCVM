@@ -22,6 +22,7 @@ namespace xCVM.Core
         public List<Instruct> Instructions = new List<Instruct>();
         public List<ExternFunction> ExternFunctions = new List<ExternFunction>();
         public List<ExternStruct> ExternStructs = new List<ExternStruct>();
+        public List<DataType> ExternVariables = new List<DataType>();
         public xCVMResource? xCVMResource;
         public void WriteBrinary(Stream stream)
         {
@@ -71,11 +72,26 @@ namespace xCVM.Core
                 using (MemoryStream ms = new MemoryStream())
                 {
                     ms.Write(BitConverter.GetBytes(ExternStructs.Count));
-                    foreach (var __func in ExternStructs)
+                    foreach (var __struct in ExternStructs)
                     {
                         using (MemoryStream funcMem = new MemoryStream())
                         {
-                            __func.WriteToStream(funcMem);
+                            __struct.WriteToStream(funcMem);
+                            ms.WriteBytes(funcMem.GetBuffer());
+                        }
+                    }
+                    stream.WriteBytes(ms.GetBuffer());
+                }
+            }
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    ms.Write(BitConverter.GetBytes(ExternVariables.Count));
+                    foreach (var __variable in ExternVariables)
+                    {
+                        using (MemoryStream funcMem = new MemoryStream())
+                        {
+                            __variable.WriteToStream(funcMem);
                             ms.WriteBytes(funcMem.GetBuffer());
                         }
                     }
@@ -168,6 +184,19 @@ namespace xCVM.Core
                 }
             }
             {
+                var b = stream.ReadBytes();
+                using (MemoryStream ms = new MemoryStream(b))
+                {
+                    byte [ ] bytes = new byte [ 4 ];
+                    ms.Read(bytes , 0 , 4);
+                    int Count = BitConverter.ToInt32(bytes , 0);
+                    for (int i = 0 ; i < Count ; i++)
+                    {
+                        xCVMModule.ExternVariables.Add(DataType.FromStream(ms));
+                    }
+                }
+            }
+            {
                 byte [ ] bytes = new byte [ 4 ];
                 stream.Read(bytes , 0 , 4);
                 int Count = BitConverter.ToInt32(bytes , 0);
@@ -217,7 +246,7 @@ namespace xCVM.Core
     }
     public class ExternStruct
     {
-        public string Name="";
+        public string Name = "";
         public bool RuntimeStruct;
         public Dictionary<int , DataType> Fields = new Dictionary<int , DataType>();
         public void WriteToStream(Stream stream)
@@ -289,7 +318,7 @@ namespace xCVM.Core
     }
     public class ExternFunction
     {
-        public string Name= "";
+        public string Name = "";
         public int Label;
         public DataType ReturnType = new DataType { Type = -1 };
         public Dictionary<int , DataType> Registers = new Dictionary<int , DataType>();
@@ -360,6 +389,48 @@ namespace xCVM.Core
             }
             return externFunction;
         }
+    }
+    public class InternalDataType
+    {
+        public static int Length(InternalDataTypes dataType)
+        {
+            switch (dataType)
+            {
+                case InternalDataTypes.CIL_Object:
+                    return 0;
+                case InternalDataTypes._int:
+                    return sizeof(int);
+                case InternalDataTypes._long:
+                    return sizeof(long);
+                case InternalDataTypes._float:
+                    return sizeof(float);
+                case InternalDataTypes._double:
+                    return sizeof(double);
+                case InternalDataTypes._void:
+                    return 0;
+                case InternalDataTypes._struct:
+                    return -2;
+                case InternalDataTypes._unsigned_int:
+                    return sizeof(uint);
+                case InternalDataTypes.unsigned_long:
+                    return sizeof(ulong);
+                case InternalDataTypes._byte:
+                    return sizeof(byte);
+                case InternalDataTypes._short:
+                    return sizeof(short);
+                case InternalDataTypes._ushort:
+                    return sizeof(ushort);
+                default:
+                    return 0;
+            }
+        }
+    }
+    public enum InternalDataTypes
+    {
+        CIL_Object = 0, _int = 1, _long = 2, _float = 3, _double = 4, _void = -1, _struct = -2, _unsigned_int = 5, unsigned_long = 6,
+        _byte = 7,
+        _short = 8,
+        _ushort = 9,
     }
     public class DataType
     {

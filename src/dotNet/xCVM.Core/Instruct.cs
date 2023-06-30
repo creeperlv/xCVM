@@ -205,7 +205,26 @@ namespace xCVM.Core
         /// cvt $data_to_convert original_type target_type
         /// </summary>
         cvt=0x0320,
-
+        /// <summary>
+        /// Write Private Data
+        /// pdw $pointer_to_memory $double_word_contains_pointer_of_extern_variable $Length_given_in_register
+        /// </summary>
+        pdw=0x0330,
+        /// <summary>
+        /// Read Private Data
+        /// pdw $pointer_to_memory $double_word_contains_pointer_of_extern_variable $Length_given_in_register
+        /// </summary>
+        pdr = 0x0331,
+        /// <summary>
+        /// Initialize Private Data, size is size of extern-varible + 1 pointer to store global variables.
+        /// pdint
+        /// </summary>
+        pdint=0x0332,
+        /// <summary>
+        /// Initialize Private Data for a module
+        /// pdintm $register_module_id
+        /// </summary>
+        pdintm=0x0333,
 
         lcmp = 0x0059,
         lcmpi = 0x005A,

@@ -22,6 +22,7 @@ namespace xCVM.Core.CompilerServices
         public string RuntimeStructIdentifier = "rst";
         public string ReturnIdentifier = "return";
         public string InternalTypeIdentifier = "internal";
+        public List<string> StructIdentifiers =new List<string> { "struct" , "st" , "structure" };
         public Dictionary<string,int> PredefinedTypeMapping = new Dictionary<string,int>();
         public Dictionary<string, string> PredefinedSymbols = new Dictionary<string, string>();
         public List<InstructionDefinition> Definitions = new List<InstructionDefinition>();

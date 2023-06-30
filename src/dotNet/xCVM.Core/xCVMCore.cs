@@ -23,6 +23,7 @@ namespace xCVM.Core
         Stack<CallFrame> CallStack = new Stack<CallFrame>();
         Dictionary<int , ISysCall> SysCalls = new Dictionary<int , ISysCall>();
         Dictionary<int , Dictionary<int , ISysCall>> FunctionTable = new Dictionary<int , Dictionary<int , ISysCall>>();
+        Dictionary<int , xCVMem> PrivateData = new Dictionary<int , xCVMem>();
         public Dictionary<int , IDisposable> Resources = new Dictionary<int , IDisposable>();
         int CurrentModule = -1;
         public int AddResource(IDisposable disposable)
@@ -89,7 +90,8 @@ namespace xCVM.Core
                 MemoryBlocks = new xCVMemBlock();
                 InitMemory();
             }
-            runtimeData = new RuntimeData(Registers , MemoryBlocks);
+            PrivateData = new Dictionary<int , xCVMem>();
+            runtimeData = new RuntimeData(Registers , MemoryBlocks , PrivateData);
         }
         public void SetEnvironmentVariable(List<string> Variables)
         {
@@ -97,7 +99,7 @@ namespace xCVM.Core
             int C = 0;
             foreach (var item in Variables)
             {
-                var LB=BitConverter.GetBytes(item.Length);
+                var LB = BitConverter.GetBytes(item.Length);
                 var SB = Encoding.UTF8.GetBytes(item);
                 var Final = new byte [ LB.Length + SB.Length ];
                 LB.CopyTo(Final , 0);
@@ -131,6 +133,8 @@ namespace xCVM.Core
         byte [ ] VM__BUFFER_4_BYTES;
         byte [ ] VM__BUFFER_8_BYTES;
         byte [ ] VM__BUFFER_16_BYTES;
+        #region Dara RW
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ReadInt32(byte [ ] Target , int offset)
         {
@@ -315,6 +319,7 @@ namespace xCVM.Core
         {
             return BitConverter.ToInt32(inst_parameter) * RegisterSize;
         }
+        #endregion
         bool Running;
         public void Execute(Instruct instruct)
         {
@@ -1990,6 +1995,38 @@ namespace xCVM.Core
                         WriteBytes(result , Registers.data , 4 * RegisterSize);
                     }
                     break;
+                case (int)Inst.pdint:
+                    {
+                        var cm = CurrentModule;
+                        int Size = sizeof(long);
+                        var module = LoadedModules [ cm ];
+                        foreach (var item in module.ExternVariables)
+                        {
+                            Size += DataLength(item , cm);
+                        }
+                        xCVMem xCVMem = new xCVMem(new byte [ Size ]);
+                        if (PrivateData.ContainsKey(cm))
+                            PrivateData [ cm ] = xCVMem;
+                        else PrivateData.Add(cm , xCVMem);
+                    }
+                    break;
+                case (int)Inst.pdintm:
+                    {
+                        var cm = //CurrentModule;
+                        RegisterToInt32(instruct.Op0);
+                        int Size = sizeof(long);
+                        var module = LoadedModules [ cm ];
+
+                        foreach (var item in module.ExternVariables)
+                        {
+                            Size += DataLength(item , cm);
+                        }
+                        xCVMem xCVMem = new xCVMem(new byte [ Size ]);
+                        if (PrivateData.ContainsKey(cm))
+                            PrivateData [ cm ] = xCVMem;
+                        else PrivateData.Add(cm , xCVMem);
+                    }
+                    break;
                 case (int)ManagedExt.mcall:
                     {
 
@@ -1997,6 +2034,25 @@ namespace xCVM.Core
                     break;
                 default:
                     break;
+            }
+        }
+        public int DataLength(DataType type , int Module)
+        {
+            var l = InternalDataType.Length((InternalDataTypes)type.Type);
+            if (l >= 0)
+            {
+                return l;
+            }
+            else
+            {
+                int size = 0;
+                var md = LoadedModules [ Module ];
+                var st = md.ExternStructs [ type.AdditionalTypeID ];
+                foreach (var item in st.Fields)
+                {
+                    size += DataLength(item.Value , Module);
+                }
+                return size;
             }
         }
         int PC = 0;

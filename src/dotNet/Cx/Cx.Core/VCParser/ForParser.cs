@@ -39,14 +39,13 @@ namespace Cx.Core.VCParser
                         }
                         else if (MSEMI0 == MatchResult.Mismatch)
                         {
-
-                        }
-                        var EPResult = ExpressionParser.Parse(provider , ClosedContext , node);
-                        if (FinalResult.CheckAndInheritAbnormalities(EPResult)) return FinalResult;
-                        if (FinalResult.Result == false)
-                        {
-                            FinalResult.AddError(new ParseFailError(context.Current , ASTNodeType.Expression));
-                            return FinalResult;
+                            var EPResult = ExpressionParser.Parse(provider , ClosedContext , node);
+                            if (FinalResult.CheckAndInheritAbnormalities(EPResult)) return FinalResult;
+                            if (FinalResult.Result == false)
+                            {
+                                FinalResult.AddError(new ParseFailError(context.Current , ASTNodeType.Expression));
+                                return FinalResult;
+                            }
                         }
                     }
                     context.SetCurrent(ClosedContext.EndPoint);

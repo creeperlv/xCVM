@@ -28,7 +28,7 @@ namespace xCVM.Core.CompilerServices
         {
             using var sr = file.OpenText();
             var content = sr.ReadToEnd();
-            return Assemble(parser.Parse(content , false , file.FullName));
+            return Assemble(parser.Scan(content , false , file.FullName));
         }
         public OperationResult<xCVMModule> Assemble(List<FileInfo> files , ResourceDevDef? resourceDef = null)
         {
@@ -37,7 +37,7 @@ namespace xCVM.Core.CompilerServices
             {
                 using var sr = item.OpenText();
                 var content = sr.ReadToEnd();
-                var _s = parser.Parse(content , false , item.FullName);
+                var _s = parser.Scan(content , false , item.FullName);
                 if (s is null) s = _s;
                 else s.Concatenate(_s);
             }
@@ -86,7 +86,8 @@ namespace xCVM.Core.CompilerServices
                                                                   ".ids" ,
                                                                   ".codes" ,
                                                                   ".extern_func" ,
-                                                                  ".extern_struct");
+                                                                  ".extern_struct" ,
+                                                                  ".extern_var");
                     //Console.WriteLine(mr + ":" + section);
                     if (mr == MatchResult.Match)
                     {
@@ -150,6 +151,10 @@ namespace xCVM.Core.CompilerServices
                     }
                 }
             }
+            foreach (IntermediateDataType item in module.ExternVariables)
+            {
+                PostProcessDT(item);
+            }
             void PostProcessDT(IntermediateDataType intermediateDataType)
             {
                 if (intermediateDataType.PseudoType == null) return;
@@ -182,6 +187,35 @@ namespace xCVM.Core.CompilerServices
                             }
                         }
                     }
+                }
+                else
+                {
+                    if (!(AssemblerDefinition?.StructIdentifiers is null))
+                        foreach (var item in AssemblerDefinition.StructIdentifiers)
+                        {
+                            var _item = item;
+                            if (AssemblerDefinition?.CaseSensitiveInternalTypeIdentifier ?? true == true)
+                            {
+                                _item = _item.ToUpper();
+                            }
+                            if(L== _item)
+                            {
+                                if (intermediateDataType.PseudoAdditionalType != null)
+                                {
+                                    int id = 0;
+                                    foreach (var st in module.ExternStructs)
+                                    {
+                                        if (st.Name == intermediateDataType.PseudoAdditionalType.content)
+                                        {
+                                            intermediateDataType.Type = -2;
+                                            intermediateDataType.AdditionalTypeID = id;
+                                            break;
+                                        }
+                                        id++;
+                                    }
+                                }
+                            }
+                        }
                 }
             }
             void PostProcess(IntermediateInstruct instruct)
@@ -697,6 +731,32 @@ namespace xCVM.Core.CompilerServices
                         }
                     }
                     break;
+                case 6:
+                    {
+
+                        var MainType = context.Current;
+                        context.GoNext();
+                        var AType = context.Current;
+                        context.GoNext();
+                        module.ExternVariables.Add(new IntermediateDataType { PseudoType = MainType , PseudoAdditionalType = AType });
+                        if (AssemblerDefinition?.UseStatementEndMark ?? true == true)
+                        {
+                            var result0 = context.MatchMarch((AssemblerDefinition?.StatementEndMark) ?? ";" , true , true);
+                            if (result0 == MatchResult.Match)
+                            {
+                                context.GoBack();
+                            }
+                            else if (result0 == MatchResult.Mismatch)
+                            {
+                                assembleResult.AddError(new ExpectAMarkError(context.Last , (AssemblerDefinition?.StatementEndMark) ?? ";"));
+                            }
+                            else if (result0 == MatchResult.ReachEnd)
+                            {
+                                assembleResult.AddError(new UnexpectedEndOfFileError(context.Current));
+                            }
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -954,7 +1014,7 @@ namespace xCVM.Core.CompilerServices
                     {
                         if (NextByte(assembleResult , context , AcceptRegister , SupressError , out var reg0))
                         {
-                            reg = new byte []{ reg0 };
+                            reg = new byte [ ] { reg0 };
                             return true;
                         }
                     }
@@ -1587,7 +1647,7 @@ namespace xCVM.Core.CompilerServices
 
         public OperationResult<xCVMModule> Assemble(string content)
         {
-            var segments = parser.Parse(content , false);
+            var segments = parser.Scan(content , false);
             return Assemble(segments);
         }
     }
