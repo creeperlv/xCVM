@@ -2027,9 +2027,32 @@ namespace xCVM.Core
                         else PrivateData.Add(cm , xCVMem);
                     }
                     break;
+                case (int)Inst.pdr:
+                    {
+                        int MemInfo = ImmediateToInt32(instruct.Op0);
+                        int mem = RegisterToInt32(MemInfo);
+                        int offset = RegisterToInt32(MemInfo + 4);
+                        int PDInfo = ImmediateToInt32(instruct.Op1);
+                        int DataLength = RegisterToInt32(instruct.Op2);
+                        int ModuleID = RegisterToInt32(PDInfo);
+                        int Offset_PD = RegisterToInt32(PDInfo + 4);
+                        PrivateData [ ModuleID ].data [ Offset_PD..(Offset_PD + DataLength) ].CopyTo(MemoryBlocks.Datas [ mem ].data , offset);
+                    }
+                    break;
+                case (int)Inst.pdw:
+                    {
+                        int MemInfo = ImmediateToInt32(instruct.Op0);
+                        int mem = RegisterToInt32(MemInfo);
+                        int offset = RegisterToInt32(MemInfo + 4);
+                        int PDInfo = ImmediateToInt32(instruct.Op1);
+                        int DataLength = RegisterToInt32(instruct.Op2);
+                        int ModuleID = RegisterToInt32(PDInfo);
+                        int Offset_PD = RegisterToInt32(PDInfo + 4);
+                        MemoryBlocks.Datas [ mem ].data [ offset..(offset + DataLength) ].CopyTo(PrivateData [ ModuleID ].data , Offset_PD);
+                    }
+                    break;
                 case (int)ManagedExt.mcall:
                     {
-
                     }
                     break;
                 default:
