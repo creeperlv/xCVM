@@ -9,7 +9,7 @@ namespace Cx.Core.Analyzer
     public class CAnalyzer
     {
         public List<int> ConcernedAnalyzers=new List<int>();
-        public virtual OperationResult<(bool, Symbol?)> Analyze(AnalyzerProvider provider,int Pos,ref TreeNode node)
+        public virtual OperationResult<(bool, Symbol?)> BuildSymbolTable(AnalyzerProvider provider,int Pos,ref TreeNode node)
         {
             return (false,null);
         }
