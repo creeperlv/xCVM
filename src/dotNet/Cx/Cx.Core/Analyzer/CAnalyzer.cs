@@ -37,6 +37,15 @@ namespace Cx.Core.Analyzer
     public class AnalyzedTreeNode : TreeNode
     {
         public SymbolTable? table = null;
+        public static AnalyzedTreeNode FromTreeNode(TreeNode node)
+		{
+			AnalyzedTreeNode analyzedTreeNode = new AnalyzedTreeNode();
+			analyzedTreeNode.Type = node.Type;
+			analyzedTreeNode.Segment = node.Segment;
+            analyzedTreeNode.table = null;
+            return analyzedTreeNode;
+
+		}
     }
     public enum SymbolType
     {

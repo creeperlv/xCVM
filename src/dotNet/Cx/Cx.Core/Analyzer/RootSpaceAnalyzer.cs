@@ -51,19 +51,4 @@ namespace Cx.Core.Analyzer
 			return FinalResult;
 		}
 	}
-
-	public class FuncAnalyzer : CAnalyzer
-	{
-		public FuncAnalyzer()
-		{
-			ConcernedAnalyzers = new List<int>
-			{	ASTNodeType.DeclareVar,
-				ASTNodeType.Scope,
-				ASTNodeType.If,
-				ASTNodeType.While,
-				ASTNodeType.For,
-				ASTNodeType.AssignedDeclareVariable,
-			};
-		}
-	}
 }
