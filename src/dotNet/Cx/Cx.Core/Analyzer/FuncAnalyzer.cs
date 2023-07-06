@@ -41,9 +41,17 @@ namespace Cx.Core.Analyzer
 					}
 					CollectedAnalyzers.Add(p);
 				}
-				foreach (var item in node.Children)
+				int Position = 0;
+				for (int i = 0 ; i < node.Children.Count ; i++)
 				{
-
+					TreeNode? item = node.Children [ i ];
+					foreach (var analyzer in CollectedAnalyzers)
+					{
+						var AR = analyzer.BuildSymbolTable(provider , Position , ref item);
+						if (FinalResult.CheckAndInheritAbnormalities(AR)) return FinalResult;
+						if (AR.Result.Item1) break;
+					}
+					Position++;
 				}
 				FinalResult.Result.Item1 = true;
 				FinalResult.Result.Item2 = symbol;
