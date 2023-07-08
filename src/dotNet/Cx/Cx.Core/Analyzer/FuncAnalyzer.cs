@@ -5,21 +5,25 @@ namespace Cx.Core.Analyzer
 {
 	public class DeclareVarAnalyzer : CAnalyzer
 	{
-		public override OperationResult<(bool, Symbol?)> BuildSymbolTable(AnalyzerProvider provider , int Pos , ref TreeNode node)
+		public override OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos , SymbolTable ParentTable , ref TreeNode node)
 		{
-			OperationResult<(bool, Symbol?)> FinalResult = (false, null);
+			OperationResult<bool> FinalResult = false;
 			if (node.Type == ASTNodeType.DeclareVar)
 			{
 				//It should be null at this point.
 				if (node.Segment == null) return FinalResult;
-				FinalResult.Result.Item1 = true;
-				FinalResult.Result.Item2 = new Symbol(node.Segment , node , Pos , SymbolType.Variable);
+				FinalResult.Result = true;
+				ParentTable.Add(new Symbol(node.Segment , node , Pos , SymbolType.Variable));
 				return FinalResult;
 			}
 			return FinalResult;
 		}
 	}
 	public class IfAnalyzer : CAnalyzer
+	{
+
+	}
+	public class ExpressionAnalyzer : CAnalyzer
 	{
 
 	}
@@ -36,9 +40,9 @@ namespace Cx.Core.Analyzer
 				ASTNodeType.AssignedDeclareVariable,
 			};
 		}
-		public override OperationResult<(bool, Symbol?)> BuildSymbolTable(AnalyzerProvider provider , int Pos , ref TreeNode node)
+		public override OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos , SymbolTable ParentTable , ref TreeNode node)
 		{
-			OperationResult<(bool, Symbol?)> FinalResult = (false, null);
+			OperationResult<bool> FinalResult = false;
 			if (node.Type == ASTNodeType.Scope)
 			{
 
@@ -52,8 +56,8 @@ namespace Cx.Core.Analyzer
 				analyzedTreeNode.table = table;
 				var CAUResult=CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedAnalyzers , provider , node,table);
 				if (FinalResult.CheckAndInheritAbnormalities(CAUResult)) return FinalResult;
-				FinalResult.Result.Item1 = true;
-				FinalResult.Result.Item2 = symbol;
+				FinalResult.Result = true;
+				ParentTable.Add(symbol);
 			}
 			return FinalResult;
 		}
@@ -71,9 +75,9 @@ namespace Cx.Core.Analyzer
 				ASTNodeType.AssignedDeclareVariable,
 			};
 		}
-		public override OperationResult<(bool, Symbol?)> BuildSymbolTable(AnalyzerProvider provider , int Pos , ref TreeNode node)
+		public override OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos , SymbolTable ParentTable , ref TreeNode node)
 		{
-			OperationResult<(bool, Symbol?)> FinalResult = (false, null);
+			OperationResult<bool> FinalResult = false;
 			if (node.Type == ASTNodeType.DeclareFunc)
 			{
 				//It should be null at this point.
@@ -91,8 +95,8 @@ namespace Cx.Core.Analyzer
 					return FinalResult;
 				}
 
-				FinalResult.Result.Item1 = true;
-				FinalResult.Result.Item2 = symbol;
+				FinalResult.Result = true;
+				ParentTable.Add(symbol);
 				return FinalResult;
 			}
 			else

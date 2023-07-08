@@ -16,9 +16,9 @@ namespace Cx.Core.Analyzer
 				ASTNodeType.TypeDef
 			};
 		}
-		public override OperationResult<(bool, Symbol?)> BuildSymbolTable(AnalyzerProvider provider , int Pos , ref TreeNode node)
+		public override OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos , SymbolTable ParentTable , ref TreeNode node)
 		{
-			OperationResult<(bool, Symbol?)> FinalResult = (false, null);
+			OperationResult<bool> FinalResult = false;
 			List<CAnalyzer> CollectedAnalyzers = new List<CAnalyzer>();
 			foreach (var item in ConcernedAnalyzers)
 			{
@@ -33,7 +33,8 @@ namespace Cx.Core.Analyzer
 			AnalyzedTreeNode analyzedTreeNode = new AnalyzedTreeNode();
 			analyzedTreeNode.Type = node.Type;
 			analyzedTreeNode.Segment = node.Segment;
-			analyzedTreeNode.table = new SymbolTable();
+			var table = new SymbolTable();
+			analyzedTreeNode.table = table;
 			if (node.Type != ASTNodeType.Root) return FinalResult;
 			int Position = 0;
 			for (int i = 0 ; i < node.Children.Count ; i++)
@@ -41,13 +42,13 @@ namespace Cx.Core.Analyzer
 				TreeNode? item = node.Children [ i ];
 				foreach (var analyzer in CollectedAnalyzers)
 				{
-					var AR = analyzer.BuildSymbolTable(provider , Position , ref item);
+					var AR = analyzer.BuildSymbolTable(provider , Position , table,ref item);
 					if (FinalResult.CheckAndInheritAbnormalities(AR)) return FinalResult;
-					if (AR.Result.Item1) break;
+					if (AR.Result) break;
 				}
 				Position++;
 			}
-			FinalResult.Result.Item1 = true;
+			FinalResult.Result = true;
 			return FinalResult;
 		}
 	}
