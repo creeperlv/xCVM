@@ -7,7 +7,7 @@ namespace Cx.Core.Analyzer
 	{
 		public RootSpaceAnalyzer()
 		{
-			ConcernedAnalyzers = new List<int>
+			ConcernedSymbolTableBuildingAnalyzers = new List<int>
 			{
 				ASTNodeType.DeclareFunc,
 				ASTNodeType.DeclareVar,
@@ -20,7 +20,7 @@ namespace Cx.Core.Analyzer
 		{
 			OperationResult<bool> FinalResult = false;
 			List<CAnalyzer> CollectedAnalyzers = new List<CAnalyzer>();
-			foreach (var item in ConcernedAnalyzers)
+			foreach (var item in ConcernedSymbolTableBuildingAnalyzers)
 			{
 				var p = provider.GetAnalyzer(item);
 				if (p == null)

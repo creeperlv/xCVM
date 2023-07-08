@@ -9,7 +9,7 @@ namespace Cx.Core.Analyzer
 {
 	public class CAnalyzer
 	{
-		public List<int> ConcernedAnalyzers = new List<int>();
+		public List<int> ConcernedSymbolTableBuildingAnalyzers = new List<int>();
 		public virtual OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos ,SymbolTable ParentTable, ref TreeNode node)
 		{
 			return false;
@@ -17,7 +17,7 @@ namespace Cx.Core.Analyzer
 	}
 	public class AnalyzerProvider
 	{
-		Dictionary<int , CAnalyzer> analyzers = new Dictionary<int , CAnalyzer>();
+		public Dictionary<int , CAnalyzer> analyzers = new Dictionary<int , CAnalyzer>();
 		public void RegisterAnalyzer(int ID , CAnalyzer parser)
 		{
 			if (analyzers.ContainsKey(ID))

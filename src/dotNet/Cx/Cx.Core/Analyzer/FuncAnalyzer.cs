@@ -19,20 +19,13 @@ namespace Cx.Core.Analyzer
 			return FinalResult;
 		}
 	}
-	public class IfAnalyzer : CAnalyzer
-	{
-
-	}
-	public class ExpressionAnalyzer : CAnalyzer
-	{
-
-	}
 	public class ScopeAnalyzer : CAnalyzer
 	{
 		public ScopeAnalyzer()
 		{
-			ConcernedAnalyzers = new List<int>
+			ConcernedSymbolTableBuildingAnalyzers = new List<int>
 			{   ASTNodeType.DeclareVar,
+				ASTNodeType.Expression,
 				ASTNodeType.Scope,
 				ASTNodeType.If,
 				ASTNodeType.While,
@@ -54,7 +47,7 @@ namespace Cx.Core.Analyzer
 				node = analyzedTreeNode;
 				SymbolTable table = new SymbolTable();
 				analyzedTreeNode.table = table;
-				var CAUResult=CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedAnalyzers , provider , node,table);
+				var CAUResult=CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedSymbolTableBuildingAnalyzers , provider , node,table);
 				if (FinalResult.CheckAndInheritAbnormalities(CAUResult)) return FinalResult;
 				FinalResult.Result = true;
 				ParentTable.Add(symbol);
@@ -66,7 +59,7 @@ namespace Cx.Core.Analyzer
 	{
 		public FuncAnalyzer()
 		{
-			ConcernedAnalyzers = new List<int>
+			ConcernedSymbolTableBuildingAnalyzers = new List<int>
 			{   ASTNodeType.DeclareVar,
 				ASTNodeType.Scope,
 				ASTNodeType.If,
@@ -89,7 +82,7 @@ namespace Cx.Core.Analyzer
 				node.Parent.ReplaceChild(node , node);
 				node = analyzedTreeNode;
 				analyzedTreeNode.table = new SymbolTable();
-				var CAUResult = CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedAnalyzers , provider , node, analyzedTreeNode.table);
+				var CAUResult = CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedSymbolTableBuildingAnalyzers , provider , node, analyzedTreeNode.table);
 				if (FinalResult.CheckAndInheritAbnormalities(CAUResult))
 				{
 					return FinalResult;
