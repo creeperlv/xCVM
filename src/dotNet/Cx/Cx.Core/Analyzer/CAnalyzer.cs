@@ -50,15 +50,15 @@ namespace Cx.Core.Analyzer
 	}
 	public enum SymbolType
 	{
-		Function, Variable, TypeDefinition, StructDeclaration,SubSymbolTable
+		Function=0x0000, Variable=0x0001, TypeDefinition=0x0002, StructDeclaration=0x0003,SubSymbolTable=0x0004
 	}
 	public class Symbol
 	{
 		public Segment? Name;
 		public TreeNode ReferredNode;
 		public int Position;
-		public SymbolType symbolType;
-		public Symbol(Segment? name , TreeNode referredNode , int position , SymbolType symbolType)
+		public int symbolType;
+		public Symbol(Segment? name , TreeNode referredNode , int position , int symbolType)
 		{
 			Name = name;
 			ReferredNode = referredNode;

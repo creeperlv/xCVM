@@ -3,9 +3,9 @@ using xCVM.Core.CompilerServices;
 
 namespace Cx.Core.Analyzer
 {
-	public class IfAnalyzer : CAnalyzer
+	public class ScopeAnalyzer : CAnalyzer
 	{
-		public IfAnalyzer()
+		public ScopeAnalyzer()
 		{
 			ConcernedSymbolTableBuildingAnalyzers = new List<int>
 			{   ASTNodeType.DeclareVar,
@@ -20,7 +20,7 @@ namespace Cx.Core.Analyzer
 		public override OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos , SymbolTable ParentTable , ref TreeNode node)
 		{
 			OperationResult<bool> FinalResult = false;
-			if (node.Type == ASTNodeType.If)
+			if (node.Type == ASTNodeType.Scope)
 			{
 
 				//A DeclareFunc Node cannot exist without a parent node.
@@ -31,7 +31,7 @@ namespace Cx.Core.Analyzer
 				node = analyzedTreeNode;
 				SymbolTable table = new SymbolTable();
 				analyzedTreeNode.table = table;
-				var CAUResult = CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedSymbolTableBuildingAnalyzers , provider , node , table);
+				var CAUResult=CAnalyzerUtilities.SubAnalyze_BuildSymbolTable(ConcernedSymbolTableBuildingAnalyzers , provider , node,table);
 				if (FinalResult.CheckAndInheritAbnormalities(CAUResult)) return FinalResult;
 				FinalResult.Result = true;
 				ParentTable.Add(symbol);
