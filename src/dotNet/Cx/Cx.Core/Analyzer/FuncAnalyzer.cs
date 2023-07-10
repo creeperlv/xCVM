@@ -25,7 +25,7 @@ namespace Cx.Core.Analyzer
 				if (node.Segment == null) return FinalResult;
 				//A DeclareFunc Node cannot exist without a parent node.
 				if (node.Parent == null) return FinalResult;
-				Symbol symbol = new Symbol(node.Segment , node , Pos , SymbolType.Function);
+				Symbol symbol = new Symbol(node.Segment , node , Pos , (int)SymbolType.Function);
 				AnalyzedTreeNode analyzedTreeNode = AnalyzedTreeNode.FromTreeNode(node);
 				node.Parent.ReplaceChild(node , node);
 				node = analyzedTreeNode;

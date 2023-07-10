@@ -35,7 +35,7 @@ namespace xCVM.Core.CompilerServices
         {
             ResourceManifestScanner parser = new ResourceManifestScanner();
             var content = reader.ReadToEnd();
-            var segments = parser.Parse(content, false, ID);
+            var segments = parser.Scan(content, false, ID);
             SegmentContext context = new SegmentContext(segments);
             var result = Parse(context, Parent);
             return result;

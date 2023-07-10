@@ -140,7 +140,7 @@ namespace xCVM.Core.CompilerServices
             ResourceDevDef def = new ResourceDevDef();
             OperationResult<ResourceDevDef> result = new OperationResult<ResourceDevDef>(def);
             ResourceManifestScanner parser = new ResourceManifestScanner();
-            SegmentContext context = new SegmentContext(parser.Parse(stream.ReadToEnd(), false, ID));
+            SegmentContext context = new SegmentContext(parser.Scan(stream.ReadToEnd(), false, ID));
             while (true)
             {
                 if (context.ReachEnd)

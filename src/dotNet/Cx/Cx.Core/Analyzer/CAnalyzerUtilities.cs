@@ -25,13 +25,13 @@ namespace Cx.Core.Analyzer
 				TreeNode? item = node.Children [ i ];
 				foreach (var analyzer in CollectedAnalyzers)
 				{
-					var AR = analyzer.BuildSymbolTable(provider , Position , ref item);
+					var AR = analyzer.BuildSymbolTable(provider , Position,table , ref item);
 					if (FinalResult.CheckAndInheritAbnormalities(AR)) return FinalResult;
-					if (AR.Result.Item1)
+					if (AR.Result)
 					{
-						if (AR.Result.Item2 != null)
+						//if (AR.Result.Item2 != null)
 						{
-							table.Add(AR.Result.Item2);
+							//table.Add(AR.Result.Item2);
 							break;
 						}
 					}
