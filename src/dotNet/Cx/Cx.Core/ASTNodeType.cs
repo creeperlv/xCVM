@@ -36,6 +36,7 @@
         public const int AssignedDeclareVariable = 30;
         public const int CombinedSymbol = 31;
         public const int CombinedAssign = 32;
+        public const int RawAssembly= 33;
     }
     public static class Symbols
     {

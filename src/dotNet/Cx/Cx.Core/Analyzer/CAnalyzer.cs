@@ -10,29 +10,13 @@ namespace Cx.Core.Analyzer
 	public class CAnalyzer
 	{
 		public List<int> ConcernedSymbolTableBuildingAnalyzers = new List<int>();
+		public List<int> ConcernedSubReferenceAnalyzers= new List<int>();
 		public virtual OperationResult<bool> BuildSymbolTable(AnalyzerProvider provider , int Pos ,SymbolTable ParentTable, ref TreeNode node)
 		{
 			return false;
 		}
-	}
-	public class AnalyzerProvider
-	{
-		public Dictionary<int , CAnalyzer> analyzers = new Dictionary<int , CAnalyzer>();
-		public void RegisterAnalyzer(int ID , CAnalyzer parser)
-		{
-			if (analyzers.ContainsKey(ID))
-			{
-				analyzers [ ID ] = parser;
-			}
-			else analyzers.Add(ID , parser);
-		}
-		public CAnalyzer? GetAnalyzer(int ID)
-		{
-			if (analyzers.ContainsKey(ID))
-			{
-				return analyzers [ ID ];
-			}
-			return null;
+		public virtual OperationResult<bool> ReferenceAnalyze(AnalyzerProvider provider ,int Pos,AnalyzedTreeNode node) {
+			return false;
 		}
 	}
 	public class AnalyzedTreeNode : TreeNode
@@ -58,13 +42,24 @@ namespace Cx.Core.Analyzer
 		public TreeNode ReferredNode;
 		public int Position;
 		public int symbolType;
+		public List<SymbolRef> Referees;
 		public Symbol(Segment? name , TreeNode referredNode , int position , int symbolType)
 		{
 			Name = name;
 			ReferredNode = referredNode;
 			Position = position;
 			this.symbolType = symbolType;
+			Referees=new List<SymbolRef>();
 		}
+		public void Refer(int Pos,TreeNode treeNode)
+		{
+			Referees.Add(new SymbolRef { Pos=Pos,Referee=treeNode });
+		}
+	}
+	public class SymbolRef
+	{
+		public int Pos;
+		public TreeNode? Referee;
 	}
 	public class SymbolTable
 	{
