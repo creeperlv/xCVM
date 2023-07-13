@@ -37,6 +37,8 @@
         public const int CombinedSymbol = 31;
         public const int CombinedAssign = 32;
         public const int RawAssembly= 33;
+        public const int FieldInStruct= 34;
+        public const int FieldInPointer= 35;
     }
     public static class Symbols
     {

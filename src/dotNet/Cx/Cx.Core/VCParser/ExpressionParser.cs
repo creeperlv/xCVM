@@ -208,7 +208,37 @@ namespace Cx.Core.VCParser
             FinalResult.Result = node;
             return FinalResult;
         }
+        public OperationResult<bool> CustomPass_CascadedVariableScan(ParserProvider provider, ExpressionSegmentContext context)
+        {
+            OperationResult<bool> FinalResult = (false);
+            while (true)
+            {
+                if (context.IsReachEnd)break;
+                var match_0=context.MatchCollectionWithMatchItem("." , "->");
+                if(match_0.Item1== ESCMatchResult.Match)
+                {
+                    if (context.Current == null)
+                    {
+                        return FinalResult;
+                    }
+                    var L = context.Current.Prev;
+                    var R = context.Current.Next;
+                    TreeNode treeNode = new TreeNode();
+                    switch(match_0.Item2)
+					{
+						case ".":
+                            treeNode.Type = ASTNodeType.FieldInStruct;
+							break;
+						case "->":
+                            treeNode.Type = ASTNodeType.FieldInPointer;
+							break;
+					}
 
+                }
+                context.GoNext();
+            }
+            return FinalResult;
+        }
         public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
         {
             var HEAD = context.Current;
