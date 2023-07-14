@@ -39,6 +39,7 @@
         public const int RawAssembly= 33;
         public const int FieldInStruct= 34;
         public const int FieldInPointer= 35;
+        public const int Variable= 36;
     }
     public static class Symbols
     {
