@@ -20,6 +20,7 @@
             ParserProvider.RegisterParser(ASTNodeType.AssignedDeclareVariable, new AssignedDeclareVariableParser());
             ParserProvider.RegisterParser(ASTNodeType.Assign, new AssignParser());
             ParserProvider.RegisterParser(ASTNodeType.CombinedAssign , new CombinedAssignParser());
+            ParserProvider.RegisterParser(ASTNodeType.Variable , new VariableParser()) ;
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_NonSemicolonStatement, new NonSemiColonStatementParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatement, new AllStatementParser());
             ParserProvider.RegisterParser(IntermediateASTNodeType.Intermediate_AllStatementAndAScope , new AllStatementAndScopeParser());

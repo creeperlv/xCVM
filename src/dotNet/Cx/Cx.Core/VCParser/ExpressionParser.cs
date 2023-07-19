@@ -73,18 +73,18 @@ namespace Cx.Core.VCParser
                 if (FinalResult.CheckAndInheritAbnormalities(TER)) return FinalResult;
                 var _newContext = TER.Result;
 
-#if DEBUG
-                Console.WriteLine("Terminated.");
-                while (!_newContext.ReachEnd)
-                {
-                    Console.Write($"{_newContext.Current?.content ?? "null"}");
-                    Console.Write("\t");
-                    _newContext.GoNext();
-                }
-                Console.WriteLine();
-                _newContext.ResetCurrent();
-#endif
-                var FPR = FirstPass_SubstituteCalls(provider , _newContext);
+//#if DEBUG
+//                Console.WriteLine("Terminated.");
+//                while (!_newContext.ReachEnd)
+//                {
+//                    Console.Write($"{_newContext.Current?.content ?? "null"}");
+//                    Console.Write("\t");
+//                    _newContext.GoNext();
+//                }
+//                Console.WriteLine();
+//                _newContext.ResetCurrent();
+//#endif
+                var FPR = FirstPass_SubstituteCallsAndVariables(provider , _newContext);
                 if (FinalResult.CheckAndInheritAbnormalities(FPR)) return FinalResult;
                 if (FPR.Result == null)
                 {
@@ -206,37 +206,6 @@ namespace Cx.Core.VCParser
             var node = FinalizeContext(context);
 
             FinalResult.Result = node;
-            return FinalResult;
-        }
-        public OperationResult<bool> CustomPass_CascadedVariableScan(ParserProvider provider, ExpressionSegmentContext context)
-        {
-            OperationResult<bool> FinalResult = (false);
-            while (true)
-            {
-                if (context.IsReachEnd)break;
-                var match_0=context.MatchCollectionWithMatchItem("." , "->");
-                if(match_0.Item1== ESCMatchResult.Match)
-                {
-                    if (context.Current == null)
-                    {
-                        return FinalResult;
-                    }
-                    var L = context.Current.Prev;
-                    var R = context.Current.Next;
-                    TreeNode treeNode = new TreeNode();
-                    switch(match_0.Item2)
-					{
-						case ".":
-                            treeNode.Type = ASTNodeType.FieldInStruct;
-							break;
-						case "->":
-                            treeNode.Type = ASTNodeType.FieldInPointer;
-							break;
-					}
-
-                }
-                context.GoNext();
-            }
             return FinalResult;
         }
         public OperationResult<SegmentContext> TerminateExpression(ParserProvider provider , SegmentContext context)
@@ -617,18 +586,25 @@ namespace Cx.Core.VCParser
             FinalResult.Result = true;
             return FinalResult;
         }
-        public OperationResult<ExpressionSegment?> FirstPass_SubstituteCalls(ParserProvider provider , SegmentContext context)
+        public OperationResult<ExpressionSegment?> FirstPass_SubstituteCallsAndVariables(ParserProvider provider , SegmentContext context)
         {
             OperationResult<ExpressionSegment?> FinalResult = new OperationResult<ExpressionSegment?>(null);
             var HEAD = context.Current;
 
             var CallParser = provider.GetParser(ASTNodeType.Call);
-            if (CallParser == null)
-            {
-                FinalResult.AddError(new ParserNotFoundError(HEAD , ASTNodeType.Call));
-                return FinalResult;
-            }
-            TreeNode Reciver = new TreeNode();
+            var VariableParser = provider.GetParser(ASTNodeType.Variable);
+			if (CallParser == null)
+			{
+				FinalResult.AddError(new ParserNotFoundError(HEAD , ASTNodeType.Call));
+				return FinalResult;
+			}
+
+			if (VariableParser == null)
+			{
+				FinalResult.AddError(new ParserNotFoundError(HEAD , ASTNodeType.Variable));
+				return FinalResult;
+			}
+			TreeNode Reciver = new TreeNode();
             ExpressionSegment? ES_HEAD = null;
             ExpressionSegment? Current = null;
             int ID = 0;
@@ -659,18 +635,41 @@ namespace Cx.Core.VCParser
                 else
                 {
                     context.SetCurrent(CUR);
-                    new_segment.Segment = context.Current;
-                    if (ES_HEAD == null || Current == null)
+                    var VPR = VariableParser.Parse(provider , context , Reciver);
+
+					if (FinalResult.CheckAndInheritAbnormalities(VPR)) { return FinalResult; }
+                    if (VPR.Result)
                     {
-                        ES_HEAD = new_segment;
-                        Current = new_segment;
+
+						var NewNode = Reciver.Children [ 0 ];
+						Reciver.Children.Clear();
+						new_segment.Node = NewNode;
+						if (ES_HEAD == null || Current == null)
+						{
+							ES_HEAD = new_segment;
+							Current = new_segment;
+						}
+						else
+						{
+							Current.AttachNext(new_segment);
+							Current = new_segment;
+						}
                     }
                     else
-                    {
-                        Current.AttachNext(new_segment);
-                        Current = new_segment;
-                    }
-                    context.GoNext();
+					{
+						new_segment.Segment = context.Current;
+						if (ES_HEAD == null || Current == null)
+						{
+							ES_HEAD = new_segment;
+							Current = new_segment;
+						}
+						else
+						{
+							Current.AttachNext(new_segment);
+							Current = new_segment;
+						}
+						context.GoNext();
+					}
                 }
                 ID++;
             }
