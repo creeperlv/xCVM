@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cx.Core.Analyzer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -8,11 +9,35 @@ namespace Cx.Core.CodeGen
 {
     public class CodeGenerator
     {
-        public virtual OperationResult<bool> Write(GeneratorProvider provider, TreeNode node , StreamWriter writer)
+        public virtual OperationResult<bool> Write(GeneratorProvider provider, AnalyzedTreeNode node , StreamWriter writer)
         {
             return new OperationResult<bool>(false);
         }
     }
+    public class ToASM_Scope_Generator : CodeGenerator
+    {
+
+    }
+    public class ToASM_CallGenerator : CodeGenerator
+    {
+		public override OperationResult<bool> Write(GeneratorProvider provider , AnalyzedTreeNode node , StreamWriter writer)
+		{
+            if(node.Type!= ASTNodeType.Call)
+            {
+                switch (node.Segment?.content??"")
+                {
+                    case "ASM_0":
+                        {
+
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return false;
+		}
+	}
     public class GeneratorProvider
     {
 
