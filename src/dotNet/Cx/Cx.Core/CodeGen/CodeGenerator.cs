@@ -9,11 +9,11 @@ namespace Cx.Core.CodeGen
 {
 	public class CodeGenerator
 	{
-		public virtual OperationResult<bool> Write(GeneratorProvider provider , AnalyzedTreeNode node , StreamWriter writer)
+		public virtual OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
 		{
 			return new OperationResult<bool>(false);
 		}
-		public OperationResult<bool> CheckThenRun(AnalyzedTreeNode node , int [ ] AcceptedIDs , Func<OperationResult<bool>> func)
+		public OperationResult<bool> CheckThenRun(TreeNode node , int [ ] AcceptedIDs , Func<OperationResult<bool>> func)
 		{
 			bool Hit = false;
 			foreach (var item in AcceptedIDs)
@@ -31,7 +31,7 @@ namespace Cx.Core.CodeGen
 	public class ToASM_Scope_Generator : CodeGenerator
 	{
 		static readonly int [ ] types = new int [ ] { ASTNodeType.Scope };
-		public override OperationResult<bool> Write(GeneratorProvider provider , AnalyzedTreeNode node , StreamWriter writer)
+		public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
 		{
 			return CheckThenRun(node , types , () => { return false; });
 		}
@@ -39,7 +39,7 @@ namespace Cx.Core.CodeGen
 	public class ToASM_RawAssembly_Generator : CodeGenerator
 	{
 		static readonly int [ ] types = new int [ ] { ASTNodeType.RawAssembly };
-		public override OperationResult<bool> Write(GeneratorProvider provider , AnalyzedTreeNode node , StreamWriter writer)
+		public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
 		{
 			return CheckThenRun(node , types , () => { return false; });
 		}
@@ -47,7 +47,7 @@ namespace Cx.Core.CodeGen
 	public class ToASM_CallGenerator : CodeGenerator
 	{
 		static readonly int [ ] types = new int [ ] { ASTNodeType.Call };
-		public override OperationResult<bool> Write(GeneratorProvider provider , AnalyzedTreeNode node , StreamWriter writer)
+		public override OperationResult<bool> Write(GeneratorProvider provider , TreeNode node , StreamWriter writer)
 		{
 			return CheckThenRun(node , types , () => { return false; });
 		}
