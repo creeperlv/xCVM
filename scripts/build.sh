@@ -19,10 +19,5 @@ cd xCVMc
 dotbuild
 cd ../xCVM.VM
 dotbuild
-cd ../Cx/cli-tools
-cd cxp
-buildcli
-cd ../cxhlc/
-buildcli
-cd ./../../../
+cd ./../../
 echo "Build Done."
